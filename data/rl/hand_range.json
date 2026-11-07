@@ -1,0 +1,136 @@
+{
+ "examples": 2320734,
+ "train": 1951386,
+ "validation": 102573,
+ "test": {
+  "all/all_streets": {
+   "n": 266775,
+   "model_nll": 4.5574,
+   "baseline_nll": 5.1881,
+   "gain_nats": 0.6307,
+   "top1": 0.0407,
+   "top10": 0.2769
+  },
+  "all/preflop": {
+   "n": 170890,
+   "model_nll": 4.5808,
+   "baseline_nll": 5.1689,
+   "gain_nats": 0.5881,
+   "top1": 0.0384,
+   "top10": 0.2654
+  },
+  "all/flop": {
+   "n": 43326,
+   "model_nll": 4.5059,
+   "baseline_nll": 5.2511,
+   "gain_nats": 0.7452,
+   "top1": 0.0446,
+   "top10": 0.2966
+  },
+  "all/turn": {
+   "n": 28862,
+   "model_nll": 4.5339,
+   "baseline_nll": 5.2111,
+   "gain_nats": 0.6772,
+   "top1": 0.0445,
+   "top10": 0.2925
+  },
+  "all/river": {
+   "n": 23697,
+   "model_nll": 4.5116,
+   "baseline_nll": 5.1833,
+   "gain_nats": 0.6717,
+   "top1": 0.0449,
+   "top10": 0.3049
+  },
+  "pluribus/all_streets": {
+   "n": 44036,
+   "model_nll": 4.7837,
+   "baseline_nll": 5.0921,
+   "gain_nats": 0.3084,
+   "top1": 0.0214,
+   "top10": 0.158
+  },
+  "pluribus/preflop": {
+   "n": 37477,
+   "model_nll": 4.8497,
+   "baseline_nll": 5.0562,
+   "gain_nats": 0.2064,
+   "top1": 0.0182,
+   "top10": 0.135
+  },
+  "pluribus/flop": {
+   "n": 3230,
+   "model_nll": 4.4076,
+   "baseline_nll": 5.3041,
+   "gain_nats": 0.8965,
+   "top1": 0.0399,
+   "top10": 0.2749
+  },
+  "pluribus/turn": {
+   "n": 2008,
+   "model_nll": 4.4063,
+   "baseline_nll": 5.2974,
+   "gain_nats": 0.8911,
+   "top1": 0.0393,
+   "top10": 0.2933
+  },
+  "pluribus/river": {
+   "n": 1321,
+   "model_nll": 4.4043,
+   "baseline_nll": 5.2827,
+   "gain_nats": 0.8784,
+   "top1": 0.0394,
+   "top10": 0.3187
+  },
+  "online_showdown/all_streets": {
+   "n": 222739,
+   "model_nll": 4.5127,
+   "baseline_nll": 5.2071,
+   "gain_nats": 0.6944,
+   "top1": 0.0445,
+   "top10": 0.3004
+  },
+  "online_showdown/preflop": {
+   "n": 133413,
+   "model_nll": 4.5052,
+   "baseline_nll": 5.2006,
+   "gain_nats": 0.6954,
+   "top1": 0.0441,
+   "top10": 0.302
+  },
+  "online_showdown/flop": {
+   "n": 40096,
+   "model_nll": 4.5139,
+   "baseline_nll": 5.2468,
+   "gain_nats": 0.733,
+   "top1": 0.045,
+   "top10": 0.2983
+  },
+  "online_showdown/turn": {
+   "n": 26854,
+   "model_nll": 4.5434,
+   "baseline_nll": 5.2046,
+   "gain_nats": 0.6612,
+   "top1": 0.0449,
+   "top10": 0.2924
+  },
+  "online_showdown/river": {
+   "n": 22376,
+   "model_nll": 4.518,
+   "baseline_nll": 5.1774,
+   "gain_nats": 0.6595,
+   "top1": 0.0453,
+   "top10": 0.3041
+  }
+ },
+ "config": {
+  "hidden": 512,
+  "k": 64,
+  "layers": 3
+ },
+ "validation_nll": 4.507,
+ "device": "NVIDIA GeForce RTX 5090",
+ "units": "mean negative log probability of the true 169-class hand (nats); baseline = card counting only",
+ "numpy_port_max_abs_diff": 8.940696716308594e-08
+}
