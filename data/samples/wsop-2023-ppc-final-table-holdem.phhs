@@ -1,0 +1,925 @@
+[1]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 120000, 0, 0, 0]
+blinds_or_straddles = [40000, 80000, 0, 0, 0]
+min_bet = 80000
+starting_stacks = [7380000, 2500000, 5110000, 10170000, 4545000]
+actions = [
+  'd dh p1 7s4s',
+  'd dh p2 Js8h',
+  'd dh p3 Td8c',
+  'd dh p4 6d5h',
+  'd dh p5 Qh7h',
+  'p3 f',
+  'p4 cbr 170000',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db JcTs2d',
+  'p2 cc',
+  'p4 cbr 140000',
+  'p2 cc',
+  'd db As',
+  'p2 cc',
+  'p4 cbr 325000',
+  'p2 cc',
+  'd db Qs',
+  'p2 cc',
+  'p4 cbr 600000',
+  'p2 cc',
+  'p4 sm 6d5h',
+  'p2 sm Js8h',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 1
+source_file = 'wsop/2023/43/5/1.phh'
+players = ['Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast']
+finishing_stacks = [7340000, 3775000, 5110000, 8935000, 4545000]
+
+[2]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 120000, 0, 0, 0]
+blinds_or_straddles = [40000, 80000, 0, 0, 0]
+min_bet = 80000
+starting_stacks = [3775000, 5110000, 8935000, 4545000, 7340000]
+actions = [
+  'd dh p1 Th5d',
+  'd dh p2 Qs4s',
+  'd dh p3 Ac5h',
+  'd dh p4 QcJs',
+  'd dh p5 AsQh',
+  'p3 cbr 170000',
+  'p4 f',
+  'p5 cc',
+  'p1 f',
+  'p2 cbr 875000',
+  'p3 f',
+  'p5 cbr 4990000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 2
+source_file = 'wsop/2023/43/5/2.phh'
+players = ['Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton']
+finishing_stacks = [3735000, 4115000, 8765000, 4545000, 8545000]
+
+[3]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 150000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [4100000, 8775000, 4550000, 8525000, 3750000]
+actions = [
+  'd dh p1 Qd8s',
+  'd dh p2 Ts2d',
+  'd dh p3 4c3s',
+  'd dh p4 7s5h',
+  'd dh p5 QcTc',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 200000',
+  'p1 f',
+  'p2 cc',
+  'd db Th8c5d',
+  'p2 cc',
+  'p5 cbr 175000',
+  'p2 cc',
+  'd db 9d',
+  'p2 cc',
+  'p5 cc',
+  'd db Jd',
+  'p2 cbr 225000',
+  'p5 cbr 700000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 3
+source_file = 'wsop/2023/43/5/3.phh'
+players = ['James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong']
+finishing_stacks = [4050000, 8025000, 4550000, 8525000, 4550000]
+
+[4]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 150000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [8025000, 4550000, 8525000, 4550000, 4050000]
+actions = [
+  'd dh p1 Qd8s',
+  'd dh p2 5h3s',
+  'd dh p3 Jc7c',
+  'd dh p4 9h4d',
+  'd dh p5 Jd6s',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 2s5s2d',
+  'p1 cc',
+  'p2 cbr 175000',
+  'p1 cc',
+  'd db As',
+  'p1 cc',
+  'p2 cbr 300000',
+  'p1 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 4
+source_file = 'wsop/2023/43/5/4.phh'
+players = ['Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst']
+finishing_stacks = [7750000, 4825000, 8525000, 4550000, 4050000]
+
+[5]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [4100000, 5550000, 3075000, 10125000, 6850000]
+actions = [
+  'd dh p1 QhQdTc2h',
+  'd dh p2 AsJc6d5s',
+  'd dh p3 QcJh8s2c',
+  'd dh p4 KhTd8d3s',
+  'd dh p5 AhAc7h2d',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 350000',
+  'p1 f',
+  'p2 cbr 1100000',
+  'p5 cbr 3350000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 27
+source_file = 'wsop/2023/43/5/27.phh'
+players = ['Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton']
+finishing_stacks = [4050000, 4350000, 3075000, 10125000, 8100000]
+
+[6]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [4350000, 3075000, 10125000, 8100000, 4050000]
+actions = [
+  'd dh p1 ????????',
+  'd dh p2 Tc5h5d2c',
+  'd dh p3 AhKcQsJh',
+  'd dh p4 Kd9h5s2h',
+  'd dh p5 Ts8s6d3h',
+  'p3 cbr 275000',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 28
+source_file = 'wsop/2023/43/5/28.phh'
+players = ['James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong']
+finishing_stacks = [4300000, 2875000, 10375000, 8100000, 4050000]
+
+[7]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [2875000, 10375000, 8100000, 4050000, 4300000]
+actions = [
+  'd dh p1 Td4c2d2c',
+  'd dh p2 KcJs8c5d',
+  'd dh p3 QhQdTh6d',
+  'd dh p4 AcQc8s4h',
+  'd dh p5 Jh7s7d3s',
+  'p3 cbr 350000',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 29
+source_file = 'wsop/2023/43/5/29.phh'
+players = ['Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst']
+finishing_stacks = [2825000, 10175000, 8350000, 4050000, 4300000]
+
+[8]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [10175000, 8350000, 4050000, 4300000, 2825000]
+actions = [
+  'd dh p1 Jd7h5c2c',
+  'd dh p2 AhKs4d2s',
+  'd dh p3 Qs6s6d5d',
+  'd dh p4 8h8d3s3d',
+  'd dh p5 Tc9h7d2d',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 300000',
+  'p1 f',
+  'p2 cc',
+  'd db 6cJc4h',
+  'p2 cc',
+  'p5 cc',
+  'd db 9s',
+  'p2 cc',
+  'p5 cc',
+  'd db 7c',
+  'p2 cbr 250000',
+  'p5 cc',
+  'p2 sm AhKs4d2s',
+  'p5 sm Tc9h7d2d',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 30
+source_file = 'wsop/2023/43/5/30.phh'
+players = ['Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi']
+finishing_stacks = [10125000, 7700000, 4050000, 4300000, 3525000]
+
+[9]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [7700000, 4050000, 4300000, 3525000, 10125000]
+actions = [
+  'd dh p1 JsThTd6d',
+  'd dh p2 AdTsTc8h',
+  'd dh p3 KhJc7h7d',
+  'd dh p4 9h6s4s4h',
+  'd dh p5 9c7s5h2h',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 3c2dKc',
+  'p1 cc',
+  'p2 cc',
+  'd db Qh',
+  'p1 cc',
+  'p2 cc',
+  'd db 8c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm JsThTd6d',
+  'p2 sm AdTsTc8h',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 31
+source_file = 'wsop/2023/43/5/31.phh'
+players = ['Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast']
+finishing_stacks = [7750000, 4000000, 4300000, 3525000, 10125000]
+
+[10]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [4000000, 4300000, 3525000, 10125000, 7750000]
+actions = [
+  'd dh p1 Tc9h4h2c',
+  'd dh p2 AcJd8c4d',
+  'd dh p3 Jh9c8d5s',
+  'd dh p4 AdQd7h2s',
+  'd dh p5 Qh9d8s5d',
+  'p3 f',
+  'p4 cbr 350000',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db As5h7d',
+  'p2 cc',
+  'p4 cbr 800000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 32
+source_file = 'wsop/2023/43/5/32.phh'
+players = ['Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton']
+finishing_stacks = [3950000, 3850000, 3525000, 10625000, 7750000]
+
+[11]
+variant = 'PO'
+ante_trimming_status = false
+antes = [0, 100000, 0, 0, 0]
+blinds_or_straddles = [50000, 100000, 0, 0, 0]
+min_bet = 100000
+starting_stacks = [3850000, 3525000, 10625000, 7750000, 3950000]
+actions = [
+  'd dh p1 Qs5d3d2h',
+  'd dh p2 KsJd7c3c',
+  'd dh p3 Td8h8c2s',
+  'd dh p4 Qh6d5s4s',
+  'd dh p5 AcTc9h2d',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 250000',
+  'p1 f',
+  'p2 cc',
+  'd db 4h6h9c',
+  'p2 cc',
+  'p5 cbr 375000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 33
+source_file = 'wsop/2023/43/5/33.phh'
+players = ['James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong']
+finishing_stacks = [3800000, 3175000, 10625000, 7750000, 4350000]
+
+[12]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [3175000, 10625000, 7750000, 4350000, 3800000]
+actions = [
+  'd dh p1 Td4c',
+  'd dh p2 Tc9s',
+  'd dh p3 6s5h',
+  'd dh p4 3h3d',
+  'd dh p5 Jc4d',
+  'p3 f',
+  'p4 cbr 400000',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db Ts9d5d',
+  'p2 cc',
+  'p4 cbr 200000',
+  'p2 cbr 400000',
+  'p4 cc',
+  'd db Kc',
+  'p2 cbr 400000',
+  'p4 cc',
+  'd db Qh',
+  'p2 cc',
+  'p4 cc',
+  'p2 sm Tc9s',
+  'p4 sm',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 34
+source_file = 'wsop/2023/43/5/34.phh'
+players = ['Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst']
+finishing_stacks = [3075000, 11925000, 7750000, 3150000, 3800000]
+
+[13]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [11925000, 7750000, 3150000, 3800000, 3075000]
+actions = [
+  'd dh p1 KsKc',
+  'd dh p2 Td4d',
+  'd dh p3 ????',
+  'd dh p4 5c3h',
+  'd dh p5 Qc9s',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 400000',
+  'p1 cbr 600000',
+  'p2 f',
+  'p5 cc',
+  'd db 9h2cJc',
+  'p1 cbr 200000',
+  'p5 cc',
+  'd db Jd',
+  'p1 cbr 400000',
+  'p5 cc',
+  'd db Tc',
+  'p1 cbr 400000',
+  'p5 cc',
+  'p1 sm KsKc',
+  'p5 sm',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 35
+source_file = 'wsop/2023/43/5/35.phh'
+players = ['Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi']
+finishing_stacks = [13725000, 7550000, 3150000, 3800000, 1475000]
+
+[14]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [7550000, 3150000, 3800000, 1475000, 13725000]
+actions = [
+  'd dh p1 Td5c',
+  'd dh p2 Qs9c',
+  'd dh p3 KsJc',
+  'd dh p4 ????',
+  'd dh p5 Jd3c',
+  'p3 cbr 400000',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 36
+source_file = 'wsop/2023/43/5/36.phh'
+players = ['Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast']
+finishing_stacks = [7450000, 2950000, 4100000, 1475000, 13725000]
+
+[15]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [2950000, 4100000, 1475000, 13725000, 7450000]
+actions = [
+  'd dh p1 8h4d',
+  'd dh p2 9d7c',
+  'd dh p3 Kc8s',
+  'd dh p4 Td6h',
+  'd dh p5 Tc7h',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 37
+source_file = 'wsop/2023/43/5/37.phh'
+players = ['Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton']
+finishing_stacks = [2850000, 4200000, 1475000, 13725000, 7450000]
+
+[16]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [4200000, 1475000, 13725000, 7450000, 2850000]
+actions = [
+  'd dh p1 5s2c',
+  'd dh p2 AhQh',
+  'd dh p3 8c6c',
+  'd dh p4 5d4s',
+  'd dh p5 9s7h',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 38
+source_file = 'wsop/2023/43/5/38.phh'
+players = ['James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong']
+finishing_stacks = [4100000, 1575000, 13725000, 7450000, 2850000]
+
+[17]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [1575000, 13725000, 7450000, 2850000, 4100000]
+actions = [
+  'd dh p1 Js9c',
+  'd dh p2 Ah7d',
+  'd dh p3 7s4c',
+  'd dh p4 6c4h',
+  'd dh p5 Qs8s',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 400000',
+  'p1 f',
+  'p2 cc',
+  'd db 4s3c2c',
+  'p2 cbr 200000',
+  'p5 cc',
+  'd db 6d',
+  'p2 cbr 400000',
+  'p5 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 39
+source_file = 'wsop/2023/43/5/39.phh'
+players = ['Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst']
+finishing_stacks = [1475000, 14425000, 7450000, 2850000, 3500000]
+
+[18]
+variant = 'FT'
+ante_trimming_status = true
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [100000, 200000, 0, 0, 0]
+small_bet = 200000
+big_bet = 400000
+starting_stacks = [14425000, 7450000, 2850000, 3500000, 1475000]
+actions = [
+  'd dh p1 Jd3d',
+  'd dh p2 8d7s',
+  'd dh p3 Jh5d',
+  'd dh p4 Ah4h',
+  'd dh p5 TsTd',
+  'p3 f',
+  'p4 cbr 400000',
+  'p5 cbr 600000',
+  'p1 f',
+  'p2 f',
+  'p4 cc',
+  'd db AcQdKh',
+  'p4 cc',
+  'p5 cbr 200000',
+  'p4 cbr 400000',
+  'p5 cc',
+  'd db 6c',
+  'p4 cbr 400000',
+  'p5 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 40
+source_file = 'wsop/2023/43/5/40.phh'
+players = ['Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi']
+finishing_stacks = [14325000, 7250000, 2850000, 4800000, 475000]
+
+[19]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [19050000, 2575000, 2575000, 3125000, 2375000]
+actions = [
+  'd dh p1 Kc8h',
+  'd dh p2 8s4s',
+  'd dh p3 9d8c',
+  'd dh p4 Tc2d',
+  'd dh p5 As4c',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cbr 2350000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 62
+source_file = 'wsop/2023/43/5/62.phh'
+players = ['Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi']
+finishing_stacks = [19425000, 2200000, 2575000, 3125000, 2375000]
+
+[20]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [2200000, 2575000, 3125000, 2375000, 19425000]
+actions = [
+  'd dh p1 4h3c',
+  'd dh p2 Qd6d',
+  'd dh p3 Td2s',
+  'd dh p4 Ad5s',
+  'd dh p5 Js6c',
+  'p3 f',
+  'p4 cbr 2375000',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 63
+source_file = 'wsop/2023/43/5/63.phh'
+players = ['Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast']
+finishing_stacks = [2125000, 2200000, 3125000, 2825000, 19425000]
+
+[21]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [2200000, 3125000, 2825000, 19425000, 2125000]
+actions = [
+  'd dh p1 3s3d',
+  'd dh p2 Kh6c',
+  'd dh p3 Jd5h',
+  'd dh p4 Ks4c',
+  'd dh p5 8d2d',
+  'p3 f',
+  'p4 cbr 300000',
+  'p5 f',
+  'p1 cbr 2200000',
+  'p2 f',
+  'p4 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 64
+source_file = 'wsop/2023/43/5/64.phh'
+players = ['Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton']
+finishing_stacks = [2875000, 2750000, 2825000, 19125000, 2125000]
+
+[22]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [2750000, 2825000, 19125000, 2125000, 2875000]
+actions = [
+  'd dh p1 8c2c',
+  'd dh p2 QdJs',
+  'd dh p3 Kh5h',
+  'd dh p4 Ks5s',
+  'd dh p5 Kd6c',
+  'p3 cbr 300000',
+  'p4 f',
+  'p5 f',
+  'p1 f',
+  'p2 cbr 2600000',
+  'p3 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 65
+source_file = 'wsop/2023/43/5/65.phh'
+players = ['James Obst', 'Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong']
+finishing_stacks = [2675000, 3200000, 18825000, 2125000, 2875000]
+
+[23]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [3200000, 18825000, 2125000, 2875000, 2675000]
+actions = [
+  'd dh p1 7s5s',
+  'd dh p2 Jc3c',
+  'd dh p3 8c2s',
+  'd dh p4 KsJd',
+  'd dh p5 Td5d',
+  'p3 f',
+  'p4 cbr 400000',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db 8dAdQc',
+  'p2 cc',
+  'p4 cbr 350000',
+  'p2 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 66
+source_file = 'wsop/2023/43/5/66.phh'
+players = ['Talal Shakerchi', 'Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst']
+finishing_stacks = [3125000, 18200000, 2125000, 3575000, 2675000]
+
+[24]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [18200000, 2125000, 3575000, 2675000, 3125000]
+actions = [
+  'd dh p1 Th2c',
+  'd dh p2 Ac5c',
+  'd dh p3 Js4s',
+  'd dh p4 Kh3h',
+  'd dh p5 5d3s',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cbr 1900000',
+  'p1 f',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 67
+source_file = 'wsop/2023/43/5/67.phh'
+players = ['Brian Rast', 'Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi']
+finishing_stacks = [18050000, 2275000, 3575000, 2675000, 3125000]
+
+[25]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 225000, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0, 0]
+min_bet = 150000
+starting_stacks = [2275000, 3575000, 2675000, 3125000, 18050000]
+actions = [
+  'd dh p1 8d3s',
+  'd dh p2 9d9c',
+  'd dh p3 6c5h',
+  'd dh p4 Js4h',
+  'd dh p5 AcKc',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 300000',
+  'p1 f',
+  'p2 cbr 3350000',
+  'p5 cc',
+  'p2 sm 9d9c',
+  'p5 sm AcKc',
+  'd db 2c8cTh',
+  'd db Ah',
+  'd db 6d',
+]
+author = 'Juho Kim'
+event = '2023 World Series of Poker Event #43: $50,000 Poker Players Championship | Day 5'
+city = 'Las Vegas'
+region = 'Nevada'
+country = 'United States of America'
+day = 22
+month = 6
+year = 2023
+hand = 68
+source_file = 'wsop/2023/43/5/68.phh'
+players = ['Matthew Ashton', 'Kristopher Tong', 'James Obst', 'Talal Shakerchi', 'Brian Rast']
+finishing_stacks = [2200000, 0, 2675000, 3125000, 21700000]

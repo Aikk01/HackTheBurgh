@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PokerSim</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1a19'/%3E%3Ctext x='16' y='24' font-size='22' text-anchor='middle' fill='%233987e5'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">&#9824;</span> PokerSim <span class="brand-sub">interactive hold'em + hand-history replayer</span></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="play">Play</button>
+    <button class="tab" data-tab="replay">Replay</button>
+    <button class="tab" data-tab="evaluate">Evaluate</button>
+    <button class="tab" data-tab="simulate">Simulate</button>
+  </nav>
+  <div class="topbar-right">
+    <label class="toggle small"><input type="checkbox" id="fourColor"> 4-colour deck</label>
+    <span class="conn" id="conn" title="server connection"><span class="dot"></span> connecting</span>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="stage">
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-rail">
+        <div class="table-felt">
+          <div class="felt-logo">PokerSim</div>
+          <div class="board" id="board"></div>
+          <div class="pot" id="pot"></div>
+          <div class="center-msg" id="centerMsg"></div>
+        </div>
+      </div>
+      <div class="seats" id="seats"></div>
+      <div class="table-overlay" id="tableOverlay">
+        <div class="overlay-card">
+          <h2>Welcome to PokerSim</h2>
+          <p>Set up a table on the right and deal, or open <b>Replay</b> to step through real hands from the
+            <a href="https://huggingface.co/datasets/gabbler/PokerData" target="_blank" rel="noopener">gabbler/PokerData</a> dataset.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar" id="actionBar" hidden>
+      <div class="action-info" id="actionInfo"></div>
+      <div class="action-buttons">
+        <button class="btn danger" id="btnFold">Fold <kbd>F</kbd></button>
+        <button class="btn" id="btnCheckCall">Check <kbd>C</kbd></button>
+        <div class="raise-group">
+          <button class="btn primary" id="btnRaise">Raise to <span id="raiseAmountLabel">0</span> <kbd>R</kbd></button>
+          <input type="range" id="raiseSlider" min="0" max="100" step="1">
+          <input type="number" id="raiseInput" step="any">
+          <div class="quick">
+            <button class="chip-btn" data-size="min">Min</button>
+            <button class="chip-btn" data-size="0.33">&#8531; pot</button>
+            <button class="chip-btn" data-size="0.5">&#189; pot</button>
+            <button class="chip-btn" data-size="0.75">&#190; pot</button>
+            <button class="chip-btn" data-size="1">Pot</button>
+            <button class="chip-btn" data-size="max">All-in</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transport" id="transport" hidden>
+      <button class="icon-btn" id="tpFirst" title="first (Home)">&#9198;</button>
+      <button class="icon-btn" id="tpPrev" title="previous (←)">&#9664;</button>
+      <button class="icon-btn" id="tpPlay" title="play/pause (space)">&#9654;</button>
+      <button class="icon-btn" id="tpNext" title="next (→)">&#9654;&#9654;</button>
+      <button class="icon-btn" id="tpLast" title="last (End)">&#9197;</button>
+      <input type="range" id="tpSlider" min="0" max="0" value="0">
+      <span class="tp-label" id="tpLabel">0 / 0</span>
+      <select id="tpSpeed" title="playback speed">
+        <option value="2000">0.5x</option>
+        <option value="1000" selected>1x</option>
+        <option value="500">2x</option>
+        <option value="250">4x</option>
+      </select>
+      <label class="toggle small"><input type="checkbox" id="tpReveal" checked> show all known cards</label>
+    </div>
+  </section>
+
+  <aside class="panel" id="panel">
+    <!-- PLAY -->
+    <div class="pane active" id="pane-play">
+      <details class="card-box" id="setupBox" open>
+        <summary>Table setup</summary>
+        <div class="form-grid">
+          <label>Small blind <input type="number" id="sb" value="1" step="any"></label>
+          <label>Big blind <input type="number" id="bb" value="2" step="any"></label>
+          <label>Ante <input type="number" id="ante" value="0" step="any"></label>
+          <label>Ante type
+            <select id="anteMode"><option value="uniform">everyone</option><option value="bb">big blind ante</option><option value="button">button ante</option></select>
+          </label>
+          <label>Default stack <input type="number" id="stack" value="200" step="any"></label>
+          <label>Bot think time (ms) <input type="number" id="botDelay" value="700" step="100" min="0"></label>
+        </div>
+        <div class="seat-config" id="seatConfig"></div>
+        <div class="row">
+          <button class="btn small" id="addSeat">+ seat</button>
+          <button class="btn small" id="removeSeat">&minus; seat</button>
+          <label class="toggle small"><input type="checkbox" id="spectate"> spectate (reveal all cards)</label>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="startGame">Deal</button>
+          <span class="hint">Pick <b>Human</b> for your seat. Model seats: <code>http</code> calls your own server, <code>claude</code> asks Claude.</span>
+        </div>
+        <div class="row" id="modelHints"></div>
+      </details>
+
+      <div class="card-box" id="gameBox" hidden>
+        <div class="row between">
+          <div><b id="gameTitle">Hand #1</b> <span class="muted" id="gameBlinds"></span></div>
+          <div class="row">
+            <label class="toggle small"><input type="checkbox" id="revealToggle"> reveal</label>
+            <button class="btn small" id="nextHand" disabled>Next hand &rarr;</button>
+            <a class="btn small" id="exportLive" href="/api/game/export" download>Export .phhs</a>
+          </div>
+        </div>
+        <div class="log" id="gameLog"></div>
+        <h4>Session results</h4>
+        <table class="mini" id="sessionTable"><thead><tr><th>Seat</th><th>Player</th><th>Stack</th><th>Net</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPLAY -->
+    <div class="pane" id="pane-replay">
+      <details class="card-box" id="loadBox" open>
+        <summary>Load hand histories</summary>
+        <div class="subtabs" id="loadTabs">
+          <button class="active" data-src="sample">Samples</button>
+          <button data-src="hf">Hugging Face</button>
+          <button data-src="upload">Upload</button>
+        </div>
+        <div class="row"><label>Max hands <input type="number" id="loadLimit" value="500" min="1"></label></div>
+        <div id="src-sample" class="srcpane active"><div class="file-list" id="sampleList"></div></div>
+        <div id="src-hf" class="srcpane">
+          <div class="hint">Browse <a href="https://huggingface.co/datasets/gabbler/PokerData" target="_blank" rel="noopener">gabbler/PokerData</a> (16 GB, fetched on demand and cached in <code>data/cache</code>).</div>
+          <h4>Featured</h4>
+          <div class="file-list" id="featuredList"></div>
+          <h4>Browse</h4>
+          <div class="crumbs" id="hfCrumbs"></div>
+          <div class="file-list" id="hfList"></div>
+          <h4>Cached</h4>
+          <div class="file-list" id="cachedList"></div>
+        </div>
+        <div id="src-upload" class="srcpane">
+          <input type="file" id="uploadFile" accept=".phh,.phhs,.txt,.toml">
+          <p class="hint">Any PHH file. Parsed locally on the server, nothing is sent elsewhere.</p>
+        </div>
+      </details>
+
+      <div class="card-box" id="handsBox" hidden>
+        <div class="row between">
+          <b id="handsTitle">Hands</b>
+          <div class="row">
+            <label class="toggle small"><input type="checkbox" id="filterShowdown"> showdown</label>
+            <label class="toggle small"><input type="checkbox" id="filterKnown"> known cards</label>
+          </div>
+        </div>
+        <div class="hand-list" id="handList"></div>
+      </div>
+
+      <div class="card-box" id="replayBox" hidden>
+        <div class="row between">
+          <b id="replayTitle"></b>
+          <button class="btn small" id="forkBtn" title="continue this hand live from the current step">Fork here &rarr; play</button>
+        </div>
+        <div class="row wrap">
+          <label>Model lens
+            <select id="lensAgent"></select>
+          </label>
+          <input type="text" id="lensParams" placeholder="params e.g. aggression=0.8 or URL" size="18">
+          <button class="btn small" id="lensRun">Predict</button>
+          <span class="muted" id="lensSummary"></span>
+        </div>
+        <div class="step-list" id="stepList"></div>
+        <details><summary>Hand info &amp; PHH source</summary><pre class="phh" id="phhSource"></pre></details>
+        <div class="warnings" id="replayWarnings"></div>
+      </div>
+    </div>
+
+    <!-- EVALUATE -->
+    <div class="pane" id="pane-evaluate">
+      <div class="card-box">
+        <h3>Shadow-evaluate a model</h3>
+        <p class="hint">Every decision in the loaded hands is shown to the model exactly as the player saw it (cards included when known - dealt face up or revealed at showdown). We measure how often it chooses the same action.</p>
+        <div class="form-grid">
+          <label>Model <select id="evalAgent"></select></label>
+          <label>Params / URL <input type="text" id="evalParams" placeholder="aggression=0.8"></label>
+          <label>Max hands <input type="number" id="evalHands" value="200" min="1"></label>
+          <label>Max decisions <input type="number" id="evalDecisions" placeholder="all"></label>
+          <label>Only player <input type="text" id="evalPlayer" placeholder="e.g. Pluribus"></label>
+          <label class="toggle"><input type="checkbox" id="evalFinal" checked> use cards revealed at showdown</label>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="evalStart">Run evaluation</button>
+          <button class="btn" id="evalStop" disabled>Stop</button>
+          <a class="btn small" id="evalExport" href="/api/evaluate/export" download hidden>Download CSV</a>
+          <span class="muted" id="evalStatus">Load a hand history in Replay first.</span>
+        </div>
+        <div class="progress" id="evalProgress" hidden><div></div></div>
+      </div>
+      <div id="evalResults"></div>
+    </div>
+
+    <!-- SIMULATE -->
+    <div class="pane" id="pane-simulate">
+      <div class="card-box">
+        <h3>Self-play</h3>
+        <p class="hint">Models and bots play each other for many hands. Results come back as bb/100 with standard errors, and every hand can be exported in PHH format - the same format as the dataset.</p>
+        <div class="form-grid">
+          <label>Hands <input type="number" id="simHands" value="300" min="1"></label>
+          <label>Stack <input type="number" id="simStack" value="200" step="any"></label>
+          <label>Small blind <input type="number" id="simSb" value="1" step="any"></label>
+          <label>Big blind <input type="number" id="simBb" value="2" step="any"></label>
+          <label>Seed <input type="number" id="simSeed" placeholder="random"></label>
+          <label class="toggle"><input type="checkbox" id="simReset" checked> reset stacks every hand</label>
+        </div>
+        <div class="seat-config" id="simSeats"></div>
+        <div class="row">
+          <button class="btn small" id="simAdd">+ seat</button>
+          <button class="btn small" id="simRemove">&minus; seat</button>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="simStart">Run</button>
+          <a class="btn small" id="simExport" href="/api/simulate/export" download hidden>Download .phhs</a>
+          <span class="muted" id="simStatus"></span>
+        </div>
+        <div class="progress" id="simProgress" hidden><div></div></div>
+      </div>
+      <div id="simResults"></div>
+    </div>
+  </aside>
+</main>
+
+<div class="modal" id="forkModal" hidden>
+  <div class="modal-card">
+    <h3>Fork this hand</h3>
+    <p class="hint">The hand continues live from the current step with the same stacks and known cards. Unknown cards are dealt at random; the recorded run-out is kept when available. Assign who plays each seat.</p>
+    <div id="forkSeats" class="seat-config"></div>
+    <div class="row">
+      <label class="toggle small"><input type="checkbox" id="forkBoard" checked> keep recorded board</label>
+      <label class="toggle small"><input type="checkbox" id="forkSpectate"> reveal all cards</label>
+    </div>
+    <div class="row right">
+      <button class="btn" id="forkCancel">Cancel</button>
+      <button class="btn primary" id="forkStart">Start</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>

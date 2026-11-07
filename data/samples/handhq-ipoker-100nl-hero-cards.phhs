@@ -1,0 +1,5422 @@
+[1]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 AcQc',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 4',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 4s3hQh',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'd db Qd',
+  'p1 cc',
+  'p2 cbr 6',
+  'p4 f',
+  'p1 cbr 18',
+  'p2 cc',
+  'd db 9h',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:00:20
+day = 1
+month = 7
+year = 2009
+hand = 3406280350
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['b7YRpJ+VzNjsnJI+8U0QXA', 'eLAkhpdLaqOO8NHcWC7ACw', 'krslYirZT5ulvjAOQpusxg', 'SLj2V/0MVXGxSK14Kv5ovg', 'TolGNxE1dENf7wCNmJ0ocw', 'MPct/y4sONu69nE4cHuzjA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[2]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 6s6d',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 cc',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 6cKcTs',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'p5 cc',
+  'd db 3h',
+  'p1 cbr 9',
+  'p2 f',
+  'p4 cc',
+  'p5 f',
+  'd db Kh',
+  'p1 cbr 19',
+  'p4 cc',
+  'p1 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:00:20
+day = 1
+month = 7
+year = 2009
+hand = 3406285398
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['SLj2V/0MVXGxSK14Kv5ovg', 'TolGNxE1dENf7wCNmJ0ocw', 'MPct/y4sONu69nE4cHuzjA', 'b7YRpJ+VzNjsnJI+8U0QXA', 'eLAkhpdLaqOO8NHcWC7ACw', 'krslYirZT5ulvjAOQpusxg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[3]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 Kc5c',
+  'p3 f',
+  'p4 f',
+  'p5 cc',
+  'p1 cc',
+  'p2 cc',
+  'd db 5hTs5s',
+  'p1 cc',
+  'p2 cbr 2',
+  'p5 cc',
+  'p1 f',
+  'd db 6h',
+  'p2 cc',
+  'p5 cc',
+  'd db 4c',
+  'p2 cc',
+  'p5 cbr 3.50',
+  'p2 cc',
+  'p5 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:00:20
+day = 1
+month = 7
+year = 2009
+hand = 3406284222
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['KVjLBSZKFyXvYXYB5s8NgA', 'bXg0qW5lFSJ6+HPPCWN9Vw', '38dgy7Sj+LDDuIvEctSIPw', '4rHjBG8vuetI1cU+CAxFwg', 'mVaOYLgJ5LqKI7tqV65u8Q']
+winnings = [0, 0, 0, 0, 0]
+
+[4]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 3dQd',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p7 cc',
+  'p1 cc',
+  'p2 cc',
+  'd db 3cQs3h',
+  'p1 cc',
+  'p2 cc',
+  'p6 cc',
+  'p7 cc',
+  'd db Tc',
+  'p1 cc',
+  'p2 cc',
+  'p6 cbr 3',
+  'p7 cc',
+  'p1 f',
+  'p2 f',
+  'd db 6s',
+  'p6 cbr 7',
+  'p7 cbr 14',
+  'p6 f',
+]
+venue = 'iPoker Network'
+time = 00:01:23
+day = 1
+month = 7
+year = 2009
+hand = 3406283872
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 1]
+players = ['WrcgVJotoWe5p7+ODVlVug', 'APvZZsAdBRDoWrd/Z9HGhA', 'bAFlYVXXWe7OK9J1kphs4Q', 'NtSV0IJWXHjY6DIr1n6FiA', 'OiGlb+aSuY0DVV8W/wdPoQ', 'nXQc98PQNT1AYT3nDoId4g', 'FbUTQoVIYXSzshvKyNoWFg']
+winnings = [0, 0, 0, 0, 0, 0, 0]
+
+[5]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 8hKd',
+  'd dh p4 ????',
+  'd dh p5 7sQs',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'p3 cbr 2',
+  'p4 f',
+  'p5 cc',
+  'p6 f',
+  'p7 f',
+  'p1 f',
+  'p2 f',
+  'd db KsQd5s',
+  'p3 cc',
+  'p5 cbr 2.75',
+  'p3 cc',
+  'd db 4d',
+  'p3 cbr 5.50',
+  'p5 cbr 27.50',
+  'p3 cc',
+  'd db 9s',
+]
+venue = 'iPoker Network'
+time = 00:01:23
+day = 1
+month = 7
+year = 2009
+hand = 3406285130
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 1]
+players = ['OXMz1K9oOJXcP1Xbu7BGzw', 'FckHTkLIDJ7Kd6QcHKGCMA', 'sFSGvq7SxFiuSUFPkJMFtg', 'APvZZsAdBRDoWrd/Z9HGhA', 'UnZQQnHXUJFjAvGhd/SGTQ', '0HXOQlu61v4Mzo3dFM4/pg', 'nmEMwIJ5KREBS87NkgySJg']
+winnings = [0, 0, 0, 0, 0, 0, 0]
+
+[6]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 3d3s',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 cbr 4.50',
+  'p1 f',
+  'p2 cc',
+  'p3 cc',
+  'd db 6s6h3h',
+  'p2 cc',
+  'p3 cc',
+  'p7 cc',
+  'd db 9c',
+  'p2 cbr 7',
+  'p3 cc',
+  'p7 f',
+  'd db Jc',
+  'p2 cbr 14',
+  'p3 cbr 41.36',
+  'p2 cc',
+  'p3 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:23
+day = 1
+month = 7
+year = 2009
+hand = 3406286790
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 1]
+players = ['dfCJJ67xoKlt61yHXwEyQw', 'VZaDCUXStCfC09fUHZj3VA', 'UBaqwk8vEhNc41MftD/ibA', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', 'Fgic6PqXurnFy6+lKlN93A', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0]
+
+[7]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 KhJs',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 4',
+  'p5 cc',
+  'p6 f',
+  'p1 f',
+  'p2 f',
+  'd db 7cJd4h',
+  'p4 cbr 6',
+  'p5 cc',
+  'd db 8h',
+  'p4 cc',
+  'p5 cc',
+  'd db 9d',
+  'p4 cc',
+  'p5 cc',
+  'p4 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:23
+day = 1
+month = 7
+year = 2009
+hand = 3406287612
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['FckHTkLIDJ7Kd6QcHKGCMA', 'APvZZsAdBRDoWrd/Z9HGhA', 'UnZQQnHXUJFjAvGhd/SGTQ', '0HXOQlu61v4Mzo3dFM4/pg', 'nmEMwIJ5KREBS87NkgySJg', 'OXMz1K9oOJXcP1Xbu7BGzw']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[8]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 Ks6s',
+  'd dh p2 ????',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 5s8c4s',
+  'p1 cc',
+  'p2 cc',
+  'd db 8s',
+  'p1 cc',
+  'p2 cc',
+  'd db 7c',
+  'p1 cbr 3',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:45
+day = 1
+month = 7
+year = 2009
+hand = 3406279894
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['6wQdj4opApyPHETJ5zMZrA', '3ubcFdHNZZK8Khk5pppIjA']
+winnings = [0, 0]
+
+[9]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 7cKh',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db AcTdJs',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 9h',
+  'p1 cc',
+  'p2 cc',
+  'd db Qc',
+  'p1 cbr 3.50',
+  'p2 cbr 7',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:45
+day = 1
+month = 7
+year = 2009
+hand = 3406281412
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['6wQdj4opApyPHETJ5zMZrA', '3ubcFdHNZZK8Khk5pppIjA']
+winnings = [0, 0]
+
+[10]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 9h9c',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 3s4d6h',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db Qd',
+  'p1 cc',
+  'p2 cbr 8',
+  'p1 cc',
+  'd db 3d',
+  'p1 cc',
+  'p2 cbr 15',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:45
+day = 1
+month = 7
+year = 2009
+hand = 3406290878
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['u2NauMv3ZkX7eRWfcc7pZQ', '3ubcFdHNZZK8Khk5pppIjA']
+winnings = [0, 0]
+
+[11]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 8c7h',
+  'd dh p2 ????',
+  'p2 cc',
+  'p1 cc',
+  'd db Td8h3s',
+  'p1 cbr 2',
+  'p2 cc',
+  'd db 4h',
+  'p1 cc',
+  'p2 cc',
+  'd db Ad',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:01:45
+day = 1
+month = 7
+year = 2009
+hand = 3406291850
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['3ubcFdHNZZK8Khk5pppIjA', 'u2NauMv3ZkX7eRWfcc7pZQ']
+winnings = [0, 0]
+
+[12]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 Ks3h',
+  'd dh p2 JhJc',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db KcQd3s',
+  'p1 cbr 3',
+  'p2 cc',
+  'd db 6s',
+  'p1 cbr 8',
+  'p2 cc',
+  'd db As',
+  'p1 cc',
+  'p2 cbr 28',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:29
+day = 1
+month = 7
+year = 2009
+hand = 3406141984
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['YccX545/2a2uoschd94zKg', 'hPFvHF4n+sHjuxQbpYnAcQ', 'xNY8yO1l+PinLBKdWTYdVg', 'CIp7/ZdX75k9s7tFp3xIpg', 'txjavdnjbtgd45qllaW3bQ', 'Mx7tx4WERXwlpnHObwPCkA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[13]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 QcJc',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 f',
+  'p6 cc',
+  'p1 f',
+  'p2 cc',
+  'd db Kc7s8c',
+  'p2 cc',
+  'p4 cbr 5',
+  'p6 cc',
+  'p2 f',
+  'd db 6c',
+  'p4 cbr 5',
+  'p6 cbr 19',
+  'p4 cc',
+  'd db 3s',
+  'p4 cc',
+  'p6 cbr 17.60',
+  'p4 cc',
+  'p6 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406125146
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['yB3yu/1wsB1XX6UUmO9EDA', 'OQCedO7vqa5jDUwgIihDQw', 'oyYjx5kmXyGIced1U+ufiA', 'VaZPy2fG3/zmwNv8tF5RNA', 'g2xOXsn4L6pyy6e4UghUiw', 'tRgFwWp4aFjTqthnXX77IQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[14]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 5hJh',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'd db Qd2sTs',
+  'p5 cc',
+  'p6 cbr 1.87',
+  'p5 cc',
+  'd db 5d',
+  'p5 cc',
+  'p6 cbr 2.81',
+  'p5 cc',
+  'd db Qh',
+  'p5 cc',
+  'p6 cc',
+  'p5 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406134672
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['Mx7tx4WERXwlpnHObwPCkA', 'OujmrPkhFWk/QK0NwiMjkg', 'tRgFwWp4aFjTqthnXX77IQ', '6nzSIBt6RQiR/po4r7833g', 'ZhpwfuyX3yAhJyfhw9IY8A', 'BeBnaJWVei8ddZxzJ+hPnQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[15]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 6d6s',
+  'd dh p2 8sTs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 9dTd7c',
+  'p1 cc',
+  'p2 cbr 5',
+  'p1 cc',
+  'd db Qs',
+  'p1 cc',
+  'p2 cc',
+  'd db 7d',
+  'p1 cbr 5',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406123852
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['LYg9XRFlihs/ynsnrrL4WA', 'OQCedO7vqa5jDUwgIihDQw', 'vHLpEpm0etSxZ/KT3riH/w', '9ATVWdXugkPTG8pyvloIzw', 'wSUf5PugLSwVV3QduZcj7A']
+winnings = [0, 0, 0, 0, 0]
+
+[16]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 TsTc',
+  'd dh p5 QsAd',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 cbr 7.53',
+  'p1 f',
+  'p2 f',
+  'p4 cc',
+  'd db Qd5c3c',
+  'p4 cc',
+  'p5 cc',
+  'd db Kh',
+  'p4 cc',
+  'p5 cc',
+  'd db 9h',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406134622
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['LI1FqymGHErbOiyeECiBqA', 'qJPxEil/UYSpiU/cGlFGqQ', 'J+RocJpTv16tFDVFntShyw', 'OIZrmhtGhD36BT/CjefFtA', 'X9iPKfoCAFNJGFmdfoBKkA']
+winnings = [0, 0, 0, 0, 0]
+
+[17]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 8hJh',
+  'd dh p4 ????',
+  'd dh p5 9hTc',
+  'p3 cc',
+  'p4 f',
+  'p5 cbr 5',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db 5s4s7d',
+  'p3 cc',
+  'p5 cbr 11.50',
+  'p3 cc',
+  'd db 2c',
+  'p3 cc',
+  'p5 cc',
+  'd db 6d',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406138082
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['J+RocJpTv16tFDVFntShyw', 'OIZrmhtGhD36BT/CjefFtA', 'X9iPKfoCAFNJGFmdfoBKkA', 'LI1FqymGHErbOiyeECiBqA', 'qJPxEil/UYSpiU/cGlFGqQ']
+winnings = [0, 0, 0, 0, 0]
+
+[18]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 4sQc',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 9d8dKd',
+  'p1 cc',
+  'p2 cc',
+  'd db 2d',
+  'p1 cc',
+  'p2 cc',
+  'd db 2c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406140326
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['OIZrmhtGhD36BT/CjefFtA', 'X9iPKfoCAFNJGFmdfoBKkA', 'LI1FqymGHErbOiyeECiBqA', 'qJPxEil/UYSpiU/cGlFGqQ', 'J+RocJpTv16tFDVFntShyw']
+winnings = [0, 0, 0, 0, 0]
+
+[19]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 QcJs',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 4cTh7s',
+  'p1 cc',
+  'p2 cc',
+  'd db 5c',
+  'p1 cc',
+  'p2 cc',
+  'd db 4h',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406142796
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['X9iPKfoCAFNJGFmdfoBKkA', 'LI1FqymGHErbOiyeECiBqA', 'qJPxEil/UYSpiU/cGlFGqQ', 'J+RocJpTv16tFDVFntShyw', 'OIZrmhtGhD36BT/CjefFtA']
+winnings = [0, 0, 0, 0, 0]
+
+[20]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 QcAh',
+  'd dh p3 ????',
+  'd dh p4 QsAc',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db QdKs7h',
+  'p2 cc',
+  'p4 cc',
+  'd db 2h',
+  'p2 cbr 5',
+  'p4 cc',
+  'd db 5d',
+  'p2 cc',
+  'p4 cbr 8',
+  'p2 cc',
+  'p4 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406131156
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['NYeuq6AaVGNHkyL3QsuqKA', 'LI1FqymGHErbOiyeECiBqA', 'OIZrmhtGhD36BT/CjefFtA', 'l6YmchxhIroSoNX8H2ED9w', 'TolGNxE1dENf7wCNmJ0ocw']
+winnings = [0, 0, 0, 0, 0]
+
+[21]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 3h7h',
+  'd dh p3 JhTd',
+  'd dh p4 ????',
+  'p3 cbr 3.50',
+  'p4 f',
+  'p1 f',
+  'p2 cc',
+  'd db 5sTc7d',
+  'p2 cc',
+  'p3 cbr 5',
+  'p2 cc',
+  'd db 2s',
+  'p2 cbr 6',
+  'p3 cc',
+  'd db 5h',
+  'p2 cbr 10',
+  'p3 cc',
+  'p2 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406140622
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['wSUf5PugLSwVV3QduZcj7A', 'LYg9XRFlihs/ynsnrrL4WA', 'vHLpEpm0etSxZ/KT3riH/w', '9ATVWdXugkPTG8pyvloIzw']
+winnings = [0, 0, 0, 0]
+
+[22]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 Jd9s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'p3 cc',
+  'p4 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 3h2sAd',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db 3c',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db 6h',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:02:30
+day = 1
+month = 7
+year = 2009
+hand = 3406139410
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['g2xOXsn4L6pyy6e4UghUiw', 'tRgFwWp4aFjTqthnXX77IQ', 'yB3yu/1wsB1XX6UUmO9EDA', 'oyYjx5kmXyGIced1U+ufiA']
+winnings = [0, 0, 0, 0]
+
+[23]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 AsTs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3',
+  'p1 f',
+  'p2 cc',
+  'd db TdQh5c',
+  'p2 cc',
+  'p5 cc',
+  'd db 8h',
+  'p2 cbr 6.50',
+  'p5 cc',
+  'd db Kh',
+  'p2 cc',
+  'p5 cc',
+  'p2 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406289602
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['MPct/y4sONu69nE4cHuzjA', 'fkABi8mMihJLxLvAWrH0og', 'wDgxZbWKGxRtTtNWXGtQ0w', 'TolGNxE1dENf7wCNmJ0ocw', 'I8x7vgoImyMmw7LqOZeQgQ']
+winnings = [0, 0, 0, 0, 0]
+
+[24]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 JsAh',
+  'd dh p5 KsJd',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 cc',
+  'p1 f',
+  'p2 f',
+  'd db 9h2sJc',
+  'p4 cbr 6',
+  'p5 cc',
+  'd db 2c',
+  'p4 cbr 10',
+  'p5 cbr 27.85',
+  'p4 cc',
+  'd db 8s',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406292582
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['wDgxZbWKGxRtTtNWXGtQ0w', 'TolGNxE1dENf7wCNmJ0ocw', 'I8x7vgoImyMmw7LqOZeQgQ', 'MPct/y4sONu69nE4cHuzjA', 'fkABi8mMihJLxLvAWrH0og']
+winnings = [0, 0, 0, 0, 0]
+
+[25]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 Kh3s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p1 cbr 3',
+  'p2 cc',
+  'd db 3h3c2d',
+  'p1 cc',
+  'p2 cc',
+  'd db Qc',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 4h',
+  'p1 cc',
+  'p2 cbr 6',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406289196
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['/0wOvWIZc5kNUDQt1mmxFA', 'WMZxebGBANeOjsFxjyRU5w', '9YJOHteeLHQuWYT0HQqe7Q', 'KVjLBSZKFyXvYXYB5s8NgA', 'O6DeI3uPxgsABPq7uWR8wg']
+winnings = [0, 0, 0, 0, 0]
+
+[26]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 AcQd',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db 8dTsAh',
+  'p2 cc',
+  'p4 cbr 4',
+  'p2 cc',
+  'd db Jh',
+  'p2 cc',
+  'p4 cc',
+  'd db Kh',
+  'p2 cc',
+  'p4 cc',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406284324
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['VR8jfViPUfhZtVCfb9Lm3Q', 'nRuDWD1lqmaINI7Cs7V2bA', 'sycpSD/L3En+mcLQYJzwJw', 'NWWjkw/2O2gq8A3+gNf2MA', 'OujmrPkhFWk/QK0NwiMjkg']
+winnings = [0, 0, 0, 0, 0]
+
+[27]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 KsQs',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3',
+  'p6 f',
+  'p1 f',
+  'p2 cc',
+  'd db 3c4dKc',
+  'p2 cc',
+  'p5 cbr 4',
+  'p2 cc',
+  'd db As',
+  'p2 cc',
+  'p5 cc',
+  'd db 6c',
+  'p2 cc',
+  'p5 cc',
+  'p2 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406279664
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['oyYjx5kmXyGIced1U+ufiA', 'sjHjx9vI71nNcK1qLoXZdA', 'DQshUn4nRrAd9g4pa3pq1Q', 'sycpSD/L3En+mcLQYJzwJw', 'ujg+JazNxVUfoUo93P6/hQ', 'xNY8yO1l+PinLBKdWTYdVg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[28]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 QcQd',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p1 f',
+  'p2 cc',
+  'd db 6d3d4h',
+  'p2 cc',
+  'p3 cc',
+  'p6 cc',
+  'd db 6c',
+  'p2 cc',
+  'p3 cbr 7',
+  'p6 cc',
+  'p2 f',
+  'd db 4c',
+  'p3 cc',
+  'p6 cc',
+  'p3 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406291450
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['sjHjx9vI71nNcK1qLoXZdA', 'DQshUn4nRrAd9g4pa3pq1Q', 'sycpSD/L3En+mcLQYJzwJw', 'ujg+JazNxVUfoUo93P6/hQ', 'xNY8yO1l+PinLBKdWTYdVg', 'oyYjx5kmXyGIced1U+ufiA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[29]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 AhKd',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 cc',
+  'p6 cc',
+  'p1 f',
+  'p2 cc',
+  'd db 7cAc8s',
+  'p2 cc',
+  'p4 cbr 10.50',
+  'p5 cc',
+  'p6 f',
+  'p2 f',
+  'd db 9d',
+  'p4 cc',
+  'p5 cc',
+  'd db 3h',
+  'p4 cc',
+  'p5 cc',
+  'p4 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406288800
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['KVjLBSZKFyXvYXYB5s8NgA', 'Nnw4OUjVZLn1Y6yiVuaf3Q', 'KePXISw/UO0VErYiaB+DKg', 'TolGNxE1dENf7wCNmJ0ocw', '6MG+EzMfWvsWe8FXh4n7pg', 'TgHtpkfe5cNgbyBacPGKZg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[30]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, -0.5, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 JdJc',
+  'd dh p5 KcKh',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 cc',
+  'p6 f',
+  'p1 cc',
+  'p2 f',
+  'd db 8s7hTh',
+  'p1 cbr 5.75',
+  'p4 cbr 22',
+  'p5 cbr 38.25',
+  'p1 f',
+  'p4 cbr 54.50',
+  'p5 cc',
+  'd db Qd',
+  'p4 cc',
+  'p5 cc',
+  'd db 2s',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406286874
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 5, 6, 4, 1]
+players = ['nRuDWD1lqmaINI7Cs7V2bA', 'sycpSD/L3En+mcLQYJzwJw', 'NWWjkw/2O2gq8A3+gNf2MA', 'OujmrPkhFWk/QK0NwiMjkg', 'vlkfwqPlH+n8uhdQqurm7A', 'VR8jfViPUfhZtVCfb9Lm3Q']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[31]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 7cQc',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 f',
+  'p6 f',
+  'p1 f',
+  'p2 cc',
+  'd db 7s8dJs',
+  'p2 cc',
+  'p4 cc',
+  'd db 4h',
+  'p2 cc',
+  'p4 cc',
+  'd db 3h',
+  'p2 cc',
+  'p4 cc',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406294370
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['OujmrPkhFWk/QK0NwiMjkg', 'vlkfwqPlH+n8uhdQqurm7A', 'VR8jfViPUfhZtVCfb9Lm3Q', 'nRuDWD1lqmaINI7Cs7V2bA', 'sycpSD/L3En+mcLQYJzwJw', 'NWWjkw/2O2gq8A3+gNf2MA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[32]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 KhKs',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'd db Ad2d6h',
+  'p3 cbr 4',
+  'p6 cc',
+  'd db 2c',
+  'p3 cc',
+  'p6 cbr 11',
+  'p3 cc',
+  'd db 3c',
+  'p3 cc',
+  'p6 cc',
+  'p3 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406285758
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['xNY8yO1l+PinLBKdWTYdVg', 'XJc3EFxIe0K6UQpo/Ty2og', '3DntKmWkXwIfhLuoWBEo/A', 'oyYjx5kmXyGIced1U+ufiA', 'KVjLBSZKFyXvYXYB5s8NgA', 'AB0f11cJSkKlnTrBDiVRag']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[33]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 8c8s',
+  'd dh p3 AhTh',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cbr 3.50',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 f',
+  'p2 cc',
+  'd db Ts5c3h',
+  'p2 cc',
+  'p3 cbr 5',
+  'p2 cbr 22.50',
+  'p3 cbr 157',
+  'p2 cc',
+  'd db 2c',
+  'p2 cc',
+  'p3 cc',
+  'd db 5s',
+]
+venue = 'iPoker Network'
+time = 00:03:20
+day = 1
+month = 7
+year = 2009
+hand = 3406292724
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['oyYjx5kmXyGIced1U+ufiA', 'Xr6CBV57VtMntsFGmLLcow', 'TolGNxE1dENf7wCNmJ0ocw', 'LUeUzOSVxgEYpOWhX6Eu0A', 'AB0f11cJSkKlnTrBDiVRag', '38dgy7Sj+LDDuIvEctSIPw']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[34]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 5hKh',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 cbr 4',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 cc',
+  'p8 f',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'd db TdKc4c',
+  'p3 cc',
+  'p7 cc',
+  'd db 7h',
+  'p3 cbr 3',
+  'p7 cc',
+  'd db Ts',
+  'p3 cc',
+  'p7 cc',
+  'p3 sm ????',
+  'p7 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:23
+day = 1
+month = 7
+year = 2009
+hand = 3406292258
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['0HXOQlu61v4Mzo3dFM4/pg', 'g+bTLLMNzvbIjamscsRJzQ', 'D9BOF0DnGo0jEbU6Po7eBw', 'xZSpJD4lrCtsSFTIW5Uydg', 'DJ7VB49QxXzAYjisgq0RMg', 'OiGlb+aSuY0DVV8W/wdPoQ', 'SmfehYOe3s8Tfmi0ao4myw', 'InJFXTB9SPTA8jbZZtNnQg', 'FckHTkLIDJ7Kd6QcHKGCMA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[35]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, -1.5, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 QsQd',
+  'd dh p7 4d4s',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'd dh p10 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 7',
+  'p7 cbr 24.52',
+  'p8 f',
+  'p9 f',
+  'p10 f',
+  'p1 f',
+  'p2 f',
+  'p3 f',
+  'p6 cc',
+  'd db Kh8dJd',
+  'p6 cc',
+  'p7 cc',
+  'd db 4h',
+  'p6 cc',
+  'p7 cc',
+  'd db Ks',
+]
+venue = 'iPoker Network'
+time = 00:03:24
+day = 1
+month = 7
+year = 2009
+hand = 3406291296
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 5, 6, 7, 8, 9, 4, 10, 1]
+players = ['0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', '8qsmVV+tAfyY4zsMUfEvZA', 'Fgic6PqXurnFy6+lKlN93A', '/V2S2rtfIZVVd0JiISADnA', 'xPGoiZ0ZP0bazJHL5ZJU/A', 'HHIzFixfq6ZlNQs+yXRslw', 'QC2/+we+9VY7m45km9ydyA', 'NSdKpmS18WXzyYnDezyDTw', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[36]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, -1.5, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 5d2d',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 KsJs',
+  'd dh p7 ????',
+  'p3 cbr 4',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p7 f',
+  'p1 cc',
+  'p2 f',
+  'd db Kc6s3d',
+  'p1 cc',
+  'p3 cc',
+  'p6 cbr 3.37',
+  'p1 cc',
+  'p3 cc',
+  'd db 8s',
+  'p1 cc',
+  'p3 cc',
+  'p6 cbr 11.80',
+  'p1 cc',
+  'p3 f',
+  'd db 3c',
+  'p1 cbr 70',
+  'p6 cc',
+  'p1 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:24
+day = 1
+month = 7
+year = 2009
+hand = 3406291692
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 5, 6, 7, 4, 1]
+players = ['UnZQQnHXUJFjAvGhd/SGTQ', '0HXOQlu61v4Mzo3dFM4/pg', 'nmEMwIJ5KREBS87NkgySJg', 'OXMz1K9oOJXcP1Xbu7BGzw', 'FckHTkLIDJ7Kd6QcHKGCMA', 'sFSGvq7SxFiuSUFPkJMFtg', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0]
+
+[37]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 KsKh',
+  'd dh p7 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 2',
+  'p7 cc',
+  'p1 f',
+  'p2 f',
+  'd db Jd4d3s',
+  'p6 cbr 4',
+  'p7 cc',
+  'd db 6c',
+  'p6 cc',
+  'p7 cc',
+  'd db Qc',
+  'p6 cbr 6',
+  'p7 cc',
+  'p6 sm ????',
+  'p7 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:24
+day = 1
+month = 7
+year = 2009
+hand = 3406291502
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 1]
+players = ['OXMz1K9oOJXcP1Xbu7BGzw', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', 'Fgic6PqXurnFy6+lKlN93A', 'APvZZsAdBRDoWrd/Z9HGhA', 'dfCJJ67xoKlt61yHXwEyQw', 'VZaDCUXStCfC09fUHZj3VA']
+winnings = [0, 0, 0, 0, 0, 0, 0]
+
+[38]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 8hAd',
+  'd dh p8 ????',
+  'd dh p9 KsJc',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 cbr 7',
+  'p8 f',
+  'p9 cc',
+  'p1 f',
+  'p2 f',
+  'd db 2hAcAs',
+  'p7 cc',
+  'p9 cc',
+  'd db 4d',
+  'p7 cc',
+  'p9 cc',
+  'd db 3h',
+]
+venue = 'iPoker Network'
+time = 00:03:25
+day = 1
+month = 7
+year = 2009
+hand = 3406289634
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['FckHTkLIDJ7Kd6QcHKGCMA', 'veizHuD/Nzs/0hPnsbQJag', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'HCiQIR9ydK8k7445soqpDQ', 'OiGlb+aSuY0DVV8W/wdPoQ', 'hS2Ap5T5wEQWpspDqw3R4g', '0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[39]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 JhAc',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 QdAh',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 3.50',
+  'p1 f',
+  'p2 cbr 20',
+  'p6 cc',
+  'd db KdQhQc',
+  'p2 cc',
+  'p6 cc',
+  'd db 9h',
+  'p2 cc',
+  'p6 cc',
+  'd db Td',
+]
+venue = 'iPoker Network'
+time = 00:03:34
+day = 1
+month = 7
+year = 2009
+hand = 3406293312
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['D3wzHvlY9qn9fHzXIBydYA', 'JSOfi4mtcGIBOM79GohcEg', '3DntKmWkXwIfhLuoWBEo/A', 'qR0ibqLUJk8r1ltTbdjLYg', 'XJc3EFxIe0K6UQpo/Ty2og', 'Nnw4OUjVZLn1Y6yiVuaf3Q']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[40]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 Qc8c',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 f',
+  'p1 f',
+  'p2 cc',
+  'd db 8dTh5h',
+  'p2 cc',
+  'p4 cbr 6',
+  'p2 cc',
+  'd db Qs',
+  'p2 cc',
+  'p4 cbr 15',
+  'p2 cbr 30',
+  'p4 cc',
+  'd db 6c',
+  'p2 cbr 60',
+  'p4 cc',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:34
+day = 1
+month = 7
+year = 2009
+hand = 3406288140
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['sycpSD/L3En+mcLQYJzwJw', 'tFJOcIGg+W84B/dmPvi6UA', '/0wOvWIZc5kNUDQt1mmxFA', 'SLj2V/0MVXGxSK14Kv5ovg', 'HShOZkAoeF8kdVTB4Fe9Hw']
+winnings = [0, 0, 0, 0, 0]
+
+[41]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 KdQc',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 cbr 4',
+  'p4 f',
+  'p5 cc',
+  'p1 cc',
+  'p2 f',
+  'd db 3hQs4c',
+  'p1 cc',
+  'p3 cc',
+  'p5 cc',
+  'd db 8s',
+  'p1 cbr 8',
+  'p3 cc',
+  'p5 f',
+  'd db Jc',
+  'p1 cc',
+  'p3 cc',
+  'p1 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:03:34
+day = 1
+month = 7
+year = 2009
+hand = 3406292372
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['1HPJd/xrfFifRl1lQnoiMQ', 'sjHjx9vI71nNcK1qLoXZdA', 'SLj2V/0MVXGxSK14Kv5ovg', 'Xx611J6hwjeCQmEP7dqZXQ', 'VS9tqWfHQdfuxOyfotprqw']
+winnings = [0, 0, 0, 0, 0]
+
+[42]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 QsAc',
+  'd dh p4 AhAd',
+  'p3 cbr 5',
+  'p4 cbr 15',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db 6sKc4h',
+  'p3 cbr 47.10',
+  'p4 cc',
+  'd db 4s',
+  'p3 cc',
+  'p4 cc',
+  'd db 2s',
+]
+venue = 'iPoker Network'
+time = 00:03:35
+day = 1
+month = 7
+year = 2009
+hand = 3406288404
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['oke8E7cdXAwMq6O8yG8/zw', 'csr9LLHLRYnasEECQ+4xgw', 'YccX545/2a2uoschd94zKg', 'NWWjkw/2O2gq8A3+gNf2MA']
+winnings = [0, 0, 0, 0]
+
+[43]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 AdTc',
+  'd dh p2 TdKs',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 2d3d4c',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 5d',
+  'p1 cc',
+  'p2 cc',
+  'd db 6h',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:04:45
+day = 1
+month = 7
+year = 2009
+hand = 3406298550
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['7yXpsHUjgRTDpopOcOUC8g', '3ubcFdHNZZK8Khk5pppIjA']
+winnings = [0, 0]
+
+[44]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 KsKc',
+  'd dh p5 As6s',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 cc',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'd db 7cTh7s',
+  'p4 cbr 4',
+  'p5 cbr 11.75',
+  'p4 cc',
+  'd db 2c',
+  'p4 cc',
+  'p5 cc',
+  'd db Qs',
+]
+venue = 'iPoker Network'
+time = 00:05:24
+day = 1
+month = 7
+year = 2009
+hand = 3406294198
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'HCiQIR9ydK8k7445soqpDQ', 'OiGlb+aSuY0DVV8W/wdPoQ', 'hS2Ap5T5wEQWpspDqw3R4g', '0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A', 'FckHTkLIDJ7Kd6QcHKGCMA', 'veizHuD/Nzs/0hPnsbQJag']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[45]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 TdTc',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 3.50',
+  'p5 f',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'd db 2sAdQh',
+  'p4 cbr 5',
+  'p6 cc',
+  'd db 6h',
+  'p4 cc',
+  'p6 cc',
+  'd db 3c',
+  'p4 cc',
+  'p6 cc',
+  'p4 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:29
+day = 1
+month = 7
+year = 2009
+hand = 3406148492
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['AB0f11cJSkKlnTrBDiVRag', '0fJH03jWzOuG8Ufw9eTQHA', 'OujmrPkhFWk/QK0NwiMjkg', 'xNY8yO1l+PinLBKdWTYdVg', 'ZhpwfuyX3yAhJyfhw9IY8A', 'oyYjx5kmXyGIced1U+ufiA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[46]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 Kd7c',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 5c9c',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p1 cc',
+  'p2 cc',
+  'd db 8d7hJh',
+  'p1 cbr 1',
+  'p2 f',
+  'p6 cc',
+  'd db Ah',
+  'p1 cbr 1',
+  'p6 cbr 3',
+  'p1 cc',
+  'd db Td',
+  'p1 cc',
+  'p6 cc',
+  'p1 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:29
+day = 1
+month = 7
+year = 2009
+hand = 3406145594
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['hPFvHF4n+sHjuxQbpYnAcQ', 'xNY8yO1l+PinLBKdWTYdVg', 'CIp7/ZdX75k9s7tFp3xIpg', 'txjavdnjbtgd45qllaW3bQ', 'Mx7tx4WERXwlpnHObwPCkA', 'YccX545/2a2uoschd94zKg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[47]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 6d8s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 9dQh5s',
+  'p1 cc',
+  'p2 cc',
+  'd db 5c',
+  'p1 cc',
+  'p2 cc',
+  'd db 8c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:29
+day = 1
+month = 7
+year = 2009
+hand = 3406143104
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['vPnPx0HWEJ/+apJ/CFBnGQ', 'KVjLBSZKFyXvYXYB5s8NgA', 'xNY8yO1l+PinLBKdWTYdVg', 'cPDP+O+r2uAUmhvNqNukeQ', 'TolGNxE1dENf7wCNmJ0ocw', 'MPct/y4sONu69nE4cHuzjA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[48]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 5dJd',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 AhQd',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 3',
+  'p1 cc',
+  'p2 f',
+  'd db 5c2d4d',
+  'p1 cc',
+  'p6 cbr 5',
+  'p1 cc',
+  'd db Td',
+  'p1 cc',
+  'p6 cc',
+  'd db 3d',
+  'p1 cbr 17',
+  'p6 cc',
+  'p1 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:30
+day = 1
+month = 7
+year = 2009
+hand = 3406145398
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['BeBnaJWVei8ddZxzJ+hPnQ', 'Mx7tx4WERXwlpnHObwPCkA', 'OujmrPkhFWk/QK0NwiMjkg', 'tRgFwWp4aFjTqthnXX77IQ', '6nzSIBt6RQiR/po4r7833g', 'ZhpwfuyX3yAhJyfhw9IY8A']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[49]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 QhAc',
+  'd dh p3 ????',
+  'd dh p4 JdJs',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 cbr 4.50',
+  'p6 f',
+  'p1 f',
+  'p2 cbr 15',
+  'p4 cbr 25.76',
+  'p5 f',
+  'p2 cc',
+  'd db Td3hKs',
+  'p2 cc',
+  'p4 cc',
+  'd db 2s',
+  'p2 cc',
+  'p4 cc',
+  'd db 7s',
+]
+venue = 'iPoker Network'
+time = 00:05:30
+day = 1
+month = 7
+year = 2009
+hand = 3406150504
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['tRgFwWp4aFjTqthnXX77IQ', '6nzSIBt6RQiR/po4r7833g', 'ZhpwfuyX3yAhJyfhw9IY8A', 'BeBnaJWVei8ddZxzJ+hPnQ', 'Mx7tx4WERXwlpnHObwPCkA', 'OujmrPkhFWk/QK0NwiMjkg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[50]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 As3h',
+  'd dh p3 6s6h',
+  'd dh p4 ????',
+  'p3 cc',
+  'p4 f',
+  'p1 f',
+  'p2 cc',
+  'd db 5d5s2s',
+  'p2 cc',
+  'p3 cc',
+  'd db 5c',
+  'p2 cc',
+  'p3 cc',
+  'd db 3s',
+  'p2 cbr 2',
+  'p3 cc',
+  'p2 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:30
+day = 1
+month = 7
+year = 2009
+hand = 3406146392
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['9ATVWdXugkPTG8pyvloIzw', 'wSUf5PugLSwVV3QduZcj7A', 'LYg9XRFlihs/ynsnrrL4WA', 'vHLpEpm0etSxZ/KT3riH/w']
+winnings = [0, 0, 0, 0]
+
+[51]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 QhAd',
+  'd dh p3 ????',
+  'p3 f',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 2c2d3d',
+  'p1 cc',
+  'p2 cc',
+  'd db 9s',
+  'p1 cc',
+  'p2 cc',
+  'd db 5c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:30
+day = 1
+month = 7
+year = 2009
+hand = 3406149178
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 1]
+players = ['X9iPKfoCAFNJGFmdfoBKkA', 'LI1FqymGHErbOiyeECiBqA', 'qJPxEil/UYSpiU/cGlFGqQ']
+winnings = [0, 0, 0]
+
+[52]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 2h2c',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 3s9s4h',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db 9c',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db Ts',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:05:31
+day = 1
+month = 7
+year = 2009
+hand = 3406144672
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['tFJOcIGg+W84B/dmPvi6UA', 'XYc4i1gmo0QIjIaCxXn4MA', 'PznweFxoXytkRpRYCJI8Gg', 'vPnPx0HWEJ/+apJ/CFBnGQ']
+winnings = [0, 0, 0, 0]
+
+[53]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 KsTs',
+  'd dh p5 AsAh',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 4',
+  'p5 cbr 7',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'p4 cc',
+  'd db 9d2dKh',
+  'p4 cc',
+  'p5 cbr 24',
+  'p6 f',
+  'p4 cbr 94.50',
+  'p5 cc',
+  'd db Tc',
+  'p4 cc',
+  'p5 cc',
+  'd db 2s',
+]
+venue = 'iPoker Network'
+time = 00:05:31
+day = 1
+month = 7
+year = 2009
+hand = 3406146314
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['oyYjx5kmXyGIced1U+ufiA', 'KVjLBSZKFyXvYXYB5s8NgA', 'jx6a7FResLXyvdqLlbOMZg', 'CIp7/ZdX75k9s7tFp3xIpg', 'JBIBZeVEvl1v0CrQZKSELA', 'J+RocJpTv16tFDVFntShyw']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[54]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 JcAh',
+  'd dh p2 TcTs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 4',
+  'p3 cc',
+  'p1 cc',
+  'd db 4sJd7d',
+  'p1 cbr 6',
+  'p2 cc',
+  'p3 f',
+  'd db 6c',
+  'p1 cbr 16.69',
+  'p2 cc',
+  'd db 4d',
+]
+venue = 'iPoker Network'
+time = 00:05:31
+day = 1
+month = 7
+year = 2009
+hand = 3406151428
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['jx6a7FResLXyvdqLlbOMZg', 'CIp7/ZdX75k9s7tFp3xIpg', 'JBIBZeVEvl1v0CrQZKSELA', 'J+RocJpTv16tFDVFntShyw', 'oyYjx5kmXyGIced1U+ufiA', 'KVjLBSZKFyXvYXYB5s8NgA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[55]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 7d7s',
+  'd dh p5 AhKd',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'p3 cbr 3',
+  'p4 cc',
+  'p5 cbr 20',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p1 f',
+  'p2 f',
+  'p3 f',
+  'p4 cc',
+  'd db 3cAc5s',
+  'p4 cc',
+  'p5 cc',
+  'd db 6h',
+  'p4 cc',
+  'p5 cc',
+  'd db 2c',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406280772
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['HCiQIR9ydK8k7445soqpDQ', 'nmEMwIJ5KREBS87NkgySJg', '3dsA6XW7IPMJ1z/5TLzErg', 'oNYK207q7EjIhkq2VGAilQ', 'InJFXTB9SPTA8jbZZtNnQg', '0HXOQlu61v4Mzo3dFM4/pg', 'NcGaMmf9+dU363x8CEPlOw', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[56]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 4dAs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 2hJcKc',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'd db 4s',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'd db 7s',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406255674
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['HCiQIR9ydK8k7445soqpDQ', 'wR+BGbwoCbvJs5oXM2hlsQ', 'lWAmjY09iqgI5le3MRIJtw', 'hS2Ap5T5wEQWpspDqw3R4g', '0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A', 'MJbQhNbe0ToqEsZxRYC/gQ', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[57]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 KsKd',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 AhQc',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 4',
+  'p6 f',
+  'p7 f',
+  'p8 cc',
+  'p1 f',
+  'p2 f',
+  'd db Ts6hTh',
+  'p5 cc',
+  'p8 cc',
+  'd db Qd',
+  'p5 cbr 4.75',
+  'p8 cbr 26',
+  'p5 cc',
+  'd db 9d',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406264408
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A', 'MJbQhNbe0ToqEsZxRYC/gQ', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'HCiQIR9ydK8k7445soqpDQ', 'wR+BGbwoCbvJs5oXM2hlsQ', 'hS2Ap5T5wEQWpspDqw3R4g']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[58]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 JcTh',
+  'd dh p8 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 cc',
+  'p8 f',
+  'p1 cbr 2',
+  'p2 f',
+  'p7 cc',
+  'd db TsAc2c',
+  'p1 cc',
+  'p7 cc',
+  'd db As',
+  'p1 cbr 1',
+  'p7 cc',
+  'd db 9h',
+  'p1 cc',
+  'p7 cc',
+  'p1 sm ????',
+  'p7 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406289446
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['qHz2yqVCn1fTlRXhxeJQfQ', '0HXOQlu61v4Mzo3dFM4/pg', 'veizHuD/Nzs/0hPnsbQJag', 'xZSpJD4lrCtsSFTIW5Uydg', 'OXMz1K9oOJXcP1Xbu7BGzw', 'APvZZsAdBRDoWrd/Z9HGhA', 'nk6bpEBKINO9WHSHzDmXbw', 'nmEMwIJ5KREBS87NkgySJg']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[59]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, -1, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 6h8d',
+  'd dh p3 5d7d',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'p3 cc',
+  'p4 cc',
+  'p5 f',
+  'p6 cc',
+  'p7 f',
+  'p8 f',
+  'p1 f',
+  'p2 cc',
+  'd db 6d5s7c',
+  'p2 cbr 4.50',
+  'p3 cbr 19',
+  'p4 f',
+  'p6 f',
+  'p2 cc',
+  'd db Js',
+  'p2 cc',
+  'p3 cc',
+  'd db Th',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406279442
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['FckHTkLIDJ7Kd6QcHKGCMA', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', '/V2S2rtfIZVVd0JiISADnA', '0HXOQlu61v4Mzo3dFM4/pg', '/f/m0BOtgdzNoMruWvhYIw', '8+tFk1xGA50CmVl1MnljAg', 'biM3LrsVRFD9zUQZT4blaA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[60]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 AdAs',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3.50',
+  'p6 f',
+  'p7 f',
+  'p8 cc',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'd db 5c6s5h',
+  'p5 cbr 6',
+  'p8 cbr 15',
+  'p5 cc',
+  'd db Jc',
+  'p5 cc',
+  'p8 cbr 10',
+  'p5 cc',
+  'd db Tc',
+  'p5 cc',
+  'p8 cbr 22.74',
+  'p5 cc',
+  'p8 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406297770
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['dsNvMiNtQ4xF8E0u37w/Uw', 'HCiQIR9ydK8k7445soqpDQ', 'nmEMwIJ5KREBS87NkgySJg', '3dsA6XW7IPMJ1z/5TLzErg', 'oFwGVcG+SakLRCvkMpgmmQ', '0HXOQlu61v4Mzo3dFM4/pg', 'W/TukQ6zB79l+4PZwSCufg', 'NcGaMmf9+dU363x8CEPlOw', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[61]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 9sJc',
+  'd dh p5 KcKh',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 cbr 7.65',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'p4 cc',
+  'd db 4cAh3d',
+  'p4 cc',
+  'p5 cc',
+  'd db Ad',
+  'p4 cc',
+  'p5 cc',
+  'd db 6h',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406282676
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['APvZZsAdBRDoWrd/Z9HGhA', 'nk6bpEBKINO9WHSHzDmXbw', 'nmEMwIJ5KREBS87NkgySJg', 'qHz2yqVCn1fTlRXhxeJQfQ', '46YohdCSBoLO4gJxg9Nf5g', '0HXOQlu61v4Mzo3dFM4/pg', 'veizHuD/Nzs/0hPnsbQJag', 'xZSpJD4lrCtsSFTIW5Uydg', 'OXMz1K9oOJXcP1Xbu7BGzw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[62]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 QsQd',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 cc',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'd db 7h2s3s',
+  'p4 cc',
+  'p5 cbr 1',
+  'p4 cbr 6',
+  'p5 cc',
+  'd db 8s',
+  'p4 cc',
+  'p5 cc',
+  'd db 9h',
+  'p4 cc',
+  'p5 cbr 1',
+  'p4 cc',
+  'p5 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406295548
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['ikbznp7Yom5yY2Hq7hy7pQ', 'eb6fdQzDJ5Ce0uQeuVUj7Q', 'eqzwE9fcQa/1aeHPfccobA', 'HdrwrCeaL30yk9bLO3LOuQ', 'DrfttRQtNt0O4ozn7aamHw', 'FckHTkLIDJ7Kd6QcHKGCMA', '/V2S2rtfIZVVd0JiISADnA', 'Fgic6PqXurnFy6+lKlN93A', 'WrcgVJotoWe5p7+ODVlVug']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[63]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 AdKd',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 JsJd',
+  'd dh p9 ????',
+  'p3 cbr 3.50',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 cc',
+  'p9 f',
+  'p1 f',
+  'p2 f',
+  'd db JhQc4d',
+  'p3 cbr 6',
+  'p8 cc',
+  'd db 4c',
+  'p3 cc',
+  'p8 cbr 3',
+  'p3 cc',
+  'd db Th',
+  'p3 cbr 19',
+  'p8 cc',
+  'p3 sm ????',
+  'p8 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406296504
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['biM3LrsVRFD9zUQZT4blaA', 'FckHTkLIDJ7Kd6QcHKGCMA', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', '/V2S2rtfIZVVd0JiISADnA', '0HXOQlu61v4Mzo3dFM4/pg', 'qe4YVne0/aq9ElOEJ4/D5Q', '/f/m0BOtgdzNoMruWvhYIw', '8+tFk1xGA50CmVl1MnljAg']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[64]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 4d3h',
+  'd dh p5 9c9h',
+  'p3 f',
+  'p4 cc',
+  'p5 cbr 3',
+  'p1 f',
+  'p2 f',
+  'p4 cc',
+  'd db 2d6c7d',
+  'p4 cc',
+  'p5 cbr 3',
+  'p4 cc',
+  'd db 7h',
+  'p4 cbr 4',
+  'p5 cbr 9',
+  'p4 cc',
+  'd db 5s',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406288146
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['Wk0tvNW5SXnihpiZaQ4erA', 'mmFyCIclw7BXPm0OgfSZeg', 'APvZZsAdBRDoWrd/Z9HGhA', 'zed1huFTrZpEYLybH2Z3ZQ', 'eLoEntjPbJUdF/9wDiCjsg']
+winnings = [0, 0, 0, 0, 0]
+
+[65]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 As6s',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 f',
+  'p1 cc',
+  'p2 cc',
+  'd db Ad6h9s',
+  'p1 cbr 3',
+  'p2 cc',
+  'p4 f',
+  'd db Tc',
+  'p1 cbr 8',
+  'p2 cc',
+  'd db 8c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406298358
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['APvZZsAdBRDoWrd/Z9HGhA', 'zed1huFTrZpEYLybH2Z3ZQ', 'RX0V2170+69Ti+Y4/9c4HA', 'Wk0tvNW5SXnihpiZaQ4erA', 'EMHkYKs3qjMQTGAn2sMeKQ']
+winnings = [0, 0, 0, 0, 0]
+
+[66]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 6d3c',
+  'd dh p2 ????',
+  'p2 cc',
+  'p1 cc',
+  'd db 4hKs4c',
+  'p1 cc',
+  'p2 cc',
+  'd db 3d',
+  'p1 cc',
+  'p2 cc',
+  'd db 2d',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406262852
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['APvZZsAdBRDoWrd/Z9HGhA', 'zed1huFTrZpEYLybH2Z3ZQ']
+winnings = [0, 0]
+
+[67]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 7s7c',
+  'd dh p2 ????',
+  'p2 cc',
+  'p1 cbr 5',
+  'p2 cc',
+  'd db Ad3h7h',
+  'p1 cbr 7',
+  'p2 cc',
+  'd db 3s',
+  'p1 cbr 16',
+  'p2 cc',
+  'd db 2h',
+  'p1 cbr 134.50',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406264034
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['APvZZsAdBRDoWrd/Z9HGhA', 'zed1huFTrZpEYLybH2Z3ZQ']
+winnings = [0, 0]
+
+[68]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 ThAc',
+  'd dh p2 5h5c',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 6sJh7d',
+  'p1 cc',
+  'p2 cc',
+  'd db 2s',
+  'p1 cc',
+  'p2 cc',
+  'd db Jd',
+  'p1 cbr 4',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:17
+day = 1
+month = 7
+year = 2009
+hand = 3406274940
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['zed1huFTrZpEYLybH2Z3ZQ', 'APvZZsAdBRDoWrd/Z9HGhA']
+winnings = [0, 0]
+
+[69]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 7h9s',
+  'd dh p3 KhKc',
+  'd dh p4 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p1 f',
+  'p2 cc',
+  'd db 5s8cTs',
+  'p2 cc',
+  'p3 cbr 4',
+  'p2 cc',
+  'd db Ac',
+  'p2 cbr 7.25',
+  'p3 cbr 14.50',
+  'p2 cc',
+  'd db As',
+]
+venue = 'iPoker Network'
+time = 00:06:20
+day = 1
+month = 7
+year = 2009
+hand = 3406296786
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['MPct/y4sONu69nE4cHuzjA', 'fkABi8mMihJLxLvAWrH0og', 'wDgxZbWKGxRtTtNWXGtQ0w', 'TolGNxE1dENf7wCNmJ0ocw']
+winnings = [0, 0, 0, 0]
+
+[70]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 KcTd',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 AcKh',
+  'd dh p5 ????',
+  'p3 f',
+  'p4 cbr 3',
+  'p5 f',
+  'p1 cc',
+  'p2 f',
+  'd db Kd2d2s',
+  'p1 cc',
+  'p4 cc',
+  'd db 3d',
+  'p1 cbr 7',
+  'p4 cc',
+  'd db 8s',
+  'p1 cbr 10.50',
+  'p4 cc',
+  'p1 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:20
+day = 1
+month = 7
+year = 2009
+hand = 3406295386
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['pcKLPP8JDRRm7y0e5DEHoA', 'KVjLBSZKFyXvYXYB5s8NgA', 'ujg+JazNxVUfoUo93P6/hQ', 'sjHjx9vI71nNcK1qLoXZdA', 'qJPxEil/UYSpiU/cGlFGqQ']
+winnings = [0, 0, 0, 0, 0]
+
+[71]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 Qh7h',
+  'd dh p4 QdAc',
+  'd dh p5 ????',
+  'p3 cc',
+  'p4 cbr 6',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db JsJc8c',
+  'p3 cc',
+  'p4 cc',
+  'd db 2c',
+  'p3 cbr 6.75',
+  'p4 cc',
+  'd db 4c',
+  'p3 cbr 13.50',
+  'p4 cc',
+  'p3 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:20
+day = 1
+month = 7
+year = 2009
+hand = 3406298832
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['sjHjx9vI71nNcK1qLoXZdA', 'qJPxEil/UYSpiU/cGlFGqQ', 'pcKLPP8JDRRm7y0e5DEHoA', 'KVjLBSZKFyXvYXYB5s8NgA', 'ujg+JazNxVUfoUo93P6/hQ']
+winnings = [0, 0, 0, 0, 0]
+
+[72]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 9s8s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 3',
+  'p1 f',
+  'p2 cc',
+  'd db Ac5s3s',
+  'p2 cc',
+  'p6 cbr 3.25',
+  'p2 cc',
+  'd db 8h',
+  'p2 cc',
+  'p6 cc',
+  'd db 7d',
+  'p2 cc',
+  'p6 cc',
+  'p2 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:20
+day = 1
+month = 7
+year = 2009
+hand = 3406300740
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['DQshUn4nRrAd9g4pa3pq1Q', 'sycpSD/L3En+mcLQYJzwJw', 'ujg+JazNxVUfoUo93P6/hQ', 'xNY8yO1l+PinLBKdWTYdVg', 'oyYjx5kmXyGIced1U+ufiA', 'sjHjx9vI71nNcK1qLoXZdA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[73]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 9d6s',
+  'd dh p2 ????',
+  'p2 cbr 2',
+  'p1 cc',
+  'd db KhKs6h',
+  'p1 cc',
+  'p2 cbr 2',
+  'p1 cc',
+  'd db 9h',
+  'p1 cc',
+  'p2 cc',
+  'd db 6d',
+  'p1 cbr 4',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:45
+day = 1
+month = 7
+year = 2009
+hand = 3406299980
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['UuB6ZbKq4fDTgZxlTpGurw', 'Gy8ifbOE43+whjDMxO8KSg']
+winnings = [0, 0]
+
+[74]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 4cTh',
+  'd dh p2 ????',
+  'p2 cbr 2',
+  'p1 cc',
+  'd db 8d4sAh',
+  'p1 cc',
+  'p2 cc',
+  'd db 7c',
+  'p1 cc',
+  'p2 cc',
+  'd db 2h',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:06:45
+day = 1
+month = 7
+year = 2009
+hand = 3406301178
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['UuB6ZbKq4fDTgZxlTpGurw', 'Gy8ifbOE43+whjDMxO8KSg']
+winnings = [0, 0]
+
+[75]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 4c3d',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cc',
+  'p1 cc',
+  'p2 cc',
+  'd db Qs2s4d',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p9 cc',
+  'd db 5c',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p9 cc',
+  'd db 7c',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p9 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p3 sm ????',
+  'p9 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:07:23
+day = 1
+month = 7
+year = 2009
+hand = 3406298540
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['OiGlb+aSuY0DVV8W/wdPoQ', 'ErGD1V4HJtrC5SjnrRnOkg', 'nXQc98PQNT1AYT3nDoId4g', 'InJFXTB9SPTA8jbZZtNnQg', 'FbUTQoVIYXSzshvKyNoWFg', 'WrcgVJotoWe5p7+ODVlVug', 'APvZZsAdBRDoWrd/Z9HGhA', 'bAFlYVXXWe7OK9J1kphs4Q', 'NtSV0IJWXHjY6DIr1n6FiA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[76]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 6cAs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 cbr 2',
+  'p9 f',
+  'p1 f',
+  'p2 cc',
+  'd db 7d4d9d',
+  'p2 cc',
+  'p8 cc',
+  'd db 7c',
+  'p2 cc',
+  'p8 cc',
+  'd db 4h',
+  'p2 cc',
+  'p8 cc',
+  'p2 sm ????',
+  'p8 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:07:24
+day = 1
+month = 7
+year = 2009
+hand = 3406299948
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['HCiQIR9ydK8k7445soqpDQ', 'OXMz1K9oOJXcP1Xbu7BGzw', 'OiGlb+aSuY0DVV8W/wdPoQ', '0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A', 'FckHTkLIDJ7Kd6QcHKGCMA', 'veizHuD/Nzs/0hPnsbQJag', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[77]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 8d9s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 cc',
+  'p1 cc',
+  'p2 cc',
+  'd db 6d5cTc',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p6 cc',
+  'd db Ks',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p6 cc',
+  'd db 8s',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p6 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p3 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:29
+day = 1
+month = 7
+year = 2009
+hand = 3406155958
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['Mx7tx4WERXwlpnHObwPCkA', 'YccX545/2a2uoschd94zKg', 'hPFvHF4n+sHjuxQbpYnAcQ', 'xNY8yO1l+PinLBKdWTYdVg', 'CIp7/ZdX75k9s7tFp3xIpg', 'txjavdnjbtgd45qllaW3bQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[78]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 9sAc',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 cbr 4.50',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db As5d8h',
+  'p3 cc',
+  'p5 cbr 7',
+  'p3 cc',
+  'd db 8s',
+  'p3 cc',
+  'p5 cc',
+  'd db 2h',
+  'p3 cc',
+  'p5 cc',
+  'p3 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406156420
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['/CAqXLn0Gy5diB97OwsChw', '9ATVWdXugkPTG8pyvloIzw', '7XuGM6dy28aVknM7zjhIBw', 'cPDP+O+r2uAUmhvNqNukeQ', '/0wOvWIZc5kNUDQt1mmxFA']
+winnings = [0, 0, 0, 0, 0]
+
+[79]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 8cQs',
+  'p3 f',
+  'p4 f',
+  'p5 cc',
+  'p1 f',
+  'p2 cc',
+  'd db Qh5sJd',
+  'p2 cbr 2',
+  'p5 cc',
+  'd db 2s',
+  'p2 cbr 4.50',
+  'p5 cc',
+  'd db 6d',
+  'p2 cc',
+  'p5 cc',
+  'p2 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406160494
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['cPDP+O+r2uAUmhvNqNukeQ', '/0wOvWIZc5kNUDQt1mmxFA', '/CAqXLn0Gy5diB97OwsChw', '9ATVWdXugkPTG8pyvloIzw', '7XuGM6dy28aVknM7zjhIBw']
+winnings = [0, 0, 0, 0, 0]
+
+[80]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, -1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 TsQc',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'p3 cc',
+  'p4 f',
+  'p1 cbr 5',
+  'p2 cc',
+  'p3 f',
+  'd db 8sJhTd',
+  'p1 cbr 8',
+  'p2 cc',
+  'd db 9c',
+  'p1 cc',
+  'p2 cc',
+  'd db 7h',
+  'p1 cbr 27',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406152940
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['qJPxEil/UYSpiU/cGlFGqQ', '19m3Ayg7jXqmSZ0LJIsc5Q', 'EMKS34XtfF0ldRLNi4eAQg', 'LI1FqymGHErbOiyeECiBqA']
+winnings = [0, 0, 0, 0]
+
+[81]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf]
+actions = [
+  'd dh p1 Th8h',
+  'd dh p2 ????',
+  'd dh p3 AsQs',
+  'p3 cbr 3',
+  'p1 cc',
+  'p2 f',
+  'd db Ks5d8s',
+  'p1 cc',
+  'p3 cbr 28.14',
+  'p1 cc',
+  'd db 4c',
+  'p1 cc',
+  'p3 cc',
+  'd db 2s',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406161712
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 1]
+players = ['EMKS34XtfF0ldRLNi4eAQg', 'LI1FqymGHErbOiyeECiBqA', 'RP9yRIdVu3O3ht8Mmw5g/w']
+winnings = [0, 0, 0]
+
+[82]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf]
+actions = [
+  'd dh p1 6c4s',
+  'd dh p2 ????',
+  'd dh p3 7cAd',
+  'p3 cbr 3',
+  'p1 cc',
+  'p2 f',
+  'd db 8d5hTd',
+  'p1 cc',
+  'p3 cc',
+  'd db 2s',
+  'p1 cc',
+  'p3 cc',
+  'd db 5c',
+  'p1 cc',
+  'p3 cc',
+  'p1 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406159834
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 1]
+players = ['BeBnaJWVei8ddZxzJ+hPnQ', 'OujmrPkhFWk/QK0NwiMjkg', 'tRgFwWp4aFjTqthnXX77IQ']
+winnings = [0, 0, 0]
+
+[83]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, -1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 6hQc',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 2',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 7s8c3d',
+  'p1 cc',
+  'p2 cc',
+  'p5 cc',
+  'd db 5h',
+  'p1 cc',
+  'p2 cc',
+  'p5 cbr 3',
+  'p1 cc',
+  'p2 f',
+  'd db 6s',
+  'p1 cc',
+  'p5 cc',
+  'p1 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:30
+day = 1
+month = 7
+year = 2009
+hand = 3406159462
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 5, 6, 4, 1]
+players = ['vPnPx0HWEJ/+apJ/CFBnGQ', 'KVjLBSZKFyXvYXYB5s8NgA', 'xNY8yO1l+PinLBKdWTYdVg', 'cPDP+O+r2uAUmhvNqNukeQ', 'JBIBZeVEvl1v0CrQZKSELA', 'MPct/y4sONu69nE4cHuzjA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[84]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ThQs',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db AdTcJh',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 6c',
+  'p1 cc',
+  'p2 cc',
+  'd db 7s',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:31
+day = 1
+month = 7
+year = 2009
+hand = 3406158844
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['tFJOcIGg+W84B/dmPvi6UA', '/0wOvWIZc5kNUDQt1mmxFA', 'XYc4i1gmo0QIjIaCxXn4MA', 'PznweFxoXytkRpRYCJI8Gg', 'nwSDrOsduCV6zNdgU7zvAQ', 'vPnPx0HWEJ/+apJ/CFBnGQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[85]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf]
+actions = [
+  'd dh p1 3h4d',
+  'd dh p2 Qc8d',
+  'd dh p3 ????',
+  'p3 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 3sKsQs',
+  'p1 cc',
+  'p2 cc',
+  'd db Js',
+  'p1 cc',
+  'p2 cc',
+  'd db 4s',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:08:31
+day = 1
+month = 7
+year = 2009
+hand = 3406159458
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 1]
+players = ['jx6a7FResLXyvdqLlbOMZg', 'oyYjx5kmXyGIced1U+ufiA', 'KVjLBSZKFyXvYXYB5s8NgA']
+winnings = [0, 0, 0]
+
+[86]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 8s8d',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 JhKs',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3',
+  'p6 cc',
+  'p1 f',
+  'p2 cbr 12.50',
+  'p5 cc',
+  'p6 f',
+  'd db 6hTcKd',
+  'p2 cbr 10.65',
+  'p5 cc',
+  'd db 7d',
+  'p2 cc',
+  'p5 cc',
+  'd db Js',
+]
+venue = 'iPoker Network'
+time = 00:09:20
+day = 1
+month = 7
+year = 2009
+hand = 3406304370
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['KVjLBSZKFyXvYXYB5s8NgA', 'O6DeI3uPxgsABPq7uWR8wg', 'JSOfi4mtcGIBOM79GohcEg', '/0wOvWIZc5kNUDQt1mmxFA', 'WMZxebGBANeOjsFxjyRU5w', '9YJOHteeLHQuWYT0HQqe7Q']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[87]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 9cAc',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cbr 3',
+  'p1 f',
+  'p2 cc',
+  'd db 2s7hAh',
+  'p2 cc',
+  'p9 cc',
+  'd db 3d',
+  'p2 cbr 4',
+  'p9 cc',
+  'd db Jd',
+  'p2 cbr 4',
+  'p9 cc',
+  'p2 sm ????',
+  'p9 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:09:23
+day = 1
+month = 7
+year = 2009
+hand = 3406302512
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['HCiQIR9ydK8k7445soqpDQ', 'nmEMwIJ5KREBS87NkgySJg', '3dsA6XW7IPMJ1z/5TLzErg', 'oFwGVcG+SakLRCvkMpgmmQ', '0HXOQlu61v4Mzo3dFM4/pg', 'W/TukQ6zB79l+4PZwSCufg', 'NcGaMmf9+dU363x8CEPlOw', 'APvZZsAdBRDoWrd/Z9HGhA', 'dsNvMiNtQ4xF8E0u37w/Uw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[88]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 JsQs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'd dh p10 As2s',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p10 cbr 3',
+  'p1 f',
+  'p2 cc',
+  'd db 9sAh5c',
+  'p2 cc',
+  'p10 cc',
+  'd db 4d',
+  'p2 cc',
+  'p10 cc',
+  'd db 5h',
+  'p2 cbr 1',
+  'p10 cc',
+  'p2 sm ????',
+  'p10 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:09:23
+day = 1
+month = 7
+year = 2009
+hand = 3406305042
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
+players = ['sGMxchFlLfIxIn6SN1GV6g', 'aNcFcPgnCphfpizQ+SrBLw', 'HCiQIR9ydK8k7445soqpDQ', 'ReBSM1VWCSy6+W1DjKLYLg', 'nmEMwIJ5KREBS87NkgySJg', 'Fgic6PqXurnFy6+lKlN93A', 'usE2Yh8K3s9XeOF6Tff10A', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'eb6fdQzDJ5Ce0uQeuVUj7Q']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[89]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 7hJc',
+  'd dh p2 ????',
+  'd dh p3 4d4c',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'd dh p10 ????',
+  'p3 cbr 4',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p10 f',
+  'p1 cc',
+  'p2 f',
+  'd db 4h5s7c',
+  'p1 cbr 13',
+  'p3 cbr 26',
+  'p1 cbr 97.38',
+  'p3 cc',
+  'd db Js',
+  'p1 cc',
+  'p3 cc',
+  'd db Ts',
+]
+venue = 'iPoker Network'
+time = 00:09:24
+day = 1
+month = 7
+year = 2009
+hand = 3406303786
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
+players = ['xPGoiZ0ZP0bazJHL5ZJU/A', 'FckHTkLIDJ7Kd6QcHKGCMA', 'QC2/+we+9VY7m45km9ydyA', 'NSdKpmS18WXzyYnDezyDTw', 'APvZZsAdBRDoWrd/Z9HGhA', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', '8qsmVV+tAfyY4zsMUfEvZA', 'Fgic6PqXurnFy6+lKlN93A', '/V2S2rtfIZVVd0JiISADnA']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[90]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 AsQs',
+  'd dh p4 ????',
+  'd dh p5 AdQd',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'd dh p10 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p5 cbr 17',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p10 f',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db JcTcKs',
+  'p3 cc',
+  'p5 cc',
+  'd db 2h',
+  'p3 cc',
+  'p5 cc',
+  'd db Kh',
+]
+venue = 'iPoker Network'
+time = 00:09:24
+day = 1
+month = 7
+year = 2009
+hand = 3406307174
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
+players = ['8SX98CaClf9I95GCdQTF6Q', '0HXOQlu61v4Mzo3dFM4/pg', 'Fgic6PqXurnFy6+lKlN93A', 'FckHTkLIDJ7Kd6QcHKGCMA', 'veizHuD/Nzs/0hPnsbQJag', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'HCiQIR9ydK8k7445soqpDQ', 'OXMz1K9oOJXcP1Xbu7BGzw', 'OiGlb+aSuY0DVV8W/wdPoQ']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[91]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 AhJd',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 QdAc',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 4',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cbr 11.88',
+  'p1 f',
+  'p2 f',
+  'p5 cc',
+  'd db Tc8c9s',
+  'p5 cc',
+  'p9 cc',
+  'd db Kh',
+  'p5 cc',
+  'p9 cc',
+  'd db 3h',
+]
+venue = 'iPoker Network'
+time = 00:09:24
+day = 1
+month = 7
+year = 2009
+hand = 3406306508
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['FckHTkLIDJ7Kd6QcHKGCMA', 'QC2/+we+9VY7m45km9ydyA', 'NSdKpmS18WXzyYnDezyDTw', 'APvZZsAdBRDoWrd/Z9HGhA', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', '8qsmVV+tAfyY4zsMUfEvZA', '/V2S2rtfIZVVd0JiISADnA', 'xPGoiZ0ZP0bazJHL5ZJU/A']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[92]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 KdAs',
+  'd dh p4 ????',
+  'd dh p5 9d9c',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 cbr 5',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cc',
+  'p1 f',
+  'p2 f',
+  'p3 cc',
+  'd db 5c5s6d',
+  'p3 cc',
+  'p5 cbr 12',
+  'p9 f',
+  'p3 cc',
+  'd db 3s',
+  'p3 cbr 41.40',
+  'p5 cc',
+  'd db Ts',
+]
+venue = 'iPoker Network'
+time = 00:09:24
+day = 1
+month = 7
+year = 2009
+hand = 3406306242
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['jnZ0G1ZyHEgbCEloRwIcLg', 'nmEMwIJ5KREBS87NkgySJg', 'qHz2yqVCn1fTlRXhxeJQfQ', 'sGMxchFlLfIxIn6SN1GV6g', '0HXOQlu61v4Mzo3dFM4/pg', '8SX98CaClf9I95GCdQTF6Q', 'OXMz1K9oOJXcP1Xbu7BGzw', 'APvZZsAdBRDoWrd/Z9HGhA', 'nk6bpEBKINO9WHSHzDmXbw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[93]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 6d6c',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cc',
+  'p1 cc',
+  'p2 f',
+  'd db 5s5cJc',
+  'p1 cbr 5',
+  'p3 f',
+  'p9 cc',
+  'd db 2c',
+  'p1 cc',
+  'p9 cc',
+  'd db 9c',
+  'p1 cc',
+  'p9 cc',
+  'p1 sm ????',
+  'p9 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:09:24
+day = 1
+month = 7
+year = 2009
+hand = 3406304274
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['n7b3QWsk2xBWjTDXylGIbA', '8SX98CaClf9I95GCdQTF6Q', 'VZaDCUXStCfC09fUHZj3VA', 'OXMz1K9oOJXcP1Xbu7BGzw', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', 'Fgic6PqXurnFy6+lKlN93A', 'APvZZsAdBRDoWrd/Z9HGhA', 'dfCJJ67xoKlt61yHXwEyQw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[94]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 3cAd',
+  'p2 cc',
+  'p1 cc',
+  'd db 5s4d9h',
+  'p1 cc',
+  'p2 cc',
+  'd db Ts',
+  'p1 cc',
+  'p2 cc',
+  'd db Jh',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:09:45
+day = 1
+month = 7
+year = 2009
+hand = 3406309890
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['Gy8ifbOE43+whjDMxO8KSg', 'UuB6ZbKq4fDTgZxlTpGurw']
+winnings = [0, 0]
+
+[95]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 5s8h',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 f',
+  'p1 f',
+  'p2 cc',
+  'd db AdQcTs',
+  'p2 cc',
+  'p4 cc',
+  'd db 6c',
+  'p2 cc',
+  'p4 cc',
+  'd db 2d',
+  'p2 cc',
+  'p4 cc',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:23
+day = 1
+month = 7
+year = 2009
+hand = 3406311868
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['HCiQIR9ydK8k7445soqpDQ', 'ReBSM1VWCSy6+W1DjKLYLg', 'nmEMwIJ5KREBS87NkgySJg', 'usE2Yh8K3s9XeOF6Tff10A', 'APvZZsAdBRDoWrd/Z9HGhA', 'NSdKpmS18WXzyYnDezyDTw', 'eb6fdQzDJ5Ce0uQeuVUj7Q', 'sGMxchFlLfIxIn6SN1GV6g', 'aNcFcPgnCphfpizQ+SrBLw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[96]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 4dAs',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 cbr 3',
+  'p9 f',
+  'p1 f',
+  'p2 cc',
+  'd db 6c7hJd',
+  'p2 cc',
+  'p8 cc',
+  'd db 8h',
+  'p2 cbr 1',
+  'p8 cbr 6',
+  'p2 cc',
+  'd db Kh',
+  'p2 cc',
+  'p8 cbr 17',
+  'p2 f',
+]
+venue = 'iPoker Network'
+time = 00:11:24
+day = 1
+month = 7
+year = 2009
+hand = 3406306472
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['nmEMwIJ5KREBS87NkgySJg', '3dsA6XW7IPMJ1z/5TLzErg', 'oFwGVcG+SakLRCvkMpgmmQ', '0HXOQlu61v4Mzo3dFM4/pg', 'W/TukQ6zB79l+4PZwSCufg', 'NcGaMmf9+dU363x8CEPlOw', 'APvZZsAdBRDoWrd/Z9HGhA', 'dsNvMiNtQ4xF8E0u37w/Uw', 'HCiQIR9ydK8k7445soqpDQ']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[97]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 8hAd',
+  'd dh p2 KsKh',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'd dh p9 ????',
+  'p3 cbr 3.50',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p9 cc',
+  'p1 cc',
+  'p2 cbr 17',
+  'p3 f',
+  'p9 f',
+  'p1 cc',
+  'd db 4s4hKc',
+  'p1 cc',
+  'p2 cc',
+  'd db As',
+  'p1 cbr 40.67',
+  'p2 cc',
+  'd db Td',
+]
+venue = 'iPoker Network'
+time = 00:11:24
+day = 1
+month = 7
+year = 2009
+hand = 3406308560
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['UnZQQnHXUJFjAvGhd/SGTQ', '0HXOQlu61v4Mzo3dFM4/pg', 'nmEMwIJ5KREBS87NkgySJg', 'OXMz1K9oOJXcP1Xbu7BGzw', 'FckHTkLIDJ7Kd6QcHKGCMA', '+d/nWggaWpUMsMRtHj6qhQ', 'APvZZsAdBRDoWrd/Z9HGhA', 'sGMxchFlLfIxIn6SN1GV6g', 'K+gd4gcNDJM4ogRCQ6qFKQ']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[98]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 4s7s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 KdKc',
+  'd dh p9 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p7 f',
+  'p8 cc',
+  'p9 f',
+  'p1 f',
+  'p2 cc',
+  'd db 5s4hTs',
+  'p2 cc',
+  'p8 cbr 2',
+  'p2 cbr 7',
+  'p8 cc',
+  'd db Ks',
+  'p2 cbr 12',
+  'p8 cbr 24',
+  'p2 cbr 92',
+  'p8 cc',
+  'd db Ac',
+]
+venue = 'iPoker Network'
+time = 00:11:24
+day = 1
+month = 7
+year = 2009
+hand = 3406312000
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 9, 1]
+players = ['sGMxchFlLfIxIn6SN1GV6g', '0HXOQlu61v4Mzo3dFM4/pg', 'HCiQIR9ydK8k7445soqpDQ', 'APvZZsAdBRDoWrd/Z9HGhA', 'dfCJJ67xoKlt61yHXwEyQw', 'n7b3QWsk2xBWjTDXylGIbA', '8SX98CaClf9I95GCdQTF6Q', 'VZaDCUXStCfC09fUHZj3VA', 'OXMz1K9oOJXcP1Xbu7BGzw']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+[99]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 KcAs',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 AcKs',
+  'd dh p6 ????',
+  'd dh p7 ????',
+  'd dh p8 ????',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3.50',
+  'p6 f',
+  'p7 f',
+  'p8 f',
+  'p1 cbr 19',
+  'p2 f',
+  'p5 cc',
+  'd db 8s5dJs',
+  'p1 cc',
+  'p5 cc',
+  'd db 7d',
+  'p1 cc',
+  'p5 cc',
+  'd db 3h',
+]
+venue = 'iPoker Network'
+time = 00:11:25
+day = 1
+month = 7
+year = 2009
+hand = 3406310548
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 7, 8, 1]
+players = ['sGMxchFlLfIxIn6SN1GV6g', '0HXOQlu61v4Mzo3dFM4/pg', '8SX98CaClf9I95GCdQTF6Q', 'OXMz1K9oOJXcP1Xbu7BGzw', 'APvZZsAdBRDoWrd/Z9HGhA', 'nk6bpEBKINO9WHSHzDmXbw', 'jnZ0G1ZyHEgbCEloRwIcLg', 'nmEMwIJ5KREBS87NkgySJg']
+winnings = [0, 0, 0, 0, 0, 0, 0, 0]
+
+[100]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 TdTc',
+  'd dh p5 ????',
+  'd dh p6 4d4s',
+  'p3 cc',
+  'p4 cbr 5',
+  'p5 f',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'p3 f',
+  'd db Kh4h6s',
+  'p4 cbr 7',
+  'p6 cbr 14',
+  'p4 cc',
+  'd db Ks',
+  'p4 cc',
+  'p6 cbr 7.50',
+  'p4 cc',
+  'd db 9s',
+]
+venue = 'iPoker Network'
+time = 00:11:29
+day = 1
+month = 7
+year = 2009
+hand = 3406161782
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['xNY8yO1l+PinLBKdWTYdVg', 'OIZrmhtGhD36BT/CjefFtA', 'txjavdnjbtgd45qllaW3bQ', 'Mx7tx4WERXwlpnHObwPCkA', 'YccX545/2a2uoschd94zKg', 'hPFvHF4n+sHjuxQbpYnAcQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[101]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 Jd3c',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cc',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db Jh8sKc',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'd db 6h',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'd db 9d',
+  'p1 cc',
+  'p2 cc',
+  'p4 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:29
+day = 1
+month = 7
+year = 2009
+hand = 3406168192
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['txjavdnjbtgd45qllaW3bQ', 'Mx7tx4WERXwlpnHObwPCkA', 'YccX545/2a2uoschd94zKg', 'hPFvHF4n+sHjuxQbpYnAcQ', 'xNY8yO1l+PinLBKdWTYdVg', 'OIZrmhtGhD36BT/CjefFtA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[102]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 5cKd',
+  'd dh p6 Th2h',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3.50',
+  'p6 cc',
+  'p1 f',
+  'p2 f',
+  'd db 9sJh9c',
+  'p5 cc',
+  'p6 cbr 8.50',
+  'p5 cbr 22.24',
+  'p6 cc',
+  'd db Js',
+  'p5 cc',
+  'p6 cc',
+  'd db 9d',
+]
+venue = 'iPoker Network'
+time = 00:11:29
+day = 1
+month = 7
+year = 2009
+hand = 3406162266
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['xg83evmP12pXSR0Kx2EdKQ', 'g2r8pc5Oekv0Rycr7NdUTQ', 'OIZrmhtGhD36BT/CjefFtA', 'wSUf5PugLSwVV3QduZcj7A', 'Yi7aJpSBiznKehm0bYtPpw', 'pcKLPP8JDRRm7y0e5DEHoA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[103]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 6s5h',
+  'd dh p5 4h4s',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 cbr 2',
+  'p5 cc',
+  'p6 f',
+  'p1 f',
+  'p2 cc',
+  'd db Ad5cAh',
+  'p2 cc',
+  'p4 cbr 1.62',
+  'p5 cc',
+  'p2 f',
+  'd db Js',
+  'p4 cbr 2.43',
+  'p5 cc',
+  'd db 3s',
+  'p4 cbr 3.65',
+  'p5 cc',
+  'p4 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:29
+day = 1
+month = 7
+year = 2009
+hand = 3406166962
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['wSUf5PugLSwVV3QduZcj7A', 'Yi7aJpSBiznKehm0bYtPpw', 'pcKLPP8JDRRm7y0e5DEHoA', 'xg83evmP12pXSR0Kx2EdKQ', 'g2r8pc5Oekv0Rycr7NdUTQ', 'OIZrmhtGhD36BT/CjefFtA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[104]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 Jd3d',
+  'd dh p2 5cJs',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cbr 3',
+  'p2 cc',
+  'd db 3cKs6h',
+  'p1 cbr 3',
+  'p2 cc',
+  'd db 2h',
+  'p1 cc',
+  'p2 cbr 6',
+  'p1 cc',
+  'd db Ad',
+  'p1 cc',
+  'p2 cbr 3.75',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:29
+day = 1
+month = 7
+year = 2009
+hand = 3406169096
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['Yi7aJpSBiznKehm0bYtPpw', 'pcKLPP8JDRRm7y0e5DEHoA', 'xg83evmP12pXSR0Kx2EdKQ', 'g2r8pc5Oekv0Rycr7NdUTQ', 'OIZrmhtGhD36BT/CjefFtA', 'wSUf5PugLSwVV3QduZcj7A']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[105]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 TdKs',
+  'd dh p5 ????',
+  'p3 cbr 3.50',
+  'p4 cc',
+  'p5 f',
+  'p1 f',
+  'p2 f',
+  'd db Kh8s5d',
+  'p3 cc',
+  'p4 cc',
+  'd db 5h',
+  'p3 cbr 6',
+  'p4 cc',
+  'd db Jh',
+  'p3 cc',
+  'p4 cc',
+  'p3 sm ????',
+  'p4 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:30
+day = 1
+month = 7
+year = 2009
+hand = 3406167324
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 1]
+players = ['xNY8yO1l+PinLBKdWTYdVg', 'oyYjx5kmXyGIced1U+ufiA', 'AB0f11cJSkKlnTrBDiVRag', '0fJH03jWzOuG8Ufw9eTQHA', 'OujmrPkhFWk/QK0NwiMjkg']
+winnings = [0, 0, 0, 0, 0]
+
+[106]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 9h9s',
+  'd dh p2 As7d',
+  'p2 cbr 3',
+  'p1 cbr 9',
+  'p2 cbr 20.06',
+  'p1 cc',
+  'd db Qc9cKc',
+  'p1 cc',
+  'p2 cc',
+  'd db 6c',
+  'p1 cc',
+  'p2 cc',
+  'd db 9d',
+]
+venue = 'iPoker Network'
+time = 00:11:30
+day = 1
+month = 7
+year = 2009
+hand = 3406165588
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['LI1FqymGHErbOiyeECiBqA', 'EMKS34XtfF0ldRLNi4eAQg']
+winnings = [0, 0]
+
+[107]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 TdTs',
+  'd dh p2 ????',
+  'd dh p3 5c7c',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cc',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cbr 4',
+  'p2 f',
+  'p3 cc',
+  'd db 3d9h6s',
+  'p1 cbr 8',
+  'p3 cc',
+  'd db 8s',
+  'p1 cbr 25',
+  'p3 cbr 83.30',
+  'p1 cc',
+  'd db 3h',
+]
+venue = 'iPoker Network'
+time = 00:11:35
+day = 1
+month = 7
+year = 2009
+hand = 3406311498
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['0avFYhgMysAKYRBfBDqCBQ', '3DntKmWkXwIfhLuoWBEo/A', 'qR0ibqLUJk8r1ltTbdjLYg', 'XJc3EFxIe0K6UQpo/Ty2og', 'rFXof5mZop+IN16fNDbcEQ', 'D3wzHvlY9qn9fHzXIBydYA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[108]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 Ah8h',
+  'd dh p2 AdAc',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cbr 3',
+  'p2 cc',
+  'd db 4h9hJc',
+  'p1 cbr 5',
+  'p2 cbr 15',
+  'p1 cbr 96',
+  'p2 cc',
+  'd db 6h',
+  'p1 cc',
+  'p2 cc',
+  'd db 8s',
+]
+venue = 'iPoker Network'
+time = 00:11:35
+day = 1
+month = 7
+year = 2009
+hand = 3406307890
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['csr9LLHLRYnasEECQ+4xgw', 'HShOZkAoeF8kdVTB4Fe9Hw', 'sycpSD/L3En+mcLQYJzwJw', 'tFJOcIGg+W84B/dmPvi6UA', '/0wOvWIZc5kNUDQt1mmxFA', 'SLj2V/0MVXGxSK14Kv5ovg']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[109]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 QdAh',
+  'd dh p2 As6s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cbr 5',
+  'p2 cc',
+  'd db 2hKs6c',
+  'p1 cbr 5',
+  'p2 cc',
+  'd db 4h',
+  'p1 cbr 5',
+  'p2 cc',
+  'd db Td',
+  'p1 cbr 15',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:35
+day = 1
+month = 7
+year = 2009
+hand = 3406306262
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['yRoxmsqYgG6HqypqJXXRZg', 'csr9LLHLRYnasEECQ+4xgw', 'MPct/y4sONu69nE4cHuzjA', 'SLj2V/0MVXGxSK14Kv5ovg', 'TolGNxE1dENf7wCNmJ0ocw', 'HShOZkAoeF8kdVTB4Fe9Hw']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[110]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 Td9d',
+  'd dh p4 ????',
+  'd dh p5 Th9c',
+  'd dh p6 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p5 cc',
+  'p6 f',
+  'p1 f',
+  'p2 f',
+  'd db 4sTc3c',
+  'p3 cbr 2',
+  'p5 cc',
+  'd db Qh',
+  'p3 cbr 2',
+  'p5 cc',
+  'd db Jc',
+  'p3 cbr 1',
+  'p5 cc',
+  'p3 sm ????',
+  'p5 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:11:35
+day = 1
+month = 7
+year = 2009
+hand = 3406307312
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['SLj2V/0MVXGxSK14Kv5ovg', 'TolGNxE1dENf7wCNmJ0ocw', 'Xx611J6hwjeCQmEP7dqZXQ', 'VS9tqWfHQdfuxOyfotprqw', '1HPJd/xrfFifRl1lQnoiMQ', 'sjHjx9vI71nNcK1qLoXZdA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[111]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 5cJc',
+  'd dh p2 2s8s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 5s3cJh',
+  'p1 cc',
+  'p2 cc',
+  'd db 7s',
+  'p1 cbr 1',
+  'p2 cc',
+  'd db Qs',
+  'p1 cbr 3',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:12:20
+day = 1
+month = 7
+year = 2009
+hand = 3406309458
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['VR8jfViPUfhZtVCfb9Lm3Q', 'nRuDWD1lqmaINI7Cs7V2bA', 'sycpSD/L3En+mcLQYJzwJw', 'NWWjkw/2O2gq8A3+gNf2MA', 'OujmrPkhFWk/QK0NwiMjkg', 'vlkfwqPlH+n8uhdQqurm7A']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[112]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 6d3d',
+  'd dh p2 4d4s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db Js6h4h',
+  'p1 cc',
+  'p2 cbr 6',
+  'p1 cbr 13',
+  'p2 cc',
+  'd db 7s',
+  'p1 cbr 34',
+  'p2 cbr 99.90',
+  'p1 cc',
+  'd db 9h',
+]
+venue = 'iPoker Network'
+time = 00:12:20
+day = 1
+month = 7
+year = 2009
+hand = 3406308866
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['pcKLPP8JDRRm7y0e5DEHoA', 'KVjLBSZKFyXvYXYB5s8NgA', 'ujg+JazNxVUfoUo93P6/hQ', 'sjHjx9vI71nNcK1qLoXZdA', 'qJPxEil/UYSpiU/cGlFGqQ', 'TolGNxE1dENf7wCNmJ0ocw']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[113]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 8sAh',
+  'd dh p2 ????',
+  'p2 cc',
+  'p1 cc',
+  'd db Td6sJh',
+  'p1 cc',
+  'p2 cc',
+  'd db 7s',
+  'p1 cc',
+  'p2 cc',
+  'd db 6c',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:12:46
+day = 1
+month = 7
+year = 2009
+hand = 3406315236
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['teyEXxkAQnopvwQ67E8VkQ', 'oXWlHv0wxHujrrNpBuHoNg']
+winnings = [0, 0]
+
+[114]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 3dJh',
+  'd dh p2 ????',
+  'p2 cc',
+  'p1 cc',
+  'd db Jc9d6h',
+  'p1 cc',
+  'p2 cc',
+  'd db Js',
+  'p1 cc',
+  'p2 cc',
+  'd db 5d',
+  'p1 cc',
+  'p2 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:12:46
+day = 1
+month = 7
+year = 2009
+hand = 3406317084
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['teyEXxkAQnopvwQ67E8VkQ', 'oXWlHv0wxHujrrNpBuHoNg']
+winnings = [0, 0]
+
+[115]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [inf, inf]
+actions = [
+  'd dh p1 Qd8c',
+  'd dh p2 3cQc',
+  'p2 cc',
+  'p1 cc',
+  'd db QsKdTh',
+  'p1 cc',
+  'p2 cc',
+  'd db 2c',
+  'p1 cc',
+  'p2 cc',
+  'd db 4d',
+  'p1 cbr 1',
+  'p2 cbr 5',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:12:46
+day = 1
+month = 7
+year = 2009
+hand = 3406312920
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 1]
+players = ['3ubcFdHNZZK8Khk5pppIjA', '7yXpsHUjgRTDpopOcOUC8g']
+winnings = [0, 0]
+
+[116]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 Js6s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 AhJd',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 cbr 3.50',
+  'p1 f',
+  'p2 cc',
+  'd db Jh2hQc',
+  'p2 cc',
+  'p6 cbr 5',
+  'p2 cbr 35.94',
+  'p6 cc',
+  'd db Kh',
+  'p2 cc',
+  'p6 cc',
+  'd db 7h',
+]
+venue = 'iPoker Network'
+time = 00:14:29
+day = 1
+month = 7
+year = 2009
+hand = 3406174680
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['wSUf5PugLSwVV3QduZcj7A', 'Yi7aJpSBiznKehm0bYtPpw', 'pcKLPP8JDRRm7y0e5DEHoA', 'xg83evmP12pXSR0Kx2EdKQ', 'g2r8pc5Oekv0Rycr7NdUTQ', 'OIZrmhtGhD36BT/CjefFtA']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[117]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf]
+actions = [
+  'd dh p1 Ah9c',
+  'd dh p2 ????',
+  'd dh p3 QhQd',
+  'd dh p4 ????',
+  'p3 cbr 3',
+  'p4 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 6h3hJh',
+  'p1 cc',
+  'p2 cc',
+  'p3 cbr 7',
+  'p1 cc',
+  'p2 f',
+  'd db Ks',
+  'p1 cc',
+  'p3 cc',
+  'd db 8c',
+  'p1 cbr 15',
+  'p3 cc',
+  'p1 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:14:30
+day = 1
+month = 7
+year = 2009
+hand = 3406169354
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 1]
+players = ['0SW3BqZgF5jU3p0YW0OA1Q', 'BeBnaJWVei8ddZxzJ+hPnQ', 'OujmrPkhFWk/QK0NwiMjkg', 'tRgFwWp4aFjTqthnXX77IQ']
+winnings = [0, 0, 0, 0]
+
+[118]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 3cAc',
+  'd dh p2 ????',
+  'd dh p3 2dJd',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 cbr 2',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cc',
+  'd db 6sKs4s',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db Td',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'd db Kd',
+  'p1 cc',
+  'p2 cc',
+  'p3 cc',
+  'p1 sm ????',
+  'p2 sm ????',
+  'p3 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:14:30
+day = 1
+month = 7
+year = 2009
+hand = 3406170256
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['Mx7tx4WERXwlpnHObwPCkA', 'YccX545/2a2uoschd94zKg', 'hPFvHF4n+sHjuxQbpYnAcQ', 'xNY8yO1l+PinLBKdWTYdVg', 'OIZrmhtGhD36BT/CjefFtA', 'txjavdnjbtgd45qllaW3bQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[119]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 8cQc',
+  'p3 f',
+  'p4 f',
+  'p5 cbr 3',
+  'p6 cc',
+  'p1 f',
+  'p2 cc',
+  'd db Kd9dAh',
+  'p2 cc',
+  'p5 cc',
+  'p6 cc',
+  'd db 7c',
+  'p2 cc',
+  'p5 cc',
+  'p6 cc',
+  'd db 7d',
+  'p2 cc',
+  'p5 cc',
+  'p6 cc',
+  'p2 sm ????',
+  'p5 sm ????',
+  'p6 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:14:31
+day = 1
+month = 7
+year = 2009
+hand = 3406169390
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['vPnPx0HWEJ/+apJ/CFBnGQ', 'tFJOcIGg+W84B/dmPvi6UA', '/0wOvWIZc5kNUDQt1mmxFA', 'XYc4i1gmo0QIjIaCxXn4MA', 'PznweFxoXytkRpRYCJI8Gg', 'nwSDrOsduCV6zNdgU7zvAQ']
+winnings = [0, 0, 0, 0, 0, 0]
+
+[120]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0, 0, 0, 0, 0]
+blinds_or_straddles = [0.5, 1, 0, 0, 0, 0]
+min_bet = 1
+starting_stacks = [inf, inf, inf, inf, inf, inf]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 9c3s',
+  'd dh p3 ????',
+  'd dh p4 ????',
+  'd dh p5 ????',
+  'd dh p6 ????',
+  'p3 f',
+  'p4 f',
+  'p5 f',
+  'p6 f',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 4dJhKs',
+  'p1 cc',
+  'p2 cbr 4',
+  'p1 cc',
+  'd db 3c',
+  'p1 cc',
+  'p2 cc',
+  'd db 3h',
+  'p1 cbr 4',
+  'p2 cbr 12',
+  'p1 cc',
+  'p2 sm ????',
+  'p1 sm ????',
+]
+venue = 'iPoker Network'
+time = 00:14:31
+day = 1
+month = 7
+year = 2009
+hand = 3406172640
+table = 'HandHQ'
+currency = 'USD'
+currency_symbol = '$'
+seats = [2, 3, 4, 5, 6, 1]
+players = ['tFJOcIGg+W84B/dmPvi6UA', '/0wOvWIZc5kNUDQt1mmxFA', 'XYc4i1gmo0QIjIaCxXn4MA', 'PznweFxoXytkRpRYCJI8Gg', 'nwSDrOsduCV6zNdgU7zvAQ', 'vPnPx0HWEJ/+apJ/CFBnGQ']
+winnings = [0, 0, 0, 0, 0, 0]
