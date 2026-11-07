@@ -475,7 +475,11 @@ def style_counts_for_hand(rec: HandRecord) -> Dict[str, Dict[str, List[int]]]:
         res = replay(rec, snapshots=False, observations=False)
     except Exception:  # noqa: BLE001
         return {}
-    hand = res.hand
+    return style_counts_from_hand(res.hand)
+
+
+def style_counts_from_hand(hand: Any) -> Dict[str, Dict[str, List[int]]]:
+    """The same five features counted on an engine ``Hand`` (also used live by the Play-table opponent model)."""
     n = hand.n
     out: Dict[str, Dict[str, List[int]]] = {}
     for p in hand.players:

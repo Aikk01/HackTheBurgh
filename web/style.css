@@ -268,6 +268,28 @@ table.mini td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-var
 .btn.recommended { box-shadow: 0 0 0 2px var(--warning); position: relative; }
 .btn.recommended::after { content: "AI"; position: absolute; top: -8px; right: -6px; font-size: 9px; font-weight: 700; background: var(--warning); color: #111; border-radius: 4px; padding: 0 3px; }
 
+.advisor-cols { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; margin-top: 4px; }
+@media (max-width: 900px) { .advisor-cols { grid-template-columns: 1fr; } }
+.advisor-options { margin-top: 6px; }
+.advisor-options tr.rec td { background: rgba(250,178,25,0.12); font-weight: 700; }
+.advisor-options .pos { color: #7fdc7f; } .advisor-options .neg { color: #ff9a8f; }
+.opp-read { border-top: 1px dashed var(--line-2); padding: 4px 0; font-size: 12px; }
+.advisor-method { font-size: 11px; margin-top: 6px; }
+/* opponent style estimate */
+.style-tag { font-weight: 600; }
+.tag.style-tight-aggressive, .fill.style-tight-aggressive { background: rgba(57,135,229,0.35); border-color: var(--series-1); }
+.tag.style-tight-passive, .fill.style-tight-passive { background: rgba(25,158,112,0.35); border-color: var(--series-3); }
+.tag.style-loose-aggressive, .fill.style-loose-aggressive { background: rgba(217,89,38,0.40); border-color: var(--series-2); }
+.tag.style-loose-passive, .fill.style-loose-passive { background: rgba(201,133,0,0.40); border-color: var(--series-4); }
+.opp-card { border-top: 1px solid var(--line); padding: 8px 0; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px; }
+.opp-type { font-size: 13px; }
+.type-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.type-bar { position: relative; height: 16px; background: var(--surface-3); border-radius: 3px; overflow: hidden; font-size: 10.5px; }
+.type-bar .fill { position: absolute; inset: 0 auto 0 0; border-right: 1px solid; }
+.type-bar span { position: relative; padding-left: 4px; line-height: 16px; }
+.opp-feats { display: flex; gap: 10px; flex-wrap: wrap; }
+.opp-card .answer { font-size: 11px; opacity: 0.8; }
+
 /* Poker Mirror */
 .mstep { display: none; } .mstep.active { display: block; }
 .demo-hand { border-top: 1px solid var(--line); padding: 8px 0; }

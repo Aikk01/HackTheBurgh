@@ -160,6 +160,8 @@
         if (p.folded) cards.style.visibility = p.has_cards ? "visible" : "hidden";
         const tags = el("div", { class: "tags" }, el("span", { class: "tag pos", text: p.position }));
         if (p.agent && p.agent.kind && p.agent.kind !== "bot") tags.appendChild(el("span", { class: `tag kind-${p.agent.kind}`, text: p.agent.kind === "human" ? "you" : p.agent.label }));
+        const est = view.styles && view.styles[p.name];
+        if (est && !(p.agent && p.agent.kind === "human")) tags.appendChild(el("span", { class: "tag style-tag style-" + est.type, title: `AIの推定: ${est.type_ja}（${Math.round(100 * est.type_prob)}%・${est.hands}ハンド観察）`, text: STYLE_SHORT[est.type] || est.type_ja }));
         if (p.all_in && !p.folded) tags.appendChild(el("span", { class: "tag", text: "ALL-IN" }));
         if (p.folded) tags.appendChild(el("span", { class: "tag", text: "folded" }));
         if (visible && p.hand && !p.folded && (hand.street_index > 0 || hand.status === "finished")) tags.appendChild(el("span", { class: "tag hand", text: p.hand }));
@@ -328,6 +330,7 @@
     const t = st.table;
     $("#gameBlinds").textContent = t && t.big_blind ? `blinds ${fmt(t.small_blind)}/${fmt(t.big_blind)}${t.ante ? " ante " + fmt(t.ante) : ""}` : (st.hand.blinds ? "blinds " + st.hand.blinds.filter((b) => b).map(fmt).join("/") : "");
     $("#gameBox").hidden = false;
+    refreshOpponents(st);
   }
 
   function renderGame(st, force) {
@@ -352,7 +355,7 @@
       const text = last.text.replace(/^.*?\s(folds|checks|calls|bets|raises)/, "$1");
       bubble = { player: last.player, text: text.charAt(0).toUpperCase() + text.slice(1), kind: /raise|bet/.test(text) ? "aggr" : /fold/.test(text) ? "fold" : "" };
     }
-    renderTable({ hand, slots, viewer: st.viewer, reveal: st.reveal, bubble, thinking: st.thinking, payouts: true });
+    renderTable({ hand, slots, viewer: st.viewer, reveal: st.reveal, bubble, thinking: st.thinking, payouts: true, styles: S.oppStyles });
   }
 
   function updateActionBar(st) {
@@ -421,17 +424,73 @@
     $(btn).classList.add("recommended");
     if (btn === "#btnRaise" && r.amount) setRaise(r.amount);
     $("#advisorFollow").hidden = false;
-    // equity vs the price of calling, as one bar
-    const meter = el("div", { class: "eq-meter" },
+    const cols = el("div", { class: "advisor-cols" });
+    // left: why
+    const left = el("div", {});
+    left.appendChild(el("div", { class: "advisor-stats" },
+      el("div", {}, el("b", { text: pct(a.equity, 0) }), el("span", { class: "muted", text: ` 勝率（相手のスタイル考慮） · ランダム仮定なら ${pct(a.equity_vs_random, 0)}` })),
+      a.to_call > 0 ? el("div", {}, el("b", { text: pct(a.pot_odds, 0) }), el("span", { class: "muted", text: " コールに必要な勝率" })) : null));
+    left.appendChild(el("div", { class: "eq-meter" },
       el("div", { class: "eq-fill", style: `width:${(100 * a.equity).toFixed(1)}%` }),
-      a.to_call > 0 ? el("div", { class: "eq-need", style: `left:${(100 * a.pot_odds).toFixed(1)}%`, title: "コールに必要な勝率" }) : null);
-    body.appendChild(el("div", { class: "advisor-stats" },
-      el("div", {}, el("b", { text: pct(a.equity, 0) }), el("span", { class: "muted", text: ` 勝率（相手${a.opponents_in_hand}人）` })),
-      a.to_call > 0 ? el("div", {}, el("b", { text: pct(a.pot_odds, 0) }), el("span", { class: "muted", text: " コールに必要な勝率" })) : el("div", {}, el("span", { class: "muted", text: "コール不要" })),
-      a.to_call > 0 ? el("div", {}, el("b", { class: a.call_ev >= 0 ? "pos" : "neg", text: (a.call_ev >= 0 ? "+" : "") + fmt(a.call_ev) }), el("span", { class: "muted", text: " コールの期待値（チップ）" })) : null));
-    body.appendChild(meter);
-    body.appendChild(el("div", { class: "advisor-reason", text: a.reason_ja }));
-    if (a.opponents && a.opponents.length) body.appendChild(el("div", { class: "muted advisor-opps", text: "残っている相手: " + a.opponents.map((o) => `${o.name}（${o.kind}・${o.position}）`).join("、") }));
+      a.to_call > 0 ? el("div", { class: "eq-need", style: `left:${(100 * a.pot_odds).toFixed(1)}%`, title: "コールに必要な勝率" }) : null));
+    left.appendChild(el("div", { class: "advisor-reason", text: a.reason_ja }));
+    // expected chips of every option
+    const ot = el("table", { class: "mini advisor-options" }, el("thead", {}, el("tr", {}, el("th", { text: "選択肢" }), el("th", { text: "期待チップ" }), el("th", { text: "全員降りる" }))));
+    const otb = el("tbody");
+    a.options.slice().sort((x, y) => y.ev - x.ev).forEach((o) => {
+      const isRec = o.action === r.action && o.amount === r.amount;
+      otb.appendChild(el("tr", { class: isRec ? "rec" : "" }, el("td", { text: ACTION_JA[o.action] + (o.amount && !["call"].includes(o.action) ? " " + fmt(o.amount) : "") }),
+        el("td", { class: o.ev >= 0 ? "pos" : "neg", text: (o.ev >= 0 ? "+" : "") + fmt(o.ev) }), el("td", { class: "muted", text: o.all_fold !== undefined ? pct(o.all_fold, 0) : "" })));
+    });
+    ot.appendChild(otb);
+    left.appendChild(ot);
+    cols.appendChild(left);
+    // right: what the AI thinks each remaining opponent holds
+    const right = el("div", { class: "advisor-opps" }, el("div", { class: "muted", text: "残っている相手の読み" }));
+    (a.opponents || []).forEach((o) => {
+      right.appendChild(el("div", { class: "opp-read" },
+        el("div", {}, el("b", { text: o.name }), " ", el("span", { class: "tag style-tag style-" + o.style.type, text: o.style.type_ja }), el("span", { class: "muted", text: ` ${Math.round(100 * o.style.type_prob)}% · ${o.style.hands}ハンド観察` })),
+        el("div", { class: "muted", text: `手札の範囲: ${o.range_ja}` }),
+        el("div", { class: "muted", text: `こちらがベット/レイズしたら降りる確率: ${pct(o.fold_to_our_bet, 0)}` })));
+    });
+    cols.appendChild(right);
+    body.appendChild(cols);
+    body.appendChild(el("div", { class: "muted advisor-method", text: a.method_ja }));
+  }
+  const ACTION_JA = { fold: "フォールド", check: "チェック", call: "コール", bet: "ベット", raise: "レイズ", all_in: "オールイン" };
+  const STYLE_SHORT = { "tight-aggressive": "タイト・攻め", "tight-passive": "タイト・受け", "loose-aggressive": "ルース・攻め", "loose-passive": "ルース・受け" };
+
+  // ------------------------------------------------------------ opponent styles (AI estimate)
+  async function refreshOpponents(st) {
+    const key = `${st.hand_no}|${st.hand.status === "finished" || st.hand.status === "incomplete" ? "done" : "live"}`;
+    if (S.oppKey === key) return;
+    S.oppKey = key;
+    try {
+      const d = await api("/api/game/opponents");
+      S.oppStyles = {};
+      d.players.forEach((p) => { S.oppStyles[p.name] = p; });
+      renderOpponents(d);
+      if (S.tab === "play" && S.game && S.game.active) renderGame(S.game, false);
+    } catch (e) { /* the table still works without the panel */ }
+  }
+  function renderOpponents(d) {
+    const box = $("#oppBox");
+    box.hidden = false;
+    const root = $("#oppList");
+    root.innerHTML = "";
+    const FEATS = [["vpip", "参加率"], ["pfr", "レイズ率"], ["af", "攻撃率"], ["fold_to_bet", "ベットに降りる"]];
+    d.players.filter((p) => !p.is_human).forEach((p) => {
+      const types = Object.entries(p.type_posterior).sort((x, y) => y[1] - x[1]);
+      root.appendChild(el("div", { class: "opp-card" },
+        el("div", { class: "row between" }, el("b", { text: p.name }), el("span", { class: "muted", text: `${p.hands}ハンド観察 · ${p.confidence_ja}` })),
+        el("div", { class: "opp-type" }, el("span", { class: "tag style-tag style-" + p.type, text: p.type_ja }), el("span", { text: ` ${Math.round(100 * p.type_prob)}%` })),
+        el("div", { class: "type-bars" }, ...types.map(([t, w]) => el("div", { class: "type-bar", title: `${STYLE_SHORT[t]} ${Math.round(100 * w)}%` },
+          el("div", { class: "fill style-" + t, style: `width:${(100 * w).toFixed(0)}%` }), el("span", { text: `${STYLE_SHORT[t]} ${Math.round(100 * w)}%` })))),
+        el("div", { class: "opp-feats" }, ...FEATS.map(([f, label]) => el("span", {}, `${label} `, el("b", { text: pct(p.rates[f], 0) })))),
+        el("div", { class: "muted", text: p.hint_ja }),
+        el("div", { class: "muted answer", text: `答え合わせ（AIは見ていません）: 実際の設定は ${p.actual_label}` })));
+    });
+    $("#oppSource").textContent = `推定の基準: ${d.types_source}。観察が少ないうちは実データの平均に近い推定になります。`;
   }
   function followAdvice() {
     const a = S.advice && S.advice.data;
@@ -499,6 +558,21 @@
     $("#revealToggle").addEventListener("change", async (e) => { try { onGameState(await api("/api/game/reveal", { reveal: e.target.checked })); } catch (err) { toast(err.message, true); } });
     $("#btnFold").addEventListener("click", () => humanAct("fold"));
     $("#advisorFollow").addEventListener("click", followAdvice);
+    $("#observeBtn").addEventListener("click", async () => {
+      const b = $("#observeBtn");
+      b.disabled = true;
+      $("#observeStatus").textContent = " 観察中…（数秒）";
+      try {
+        const r = await api("/api/game/observe", { hands: 200 });
+        $("#observeStatus").textContent = ` ${r.observed_hands}ハンド観察しました（${r.seconds}秒）`;
+        S.oppStyles = {};
+        r.opponents.players.forEach((p) => { S.oppStyles[p.name] = p; });
+        renderOpponents(r.opponents);
+        S.advice = null;
+        if (S.game && S.game.active) { renderGame(S.game, false); updateActionBar(S.game); }
+      } catch (e) { $("#observeStatus").textContent = " 失敗: " + e.message; }
+      b.disabled = false;
+    });
     $("#advisorOn").addEventListener("change", (e) => {
       try { localStorage.setItem("advisorOn", e.target.checked ? "1" : "0"); } catch (err) { /* ignore */ }
       S.advice = null;

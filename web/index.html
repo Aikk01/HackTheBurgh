@@ -134,6 +134,14 @@
         <h4>Session results</h4>
         <table class="mini" id="sessionTable"><thead><tr><th>Seat</th><th>Player</th><th>Stack</th><th>Net</th></tr></thead><tbody></tbody></table>
       </div>
+
+      <div class="card-box" id="oppBox" hidden>
+        <h4 style="margin-top:0">相手のプレイスタイル（AIの推定）</h4>
+        <p class="hint">この卓で見た行動だけから推定し、ハンドが終わるたびに更新します。最初は観察が少ないので、席に着く前に卓を観察しておくと精度が上がります。</p>
+        <div class="row"><button class="btn small" id="observeBtn">ボット同士の200ハンドを観察する</button><span class="muted" id="observeStatus"></span></div>
+        <div id="oppList"></div>
+        <p class="muted" id="oppSource"></p>
+      </div>
     </div>
 
     <!-- REPLAY -->

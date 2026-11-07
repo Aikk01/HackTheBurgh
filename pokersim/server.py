@@ -89,6 +89,8 @@ class GameSession:
         self.scenario: Optional[Dict[str, Any]] = None
         self.hand_counter = 0
         self.settled: set = set()  # id() of hands already written back to the table / archived
+        from .opponent_model import StyleTracker
+        self.styles = StyleTracker()  # per-player style counts for the AI advisor
 
     # -- setup ----------------------------------------------------------------
     def new_game(self, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -130,6 +132,7 @@ class GameSession:
             self.reveal = bool(cfg.get("spectate", False)) or not self.human_seats
             self.log = []
             self.records = []
+            self.styles.reset()
             self.hand = None
             self.mode = "table"
             self.scenario = None
@@ -160,6 +163,10 @@ class GameSession:
         if hand is None or hand.status not in ("finished", "incomplete") or id(hand) in self.settled:
             return
         self.settled.add(id(hand))
+        try:
+            self.styles.add_hand(hand)
+        except Exception:  # noqa: BLE001
+            traceback.print_exc()
         self.records.append(hand_to_record(hand, extra_meta={"venue": "pokersim live table"}))
         if self.table is not None and self.table.current is hand:
             self.table.finish_hand()
@@ -342,7 +349,7 @@ class GameSession:
 
     # -- live advice for a human seat ----------------------------------------
     def advice(self) -> Dict[str, Any]:
-        from .advisor import advise
+        from .opponent_model import advise
 
         with self.lock:
             hand = self.hand
@@ -352,17 +359,67 @@ class GameSession:
             if self.agents.get(self._seat_of(actor)) is not None:
                 return {"available": False, "reason_ja": "ボットの手番です。"}
             obs = hand.observation(actor)
-            opponents = []
-            for p in obs["players"]:
-                if p["is_hero"] or p["folded"]:
-                    continue
-                agent = self.agents.get(self._seat_of(p["index"]))
-                opponents.append({"name": p["name"], "position": p["position"], "stack": p["stack"], "bet": p["bet"],
-                                  "kind": agent.describe().get("label", agent.kind) if agent else "Human"})
+            styles = {p.index: self.styles.estimate(p.name) for p in hand.players}
             key = (hand.hand_id, actor, len(obs.get("history") or []))
-        out = advise(obs, opponents)  # Monte-Carlo runs outside the lock
+        out = advise(obs, styles)  # Monte-Carlo runs outside the lock
         out["key"] = "|".join(str(k) for k in key)
         return out
+
+    def observe(self, hands: int = 60) -> Dict[str, Any]:
+        """Watch the bots play ``hands`` hands among themselves (a stand-in takes the human seat) and
+        feed only the bots' actions to the style tracker, like watching a table before sitting down."""
+        from .replay import replay
+        from .simulate import run_match
+
+        hands = max(1, min(int(hands), 300))
+        with self.lock:
+            if self.table is None:
+                raise ApiError("start a table first")
+            specs, names, tracked = [], [], set()
+            for s in self.table.seats:
+                agent = self.agents.get(s.seat_no)
+                if agent is None or agent.kind in ("http", "claude"):
+                    specs.append("equity:iterations=80")  # stand-in; its actions are not recorded
+                    names.append(f"(代役 {s.seat_no})")
+                    continue
+                params = {k: v for k, v in agent.params.items() if k not in ("seed",)}
+                if agent.kind in ("equity", "tag", "lag"):
+                    params["iterations"] = min(int(params.get("iterations", 300)), 80)  # faster, same style
+                specs.append(agent.kind + (":" + ",".join(f"{k}={v}" for k, v in params.items()) if params else ""))
+                names.append(s.name)
+                tracked.add(s.name)
+            bb = float(self.table.big_blind or 1.0)
+            sb = float(self.table.small_blind or bb / 2)
+        t0 = time.perf_counter()
+        res = run_match(specs, hands=hands, stack=100 * bb, small_blind=sb, big_blind=bb, seed=random.randrange(1 << 30),
+                        keep_records=True, names=names)
+        added = 0
+        for rec in res.records:
+            try:
+                h = replay(rec, snapshots=False, observations=False).hand
+            except Exception:  # noqa: BLE001
+                continue
+            with self.lock:
+                self.styles.add_hand(h, only=tracked)  # the stand-in's actions are not recorded
+            added += 1
+        return {"observed_hands": added, "seconds": round(time.perf_counter() - t0, 1), "opponents": self.opponents()}
+
+    def opponents(self) -> Dict[str, Any]:
+        """Style estimate for every seat; the bot's configured type is returned separately, only to check the model."""
+        from .opponent_model import TYPES
+
+        with self.lock:
+            hand = self.hand
+            if hand is None:
+                return {"players": [], "types_source": TYPES["source"]}
+            out = []
+            for p in hand.players:
+                seat = self._seat_of(p.index)
+                agent = self.agents.get(seat)
+                est = self.styles.estimate(p.name)
+                out.append({"seat": seat, "name": p.name, "is_human": agent is None,
+                            "actual_label": agent.describe().get("label") if agent else "人間", **est})
+            return {"players": out, "types_source": TYPES["source"], "hands_total": max(self.styles.hands.values(), default=0)}
 
     # -- reporting ------------------------------------------------------------
     def set_reveal(self, reveal: bool) -> Dict[str, Any]:
@@ -848,6 +905,8 @@ class Handler(BaseHTTPRequestHandler):
             return APP.game.state()
         if path == "/api/game/advice":
             return APP.game.advice()
+        if path == "/api/game/opponents":
+            return APP.game.opponents()
         if path == "/api/game/export":
             recs = APP.game.records
             if not recs:
@@ -915,6 +974,8 @@ class Handler(BaseHTTPRequestHandler):
             return APP.game.human_act(body.get("seat"), body.get("action", ""), float(amt) if amt not in (None, "") else None)
         if path == "/api/game/reveal":
             return APP.game.set_reveal(bool(body.get("reveal", True)))
+        if path == "/api/game/observe":
+            return APP.game.observe(int(body.get("hands", 60)))
         if path == "/api/replay/load":
             return APP.load_records(body)
         if path == "/api/replay/predict":
