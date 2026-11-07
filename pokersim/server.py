@@ -118,6 +118,8 @@ class GameSession:
                         raise ApiError(str(exc))
                     name = name or f"{agent.label} {seat_no}"
                     agent.name = name
+                    if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
+                        agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
                 self.agents[seat_no] = agent
                 seats.append(Seat(seat_no=seat_no, name=name, stack=stack, agent=agent,
                                   kind="human" if agent is None else agent.kind, buy_in=stack))
@@ -362,6 +364,11 @@ class GameSession:
             styles = {p.index: self.styles.estimate(p.name) for p in hand.players}
             key = (hand.hand_id, actor, len(obs.get("history") or []))
         out = advise(obs, styles)  # Monte-Carlo runs outside the lock
+        try:
+            from .rl_policy import recommend
+            out["rl"] = recommend(obs, styles)
+        except Exception as exc:  # noqa: BLE001 - the explanation layer still works without the RL model
+            out["rl"] = {"available": False, "reason_ja": f"RLモデルを読み込めませんでした: {exc}"}
         out["key"] = "|".join(str(k) for k in key)
         return out
 

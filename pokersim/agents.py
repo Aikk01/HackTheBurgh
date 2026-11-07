@@ -415,7 +415,33 @@ class ClaudeAgent(Agent):
 
 
 # -------------------------------------------------------------------- registry
+class RLAgent(Agent):
+    """The PPO-trained 6-max policy (``data/rl/policy.npz``, see TRAINING.md).
+
+    A table can hand it opponent style estimates through ``styles_provider(obs) -> {index: style}``;
+    without one it assumes population-average opponents."""
+
+    kind = "rl"
+    label = "RL model"
+    description = "PPO policy trained by self-play against many opponent styles; uses opponent style estimates."
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.greedy = bool(params.get("greedy", False))
+        self.styles_provider: Optional[Callable[[Observation], Dict[int, Dict[str, Any]]]] = None
+
+    def act(self, obs: Observation) -> Action:
+        from .rl_policy import act as rl_act, load_policy
+
+        policy = load_policy()
+        if policy is None:
+            return passive(obs)
+        styles = self.styles_provider(obs) if self.styles_provider else {}
+        return rl_act(obs, styles, policy, self.rng, greedy=self.greedy)
+
+
 AGENT_TYPES: Dict[str, type] = {
+    "rl": RLAgent,
     "random": RandomAgent,
     "station": CallingStationAgent,
     "maniac": ManiacAgent,

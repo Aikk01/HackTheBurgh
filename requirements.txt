@@ -3,3 +3,5 @@
 pokerkit==0.7.7
 # Optional: Claude agent
 anthropic>=1.0
+# RL advisor inference (data/rl/policy.npz)
+numpy>=1.26

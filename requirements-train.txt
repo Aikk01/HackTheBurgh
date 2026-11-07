@@ -1,0 +1,5 @@
+# RL training (GPU PC only, see TRAINING.md). Install PyTorch first with the CUDA wheel that matches the GPU:
+#   RTX 50xx (Blackwell) needs CUDA 12.8 builds:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+-r requirements.txt
+-r requirements-prep.txt

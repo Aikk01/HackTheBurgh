@@ -414,19 +414,42 @@
     const body = $("#advisorBody");
     body.innerHTML = "";
     if (!a.available) { $("#advisorRec").textContent = "—"; body.textContent = a.reason_ja || ""; $("#advisorFollow").hidden = true; return; }
-    const r = a.recommend;
-    const conf = { high: "自信: 高", medium: "自信: 中", close: "微妙な場面" }[a.confidence] || "";
+    const rl = a.rl && a.rl.available ? a.rl : null;
+    // the advice to follow: the RL policy when a trained model is present, otherwise the opponent-model simulation
+    const r = rl ? { action: rl.engine_action.action, amount: rl.engine_action.amount } : a.recommend;
+    S.advice.follow = r;
     $("#advisorRec").innerHTML = "";
-    $("#advisorRec").appendChild(el("span", { class: "rec-action rec-" + (r.action === "all_in" ? "raise" : r.action === "bet" ? "raise" : r.action) },
-      a.recommend_ja + (r.amount && (r.action === "raise" || r.action === "bet" || r.action === "all_in") ? ` ${fmt(r.amount)}` : "")));
-    $("#advisorRec").appendChild(el("span", { class: "muted conf", text: conf }));
+    if (rl) {
+      const top = rl.probs[0];
+      $("#advisorRec").appendChild(el("span", { class: "rec-source", text: "RLモデル" }));
+      $("#advisorRec").appendChild(el("span", { class: "rec-action rec-" + (rl.action === "fold" ? "fold" : rl.action === "call" ? "call" : "raise") },
+        (rl.action === "call" ? (r.action === "check" ? "チェック" : "コール") : rl.action_ja) + (r.amount ? ` ${fmt(r.amount)}` : "")));
+      $("#advisorRec").appendChild(el("span", { class: "muted conf", text: `確率 ${pct(top.p, 0)}` }));
+    } else {
+      const conf = { high: "自信: 高", medium: "自信: 中", close: "微妙な場面" }[a.confidence] || "";
+      $("#advisorRec").appendChild(el("span", { class: "rec-action rec-" + (r.action === "all_in" ? "raise" : r.action === "bet" ? "raise" : r.action) },
+        a.recommend_ja + (r.amount && (r.action === "raise" || r.action === "bet" || r.action === "all_in") ? ` ${fmt(r.amount)}` : "")));
+      $("#advisorRec").appendChild(el("span", { class: "muted conf", text: conf + (a.rl ? " · RLモデル未配置" : "") }));
+    }
     const btn = r.action === "fold" ? "#btnFold" : (r.action === "check" || r.action === "call") ? "#btnCheckCall" : "#btnRaise";
     $(btn).classList.add("recommended");
     if (btn === "#btnRaise" && r.amount) setRaise(r.amount);
     $("#advisorFollow").hidden = false;
+    if (rl) {
+      const m = rl.model || {};
+      const box = el("div", { class: "rl-box" },
+        el("div", { class: "muted", text: "RLモデルの判断（各行動を選ぶ確率）" }),
+        el("div", { class: "rl-probs" }, ...rl.probs.map((p) => el("div", { class: "rl-prob" + (p.action === rl.action ? " top" : "") },
+          el("span", { class: "lbl", text: p.action_ja + (p.amount && p.action !== "call" ? ` ${fmt(p.amount)}` : "") }),
+          el("div", { class: "track" }, el("div", { class: "fill", style: `width:${(100 * p.p).toFixed(1)}%` })),
+          el("span", { class: "val", text: pct(p.p, 0) })))),
+        el("div", { class: "muted", text: `このハンドの見込み: ${rl.value_bb >= 0 ? "+" : ""}${rl.value_bb} BB · モデル: PPO ${fmt(m.hands || 0)}ハンド学習${m.trained_at ? "（" + m.trained_at.replace("T", " ") + "）" : ""}` }));
+      body.appendChild(box);
+    }
     const cols = el("div", { class: "advisor-cols" });
     // left: why
     const left = el("div", {});
+    if (rl) left.appendChild(el("div", { class: "muted", text: "参考: 相手の読みにもとづくシミュレーション" }));
     left.appendChild(el("div", { class: "advisor-stats" },
       el("div", {}, el("b", { text: pct(a.equity, 0) }), el("span", { class: "muted", text: ` 勝率（相手のスタイル考慮） · ランダム仮定なら ${pct(a.equity_vs_random, 0)}` })),
       a.to_call > 0 ? el("div", {}, el("b", { text: pct(a.pot_odds, 0) }), el("span", { class: "muted", text: " コールに必要な勝率" })) : null));
@@ -495,7 +518,7 @@
   function followAdvice() {
     const a = S.advice && S.advice.data;
     if (!a || !a.available || $("#actionBar").hidden) return;
-    const r = a.recommend;
+    const r = S.advice.follow || a.recommend;
     if (r.action === "fold") humanAct("fold");
     else if (r.action === "check" || r.action === "call") humanAct("call");
     else humanAct("raise", r.action === "all_in" ? S.game.hand.legal.max_raise_to : Number(r.amount));

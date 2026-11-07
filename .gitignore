@@ -6,3 +6,7 @@ data/cache/
 .venv/
 venv/
 .DS_Store
+# RL training: checkpoints are large and machine-specific; commit only eval/log files and data/rl/policy.*
+data/rl/runs/**/*.pt
+data/rl/runs/smoke/
+data/rl/runs/cpu-check/

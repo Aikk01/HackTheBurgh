@@ -186,6 +186,7 @@ MIRROR_COMMANDS = {
     "mirror-sufficiency": "train the population bettor with three seeds and compare (pokersim.mirror_rl)",
     "mirror-wide": "Phase 6: forecasts, bluff test and GPU dataset on every table size (pokersim.mirror_wide)",
     "mirror-real": "Phase 6: bettors tuned to real players vs the population bettor (pokersim.mirror_real)",
+    "rl-train": "PPO training of the 6-max RL advisor on a GPU (pokersim.rl_train, see TRAINING.md)",
 }
 
 
@@ -194,6 +195,9 @@ def _dispatch_mirror(argv: List[str]) -> int | None:
     if not argv or argv[0] not in MIRROR_COMMANDS:
         return None
     name, rest = argv[0], argv[1:]
+    if name == "rl-train":
+        from .rl_train import main as m
+        return m(rest)
     if name == "mirror-prepare":
         from .mirror_data import main as m
         return m(rest)
