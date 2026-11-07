@@ -139,6 +139,15 @@
     box.appendChild(el("p", { class: "hint", text: msg }));
     box.appendChild(el("p", { class: "muted", text: `Source: takara-ai/poker_hands @ ${(M.exhibit.scan.revision || "").slice(0, 10)}, generated ${M.exhibit.exhibit.generated}` }));
     root.appendChild(box);
+    // style map (type layer): who these players are; descriptive only while the type gate fails
+    if (M.styles === undefined) { try { M.styles = await api("/api/mirror/styles"); } catch (e) { M.styles = null; } }
+    if (M.styles && M.styles.present && M.step === "filters" && root.isConnected) {
+      const g = M.styles.gate || {};
+      root.appendChild(el("div", { class: "card-box" }, el("h4", { text: "Style map: who these players are" }),
+        el("p", { class: "hint" }, el("span", { class: "tag warn", text: "description only" }),
+          ` Model estimate, not an observation. The type prior ${g.pass ? "passed" : "failed"} its gate, so live forecasts ignore player types.`),
+        styleMap(M.styles)));
+    }
   }
 
   // ------------------------------------------------------------ step 3: you defend
