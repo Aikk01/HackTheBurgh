@@ -358,6 +358,10 @@ class Trainer:
         a = self.args
         torch = self.torch
         ctx = mp.get_context("spawn")
+        # one BLAS thread per worker: the range model's matrix products otherwise start a thread per core in every
+        # worker (load ~3x the core count, half the speed).  Spawned workers read this before importing NumPy.
+        for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
+            os.environ.setdefault(var, "1")
         cmd_qs = [ctx.Queue() for _ in range(a.workers)]
         out_q = ctx.Queue()
         procs = [ctx.Process(target=worker_main, args=(w, a.seed, cmd_qs[w], out_q), daemon=True) for w in range(a.workers)]
