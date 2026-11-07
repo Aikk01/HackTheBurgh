@@ -1,0 +1,342 @@
+{
+ "generated": "2026-11-07T19:34:48",
+ "baseline": "population twin trained here with the candidates' seed 17",
+ "matched_seed": true,
+ "zero_probe_identical": true,
+ "episodes": 20000,
+ "pool_sizes": [
+  4000,
+  1000,
+  2000
+ ],
+ "pairs": 1000,
+ "seed": 17,
+ "opponents": [
+  "caller",
+  "folder",
+  "population",
+  "strength"
+ ],
+ "probes": [
+  0,
+  4,
+  16,
+  64
+ ],
+ "rows": [
+  {
+   "opponent": "caller",
+   "probes": 0,
+   "baseline_mean": 0.5545,
+   "candidate_mean": 0.5545,
+   "mean_diff_chips": 0.0,
+   "ci95_chips": [
+    0.0,
+    0.0
+   ],
+   "fraction_changed": 0.0,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.672,
+    "bettor_aggr": 0.496,
+    "defender_aggr": 0.533
+   }
+  },
+  {
+   "opponent": "caller",
+   "probes": 4,
+   "baseline_mean": 0.5545,
+   "candidate_mean": 0.557,
+   "mean_diff_chips": 0.25,
+   "ci95_chips": [
+    -1.05,
+    1.65
+   ],
+   "fraction_changed": 0.108,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.538,
+    "bettor_aggr": 0.441,
+    "defender_aggr": 0.474
+   }
+  },
+  {
+   "opponent": "caller",
+   "probes": 16,
+   "baseline_mean": 0.5545,
+   "candidate_mean": 0.567,
+   "mean_diff_chips": 1.25,
+   "ci95_chips": [
+    0.05,
+    2.65
+   ],
+   "fraction_changed": 0.02,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.456,
+    "bettor_aggr": 0.305,
+    "defender_aggr": 0.328
+   }
+  },
+  {
+   "opponent": "caller",
+   "probes": 64,
+   "baseline_mean": 0.5545,
+   "candidate_mean": 0.6,
+   "mean_diff_chips": 4.55,
+   "ci95_chips": [
+    2.0,
+    7.15
+   ],
+   "fraction_changed": 0.345,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.246,
+    "bettor_aggr": 0.275,
+    "defender_aggr": 0.251
+   }
+  },
+  {
+   "opponent": "folder",
+   "probes": 0,
+   "baseline_mean": 0.758,
+   "candidate_mean": 0.758,
+   "mean_diff_chips": 0.0,
+   "ci95_chips": [
+    0.0,
+    0.0
+   ],
+   "fraction_changed": 0.0,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.672,
+    "bettor_aggr": 0.496,
+    "defender_aggr": 0.533
+   }
+  },
+  {
+   "opponent": "folder",
+   "probes": 4,
+   "baseline_mean": 0.758,
+   "candidate_mean": 0.803,
+   "mean_diff_chips": 4.5,
+   "ci95_chips": [
+    3.2,
+    5.95
+   ],
+   "fraction_changed": 0.11,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.638,
+    "bettor_aggr": 0.552,
+    "defender_aggr": 0.474
+   }
+  },
+  {
+   "opponent": "folder",
+   "probes": 16,
+   "baseline_mean": 0.758,
+   "candidate_mean": 0.758,
+   "mean_diff_chips": 0.0,
+   "ci95_chips": [
+    0.0,
+    0.0
+   ],
+   "fraction_changed": 0.0,
+   "pairs": 1000,
+   "oracle_pass": false,
+   "twin_public_fold": {
+    "checked_through": 0.598,
+    "bettor_aggr": 0.459,
+    "defender_aggr": 0.405
+   }
+  },
+  {
+   "opponent": "folder",
+   "probes": 64,
+   "baseline_mean": 0.758,
+   "candidate_mean": 0.838,
+   "mean_diff_chips": 8.0,
+   "ci95_chips": [
+    6.1,
+    10.05
+   ],
+   "fraction_changed": 0.228,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.579,
+    "bettor_aggr": 0.551,
+    "defender_aggr": 0.457
+   }
+  },
+  {
+   "opponent": "population",
+   "probes": 0,
+   "baseline_mean": 0.598,
+   "candidate_mean": 0.598,
+   "mean_diff_chips": 0.0,
+   "ci95_chips": [
+    0.0,
+    0.0
+   ],
+   "fraction_changed": 0.0,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.672,
+    "bettor_aggr": 0.496,
+    "defender_aggr": 0.533
+   }
+  },
+  {
+   "opponent": "population",
+   "probes": 4,
+   "baseline_mean": 0.598,
+   "candidate_mean": 0.581,
+   "mean_diff_chips": -1.7,
+   "ci95_chips": [
+    -3.2,
+    -0.2
+   ],
+   "fraction_changed": 0.221,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.638,
+    "bettor_aggr": 0.441,
+    "defender_aggr": 0.474
+   }
+  },
+  {
+   "opponent": "population",
+   "probes": 16,
+   "baseline_mean": 0.598,
+   "candidate_mean": 0.597,
+   "mean_diff_chips": -0.1,
+   "ci95_chips": [
+    -1.2,
+    1.0
+   ],
+   "fraction_changed": 0.11,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.527,
+    "bettor_aggr": 0.459,
+    "defender_aggr": 0.405
+   }
+  },
+  {
+   "opponent": "population",
+   "probes": 64,
+   "baseline_mean": 0.598,
+   "candidate_mean": 0.5705,
+   "mean_diff_chips": -2.75,
+   "ci95_chips": [
+    -4.4,
+    -1.1
+   ],
+   "fraction_changed": 0.352,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.579,
+    "bettor_aggr": 0.482,
+    "defender_aggr": 0.526
+   }
+  },
+  {
+   "opponent": "strength",
+   "probes": 0,
+   "baseline_mean": 0.5245,
+   "candidate_mean": 0.5245,
+   "mean_diff_chips": 0.0,
+   "ci95_chips": [
+    0.0,
+    0.0
+   ],
+   "fraction_changed": 0.0,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.672,
+    "bettor_aggr": 0.496,
+    "defender_aggr": 0.533
+   }
+  },
+  {
+   "opponent": "strength",
+   "probes": 4,
+   "baseline_mean": 0.5245,
+   "candidate_mean": 0.5235,
+   "mean_diff_chips": -0.1,
+   "ci95_chips": [
+    -1.45,
+    1.3
+   ],
+   "fraction_changed": 0.221,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.638,
+    "bettor_aggr": 0.441,
+    "defender_aggr": 0.474
+   }
+  },
+  {
+   "opponent": "strength",
+   "probes": 16,
+   "baseline_mean": 0.5245,
+   "candidate_mean": 0.5185,
+   "mean_diff_chips": -0.6,
+   "ci95_chips": [
+    -1.7,
+    0.45
+   ],
+   "fraction_changed": 0.11,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.384,
+    "bettor_aggr": 0.459,
+    "defender_aggr": 0.328
+   }
+  },
+  {
+   "opponent": "strength",
+   "probes": 64,
+   "baseline_mean": 0.5245,
+   "candidate_mean": 0.5315,
+   "mean_diff_chips": 0.7,
+   "ci95_chips": [
+    -0.7,
+    2.05
+   ],
+   "fraction_changed": 0.111,
+   "pairs": 1000,
+   "oracle_pass": true,
+   "twin_public_fold": {
+    "checked_through": 0.546,
+    "bettor_aggr": 0.413,
+    "defender_aggr": 0.423
+   }
+  }
+ ],
+ "control": {
+  "mean_diff_chips": 0.0,
+  "ci95_chips": [
+   0.0,
+   0.0
+  ],
+  "fraction_changed": 0.0
+ },
+ "label": "synthetic opponents; simulated river scenarios; chips per opportunity with paired 95% bootstrap intervals",
+ "units": "opening pot = 100 chips"
+}

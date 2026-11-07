@@ -6,7 +6,7 @@ decided, and how to pick up**. Update it whenever a step completes or a decision
 
 Build started: 2026-11-07 18:00 (local). Hours in the checklist count from here.
 Builder so far: Claude as the single build agent. Commits go out under the team member's own git identity.
-Last update: 2026-11-07 — pushed to branch `poker-mirror`; RL handed to a second PC for the full benchmark runs (see "Handoff").
+Last update: 2026-11-07 19:35 — RL runs done on the second PC and committed (`policy_population.json`, `training_sufficiency.json`, `benchmark.json`).
 
 ## Status board
 
@@ -51,7 +51,7 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 - [x] 3.3 Handle gate — handles repeat across shards (≥100 hands: PokerStars 50,781 · PartyPoker 10,669 · Full Tilt 8,416 · Absolute 7,850).
 - [x] 3.4 Types — N_min = 200 hands (reliability ≥ 0.7 on all five features); 48,059 players; K = 4, bootstrap-stable: tight-aggressive 15%, tight-passive 29%, loose-aggressive 35%, loose-passive 21%.
 - [x] 3.5 Type-prior gate — **FAILED** (recorded): log-loss lift +0.0011, 95% CI [−0.0049, +0.0069] over players. The live model runs K = 1; the type map is shown only as a labelled description.
-- [~] 3.6 Paired benchmark — redesigned (matched seeds, see decision 8) and smoke-tested; **full run handed to the second PC**.
+- [x] 3.6 Paired benchmark — full run on the second PC (9 min 38 s, 14 workers): `zero_probe_identical: true`, control 0.0 [0.0, 0.0]; personalised bot gains vs caller (+4.55 at 64 probes) and folder (+8.00), loses vs population (−2.75 [−4.4, −1.1]). Sufficiency: `all_oracle_pass: true`, seed disagreements only on near ties. Population policy reproduced exactly (only timing fields differ).
 - [~] 3.7 Visuals — range grid, policy charts, EV panel done; style map still to add to the UI.
 
 ### Phase 4 · Evidence and integration

@@ -179,7 +179,7 @@
   "profile_hash": "9264f1f6bc9e",
   "pool_size": 4000,
   "env_version": "river-v1",
-  "train_seconds": 53.4,
+  "train_seconds": 88.8,
   "oracle_check": {
    "pass": true,
    "failures": 0,
@@ -824,7 +824,7 @@
   },
   {
    "episode": 5000,
-   "seconds": 16.1,
+   "seconds": 25.3,
    "visits": {
     "1|checked_through|weak": [
      233,
@@ -923,7 +923,7 @@
   },
   {
    "episode": 10000,
-   "seconds": 29.5,
+   "seconds": 48.9,
    "visits": {
     "1|checked_through|weak": [
      391,
@@ -1022,7 +1022,7 @@
   },
   {
    "episode": 20000,
-   "seconds": 51.5,
+   "seconds": 85.3,
    "visits": {
     "1|checked_through|weak": [
      471,

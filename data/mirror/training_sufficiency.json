@@ -1,0 +1,452 @@
+{
+ "generated": "2026-11-07T19:25:11",
+ "seeds": [
+  7,
+  8,
+  9
+ ],
+ "episodes": 20000,
+ "runs": [
+  {
+   "seed": 7,
+   "train_seconds": 97.8,
+   "checkpoints": [
+    {
+     "episode": 1000,
+     "validation_mean_reward": 0.617
+    },
+    {
+     "episode": 5000,
+     "validation_mean_reward": 0.617
+    },
+    {
+     "episode": 10000,
+     "validation_mean_reward": 0.62
+    },
+    {
+     "episode": 20000,
+     "validation_mean_reward": 0.62
+    }
+   ],
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "bet_half",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "fold",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "fold",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   },
+   "oracle": {
+    "pass": true,
+    "failures": 0,
+    "pool": "training deals",
+    "tolerance": 0.1,
+    "min_visits": 100
+   }
+  },
+  {
+   "seed": 8,
+   "train_seconds": 102.1,
+   "checkpoints": [
+    {
+     "episode": 1000,
+     "validation_mean_reward": 0.6155
+    },
+    {
+     "episode": 5000,
+     "validation_mean_reward": 0.623
+    },
+    {
+     "episode": 10000,
+     "validation_mean_reward": 0.623
+    },
+    {
+     "episode": 20000,
+     "validation_mean_reward": 0.623
+    }
+   ],
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "check_back",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "fold",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "fold",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   },
+   "oracle": {
+    "pass": true,
+    "failures": 0,
+    "pool": "training deals",
+    "tolerance": 0.1,
+    "min_visits": 100
+   }
+  },
+  {
+   "seed": 9,
+   "train_seconds": 103.6,
+   "checkpoints": [
+    {
+     "episode": 1000,
+     "validation_mean_reward": 0.581
+    },
+    {
+     "episode": 5000,
+     "validation_mean_reward": 0.623
+    },
+    {
+     "episode": 10000,
+     "validation_mean_reward": 0.63
+    },
+    {
+     "episode": 20000,
+     "validation_mean_reward": 0.63
+    }
+   ],
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "check_back",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "check_back",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "fold",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "fold",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "call",
+    "2|defender_aggr|strong": "call"
+   },
+   "oracle": {
+    "pass": true,
+    "failures": 0,
+    "pool": "training deals",
+    "tolerance": 0.1,
+    "min_visits": 100
+   }
+  }
+ ],
+ "cells": [
+  {
+   "state": "1|checked_through|weak",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.1718,
+    0.5171
+   ],
+   "q_star_gap": 0.3453,
+   "min_visits": 433,
+   "supported": true
+  },
+  {
+   "state": "1|checked_through|medium",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.5024,
+    0.5815
+   ],
+   "q_star_gap": 0.0791,
+   "min_visits": 404,
+   "supported": true
+  },
+  {
+   "state": "1|checked_through|strong",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.8089,
+    0.889
+   ],
+   "q_star_gap": 0.0801,
+   "min_visits": 495,
+   "supported": true
+  },
+  {
+   "state": "1|bettor_aggr|weak",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.167,
+    0.2791
+   ],
+   "q_star_gap": 0.112,
+   "min_visits": 496,
+   "supported": true
+  },
+  {
+   "state": "1|bettor_aggr|medium",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "check_back"
+   ],
+   "agree": false,
+   "q_star": [
+    0.5558,
+    0.5405
+   ],
+   "q_star_gap": 0.0153,
+   "min_visits": 413,
+   "supported": true
+  },
+  {
+   "state": "1|bettor_aggr|strong",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.8175,
+    0.9329
+   ],
+   "q_star_gap": 0.1154,
+   "min_visits": 508,
+   "supported": true
+  },
+  {
+   "state": "1|defender_aggr|weak",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.1696,
+    0.3036
+   ],
+   "q_star_gap": 0.1339,
+   "min_visits": 459,
+   "supported": true
+  },
+  {
+   "state": "1|defender_aggr|medium",
+   "greedy_by_seed": [
+    "bet_half",
+    "check_back",
+    "check_back"
+   ],
+   "agree": false,
+   "q_star": [
+    0.4803,
+    0.4695
+   ],
+   "q_star_gap": 0.0108,
+   "min_visits": 463,
+   "supported": true
+  },
+  {
+   "state": "1|defender_aggr|strong",
+   "greedy_by_seed": [
+    "bet_half",
+    "bet_half",
+    "bet_half"
+   ],
+   "agree": true,
+   "q_star": [
+    0.8422,
+    0.9428
+   ],
+   "q_star_gap": 0.1006,
+   "min_visits": 464,
+   "supported": true
+  },
+  {
+   "state": "2|checked_through|weak",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "fold"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    -0.9735
+   ],
+   "q_star_gap": 0.4735,
+   "min_visits": 6,
+   "supported": false
+  },
+  {
+   "state": "2|checked_through|medium",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "fold"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    -0.8644
+   ],
+   "q_star_gap": 0.3644,
+   "min_visits": 9,
+   "supported": false
+  },
+  {
+   "state": "2|checked_through|strong",
+   "greedy_by_seed": [
+    "call",
+    "call",
+    "call"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    0.4913
+   ],
+   "q_star_gap": 0.9913,
+   "min_visits": 8,
+   "supported": false
+  },
+  {
+   "state": "2|bettor_aggr|weak",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "fold"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    -0.9364
+   ],
+   "q_star_gap": 0.4364,
+   "min_visits": 27,
+   "supported": false
+  },
+  {
+   "state": "2|bettor_aggr|medium",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "fold"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    -0.6025
+   ],
+   "q_star_gap": 0.1025,
+   "min_visits": 20,
+   "supported": false
+  },
+  {
+   "state": "2|bettor_aggr|strong",
+   "greedy_by_seed": [
+    "call",
+    "call",
+    "call"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    0.7047
+   ],
+   "q_star_gap": 1.2047,
+   "min_visits": 26,
+   "supported": false
+  },
+  {
+   "state": "2|defender_aggr|weak",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "fold"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    -0.9529
+   ],
+   "q_star_gap": 0.4529,
+   "min_visits": 11,
+   "supported": false
+  },
+  {
+   "state": "2|defender_aggr|medium",
+   "greedy_by_seed": [
+    "fold",
+    "fold",
+    "call"
+   ],
+   "agree": false,
+   "q_star": [
+    -0.5,
+    -0.7441
+   ],
+   "q_star_gap": 0.2441,
+   "min_visits": 8,
+   "supported": false
+  },
+  {
+   "state": "2|defender_aggr|strong",
+   "greedy_by_seed": [
+    "call",
+    "call",
+    "call"
+   ],
+   "agree": true,
+   "q_star": [
+    -0.5,
+    0.6621
+   ],
+   "q_star_gap": 1.1621,
+   "min_visits": 14,
+   "supported": false
+  }
+ ],
+ "stage1_agreement": 0.7778,
+ "disagreements_are_near_ties": true,
+ "all_oracle_pass": true,
+ "label": "population twin; Q* on the training deals; a disagreement on a near-tie cell costs almost nothing"
+}
