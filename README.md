@@ -25,7 +25,10 @@ The optional `anthropic` package enables the Claude agent.
 python -m pokersim serve --open        # http://127.0.0.1:8000/
 ```
 
-Use `--host 0.0.0.0` to share the table on a LAN. Deep links: `#demo` deals a bot-only table,
+The page opens on **Mirror** (the judging demo). **Simulator** holds Play, Replay, Evaluate and
+Simulate; **Evidence** holds the generated results. Use `--host 0.0.0.0` to share the table on a LAN.
+Deep links: `#mirror=reveal` is the judging entry, `#tab=play|replay|evaluate|simulate` opens a tool,
+`#evidence=benchmark` a topic, `#demo` deals a bot-only table,
 `#replay=pluribus-session-30.phhs&i=7&step=12&lens=tag` opens a sample hand at a step with a model
 lens, `#replay=<file>&eval=tag` runs an evaluation, `#sim=equity,tag,lag,random&hands=200` a match.
 
@@ -132,7 +135,7 @@ link that opens the hand at that exact spot with the model's suggestion overlaid
 
 ## Poker Mirror (hackathon demo)
 
-The **Mirror** tab asks one question: after accounting for the board and the public betting, how
+The **Mirror** page asks one question: after accounting for the board and the public betting, how
 much does knowing *this* opponent help a bettor decide whether to bluff? Scope: heads-up no-limit
 river, the defender checks and faces a half-pot bet. The spec is [PLAN.md](PLAN.md); the order of
 work and the build log are [CHECKLIST.md](CHECKLIST.md) and [PROGRESS.md](PROGRESS.md).
@@ -141,7 +144,9 @@ Five steps in the UI: (1) two recorded river decisions by the same player, guess
 (2) what a filter hides (folds never reach a showdown); (3) you defend, with a forecast committed
 before every click; (4) you bet against your frozen twin with an EV advisor and a range X-ray;
 (5) two Q-learning counter-bots, one trained against the population twin and one against yours.
-The **Evidence** tab shows every generated artifact with its source and denominator.
+The **Evidence** page opens each result with a question, a figure, its denominator and its source,
+with the exact table one click away. Session tagging (practice / calibration / held-out) lives under
+**Operator** in the Mirror header; held-out judges see "Forecast recorded" instead of the forecast.
 
 Offline preparation (needs `pip install -r requirements-prep.txt`, 1.3 GB download):
 
@@ -171,7 +176,9 @@ pokersim/evaluate.py   shadow evaluation report
 pokersim/simulate.py   self-play, PHH export
 pokersim/dataset.py    Hugging Face browsing/downloading (cache in data/cache)
 pokersim/server.py     HTTP + SSE API, serves web/
-web/                   index.html, style.css, app.js (table renderer, panes)
+web/                   index.html, style.css (tokens, Simulator), app.js (table renderer, Simulator tools),
+                       mirror.js + mirror.css (Mirror scenes), evidence.js (Evidence), viz.js (shared figures),
+                       sim.css (Simulator stage layouts), fonts/ (Instrument Serif/Sans, IBM Plex Mono, OFL)
 data/samples/          small hand sets from the dataset for offline use
 scripts/               validation and smoke tests
 tests/                 unit tests (python -m unittest discover tests)

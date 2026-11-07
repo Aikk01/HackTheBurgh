@@ -3,28 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PokerSim</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1a19'/%3E%3Ctext x='16' y='24' font-size='22' text-anchor='middle' fill='%233987e5'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<title>Poker Mirror · PokerSim</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230E302B'/%3E%3Crect x='8' y='5' width='16' height='22' rx='3' fill='none' stroke='%23FFD58C' stroke-width='1.6'/%3E%3Ctext x='16' y='21' font-size='12' text-anchor='middle' fill='%23FFD58C'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/mirror.css">
+<link rel="stylesheet" href="/sim.css">
 </head>
-<body data-theme="dark">
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar">
-  <div class="brand"><span class="brand-mark">&#9824;</span> PokerSim <span class="brand-sub">interactive hold'em + hand-history replayer</span></div>
-  <nav class="tabs" id="tabs">
-    <button class="tab active" data-tab="play">Play</button>
-    <button class="tab" data-tab="replay">Replay</button>
-    <button class="tab" data-tab="evaluate">Evaluate</button>
-    <button class="tab" data-tab="simulate">Simulate</button>
-    <button class="tab" data-tab="mirror">Mirror</button>
-    <button class="tab" data-tab="evidence">Evidence</button>
+  <a class="brand" href="#mirror=reveal" aria-label="Poker Mirror, start"><span class="brand-mark" aria-hidden="true">&#9824;</span><span class="brand-name">Poker Mirror</span><span class="brand-sub">PokerSim</span></a>
+  <nav class="dests" id="dests" aria-label="Main">
+    <button class="dest" data-dest="mirror">Mirror</button>
+    <button class="dest" data-dest="simulator">Simulator</button>
+    <button class="dest" data-dest="evidence">Evidence</button>
   </nav>
   <div class="topbar-right">
     <label class="toggle small"><input type="checkbox" id="fourColor"> 4-colour deck</label>
     <span class="conn" id="conn" title="server connection"><span class="dot"></span> connecting</span>
   </div>
 </header>
+<div class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></div>
 
-<main class="layout">
+<main id="main" tabindex="-1">
+<!-- MIRROR: full-width judge-facing stage (rendered by mirror.js) -->
+<section class="view" id="view-mirror" aria-label="Poker Mirror" hidden></section>
+
+<!-- EVIDENCE: full-width topics (rendered by evidence.js) -->
+<section class="view" id="view-evidence" aria-label="Evidence" hidden></section>
+
+<!-- SIMULATOR: the original table tools -->
+<section class="view" id="view-simulator" aria-label="Simulator" hidden>
+<nav class="subnav" id="tabs" aria-label="Simulator tools">
+  <button class="tab active" data-tab="play">Play</button>
+  <button class="tab" data-tab="replay">Replay</button>
+  <button class="tab" data-tab="evaluate">Evaluate</button>
+  <button class="tab" data-tab="simulate">Simulate</button>
+</nav>
+
+<div class="layout">
   <section class="stage">
     <div class="table-wrap" id="tableWrap">
       <div class="table-rail">
@@ -38,9 +57,10 @@
       <div class="seats" id="seats"></div>
       <div class="table-overlay" id="tableOverlay">
         <div class="overlay-card">
-          <h2>Welcome to PokerSim</h2>
-          <p>Set up a table on the right and deal, or open <b>Replay</b> to step through real hands from the
+          <h2 id="overlayTitle">Take a seat</h2>
+          <p id="overlayMsg">Six-handed no-limit hold'em: you in seat 1 against five bots. Or open <b>Replay</b> to step through real hands from the
             <a href="https://huggingface.co/datasets/gabbler/PokerData" target="_blank" rel="noopener">gabbler/PokerData</a> dataset.</p>
+          <button class="btn primary large" id="overlayDeal">Deal with defaults</button>
         </div>
       </div>
     </div>
@@ -67,12 +87,13 @@
     </div>
 
     <div class="transport" id="transport" hidden>
-      <button class="icon-btn" id="tpFirst" title="first (Home)">&#9198;</button>
-      <button class="icon-btn" id="tpPrev" title="previous (←)">&#9664;</button>
-      <button class="icon-btn" id="tpPlay" title="play/pause (space)">&#9654;</button>
-      <button class="icon-btn" id="tpNext" title="next (→)">&#9654;&#9654;</button>
-      <button class="icon-btn" id="tpLast" title="last (End)">&#9197;</button>
-      <input type="range" id="tpSlider" min="0" max="0" value="0">
+      <div class="tp-row">
+      <button class="icon-btn" id="tpFirst" title="first (Home)" aria-label="First step">&#9198;</button>
+      <button class="icon-btn" id="tpPrev" title="previous (←)" aria-label="Previous step">&#9664;</button>
+      <button class="icon-btn" id="tpPlay" title="play/pause (space)" aria-label="Play or pause">&#9654;</button>
+      <button class="icon-btn" id="tpNext" title="next (→)" aria-label="Next step">&#9654;&#9654;</button>
+      <button class="icon-btn" id="tpLast" title="last (End)" aria-label="Last step">&#9197;</button>
+      <input type="range" id="tpSlider" min="0" max="0" value="0" aria-label="Replay step">
       <span class="tp-label" id="tpLabel">0 / 0</span>
       <select id="tpSpeed" title="playback speed">
         <option value="2000">0.5x</option>
@@ -81,14 +102,24 @@
         <option value="250">4x</option>
       </select>
       <label class="toggle small"><input type="checkbox" id="tpReveal" checked> show all known cards</label>
+      </div>
+      <div class="action-strip" id="actionStrip" role="toolbar" aria-label="Hand actions by street. Left and right arrows step through the hand."></div>
     </div>
+
+    <!-- Evaluate / Simulate results take the stage instead of the felt -->
+    <div class="sim-stage" id="simStage" hidden></div>
   </section>
 
   <aside class="panel" id="panel">
     <!-- PLAY -->
     <div class="pane active" id="pane-play">
-      <details class="card-box" id="setupBox" open>
-        <summary>Table setup</summary>
+      <div class="card-box play-quick">
+        <h3 class="sim-h">Play a hand</h3>
+        <p class="hint" id="defaultsHint">You in seat 1 against five bots, blinds 1/2, 200 chips each.</p>
+        <button class="btn primary large" id="dealDefaults">Deal with defaults</button>
+      </div>
+      <details class="card-box" id="setupBox">
+        <summary>Table settings</summary>
         <div class="form-grid">
           <label>Small blind <input type="number" id="sb" value="1" step="any"></label>
           <label>Big blind <input type="number" id="bb" value="2" step="any"></label>
@@ -106,7 +137,7 @@
           <label class="toggle small"><input type="checkbox" id="spectate"> spectate (reveal all cards)</label>
         </div>
         <div class="row">
-          <button class="btn primary" id="startGame">Deal</button>
+          <button class="btn" id="startGame">Deal with these settings</button>
           <span class="hint">Pick <b>Human</b> for your seat. Model seats: <code>http</code> calls your own server, <code>claude</code> asks Claude.</span>
         </div>
         <div class="row" id="modelHints"></div>
@@ -236,35 +267,9 @@
       <div id="simResults"></div>
     </div>
 
-    <!-- MIRROR -->
-    <div class="pane" id="pane-mirror">
-      <div class="card-box">
-        <div class="row between">
-          <h3 style="margin:0">Poker Mirror</h3>
-          <div class="row"><span class="muted" id="mirrorSession"></span><button class="btn small" id="mirrorReset">Reset judge</button></div>
-        </div>
-        <p class="hint">After accounting for the board and the public betting, how much does knowing <b>this</b> opponent help a bettor decide whether to bluff? One spot: heads-up river, the defender checks and faces a half-pot bet.</p>
-        <div class="subtabs" id="mirrorSteps">
-          <button class="active" data-step="reveal">1 Replay</button>
-          <button data-step="filters">2 Filters</button>
-          <button data-step="drill">3 You defend</button>
-          <button data-step="play">4 You bet</button>
-          <button data-step="compare">5 Bots</button>
-        </div>
-      </div>
-      <div id="mirror-reveal" class="mstep active"></div>
-      <div id="mirror-filters" class="mstep"></div>
-      <div id="mirror-drill" class="mstep"></div>
-      <div id="mirror-play" class="mstep"></div>
-      <div id="mirror-compare" class="mstep"></div>
-    </div>
-
-    <!-- EVIDENCE -->
-    <div class="pane" id="pane-evidence">
-      <div class="card-box"><h3>Evidence</h3><p class="hint">Every number below comes from a generated artifact in <code>data/mirror/</code> and shows its source, denominator and date. Missing panels say so.</p></div>
-      <div id="evidencePanels"></div>
-    </div>
   </aside>
+</div>
+</section>
 </main>
 
 <div class="modal" id="forkModal" hidden>
@@ -285,6 +290,8 @@
 
 <div class="toast" id="toast" hidden></div>
 <script src="/app.js"></script>
+<script src="/viz.js"></script>
 <script src="/mirror.js"></script>
+<script src="/evidence.js"></script>
 </body>
 </html>

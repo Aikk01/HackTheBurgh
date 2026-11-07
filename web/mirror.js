@@ -1,671 +1,972 @@
-/* Poker Mirror panes: replay reveal, filter exhibit, defender drills, bettor play vs. twin, bot comparison, evidence. */
+/* Poker Mirror: a judge-operated, full-width sequence of five scenes.
+   1 the historical guess  2 the known-cards filter  3 you defend (the model predicts you)
+   4 you bet against your frozen twin  5 two bettors on the same deal.
+   Visual identity is keyed by scene + decision/spot so a forecast update never looks like a fresh deal. */
 (function () {
   "use strict";
-  const P = window.PokerSim;
-  const { api, el, cardEl, toast, fmt, pct } = P;
+  const P = window.PokerSim, V = window.Viz;
+  const { api, el, toast, fmt, pct } = P;
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 
+  const STEPS = [
+    { id: "reveal", label: "Which bet got the fold?" },
+    { id: "filters", label: "Where did the folds go?" },
+    { id: "drill", label: "You defend" },
+    { id: "play", label: "You bet" },
+    { id: "compare", label: "Same deal, two bettors" },
+  ];
   const M = {
-    token: null, state: null, step: "reveal", demo: null, exhibit: null, revealed: false, guess: null,
-    filter: "all", evidence: null, lastDrill: null, pollTimer: null,
+    token: null, state: null, step: "reveal", demo: null, exhibit: null, evidence: null, guess: null, filter: "all",
+    lastDrill: null, pollTimer: null, busy: false, built: false, resumeChecked: false, deepLinked: false, hu: null, sceneId: null,
+    rangeOpen: false, flyFrom: null,
   };
-  const CTX_LABEL = { checked_through: "turn checked through", bettor_aggr: "bettor bet/raised the turn", defender_aggr: "defender bet/raised the turn" };
-  const RESP = ["fold", "call", "raise"];
-
-  function token() {
-    if (M.token) return M.token;
-    try { M.token = localStorage.getItem("mirrorToken") || ""; } catch (e) { M.token = ""; }
-    return M.token;
+  const TURN = { checked_through: "both players checked the turn", bettor_aggr: "the bettor also bet the turn", defender_aggr: "the defender bet the turn" };
+  // The defender in steps 4-5 is either the judge's frozen twin or a real player's twin (Phase 6).
+  function opp() {
+    const o = (M.state && M.state.opponent) || { kind: "judge" };
+    const real = o.kind === "real";
+    return { o, real, name: real ? `${o.id}'s twin` : "Your twin", the: real ? "the player's twin" : "your twin", The: real ? "The player's twin" : "Your twin" };
   }
-  function remember(tok) { M.token = tok; try { localStorage.setItem("mirrorToken", tok); } catch (e) { /* ignore */ } }
-  const q = () => "?session=" + encodeURIComponent(token());
-  const body = (extra) => Object.assign({ session: token() }, extra || {});
-
-  async function refresh() {
-    const st = await api("/api/mirror/state" + q());
-    remember(st.token);
-    M.state = st;
-    $("#mirrorSession").textContent = "judge " + st.token.slice(0, 6) + " · " + st.profile.observations + " observations";
-    return st;
-  }
-
-  // ------------------------------------------------------------ table view for a river spot
-  function spotHand(o) {
-    const mk = (i, name, cards, bet, folded, shown, hand) => ({
-      index: i, name, seat: i + 1, position: i === 0 ? "BB" : "BTN", stack: o.stacks ? o.stacks[i] : 150, starting_stack: 200,
-      bet: bet || 0, contributed: 50 + (bet || 0), folded: !!folded, all_in: false, acted: true, mucked: false, shown: !!shown,
-      has_cards: true, cards, cards_known: cards.every((c) => c !== "??" && c !== "XX"), hand: hand || null,
-      payout: o.payouts ? o.payouts[i] : 0, net: null, is_button: i === 1, agent: null,
-    });
-    const players = [
-      mk(0, o.defenderName, o.defenderCards, o.defenderBet, o.defenderFolded, o.defenderShown),
-      mk(1, o.bettorName, o.bettorCards, o.bettorBet, o.bettorFolded, o.bettorShown),
-    ];
-    if (o.bettorHuman) players[1].agent = { kind: "human", label: "you" };
-    if (o.defenderHuman) players[0].agent = { kind: "human", label: "you" };
-    const bets = (o.defenderBet || 0) + (o.bettorBet || 0);
-    return {
-      hand_id: o.id || "mirror", variant: "NT", status: o.status || "betting", street: "river", street_index: 3, board: o.board,
-      pot: o.pot === undefined ? 100 : o.pot, total_pot: (o.pot === undefined ? 100 : o.pot) + bets, max_bet: Math.max(o.defenderBet || 0, o.bettorBet || 0),
-      actor: o.actor === undefined ? null : o.actor, button: 1, blinds: [1, 2], antes: [0, 0], min_bet: 2, players, legal: null,
-      pots: null, payouts: o.payouts || null, unresolved: false, warnings: [],
-    };
-  }
-  function showSpot(o, viewer) {
-    const hand = spotHand(o);
-    const slots = [{ slot: viewer, seat: viewer + 1, name: hand.players[viewer].name, player: viewer },
-                   { slot: 1 - viewer, seat: 2 - viewer, name: hand.players[1 - viewer].name, player: 1 - viewer }];
-    P.state.prevHand = null;
-    P.renderTable({ hand, slots, viewer, reveal: !!o.reveal, bubble: o.bubble || null, lens: o.lens || null, payouts: false });
-    $("#centerMsg").innerHTML = "";
-    if (o.message) $("#centerMsg").appendChild(el("span", { html: o.message }));
-  }
-
-  // ------------------------------------------------------------ step 1: replay reveal
-  async function renderReveal() {
-    const root = $("#mirror-reveal");
-    root.innerHTML = "";
-    if (!M.demo) {
-      try { M.demo = await api("/api/mirror/demo_hands"); } catch (e) { root.appendChild(el("div", { class: "card-box hint", text: "Demo hands not available: " + e.message })); return; }
-    }
-    if (!M.exhibit) { try { M.exhibit = await api("/api/mirror/exhibit"); } catch (e) { M.exhibit = { present: false }; } }
-    const hands = M.demo.hands || [];
-    if (!hands.length) { root.appendChild(el("div", { class: "card-box hint", text: "No demo hands bundled. Run: python -m pokersim mirror-prepare" })); return; }
-    const box = el("div", { class: "card-box" }, el("h4", { text: "Two river decisions by the same Absolute Poker 100NL player" }),
-      el("p", { class: "hint", text: "Same defender, same spot: checks the river, faces a half-pot bet. One time they folded, one time they called. Which one folded?" }));
-    hands.forEach((h, i) => {
-      const row = el("div", { class: "demo-hand" },
-        el("div", { class: "row between" }, el("b", { text: `Hand ${i + 1} · #${h.hand}` }), el("span", { class: "muted", text: `${fmt(h.bet)} into ${fmt(h.pot_before_bet)}` })),
-        el("div", { class: "row" }, P.cardsInline(h.board), el("button", { class: "btn small", onclick: () => showDemoHand(i) }, "Show on table"),
-          el("button", { class: "btn small primary", onclick: () => { M.guess = i; M.revealed = true; renderReveal(); showDemoHand(i); }, disabled: M.revealed }, "This one folded")),
-        M.revealed ? el("div", { class: "reveal" },
-          el("div", {}, el("span", { class: "tag", text: "turn: " + CTX_LABEL[h.context] }), " ", el("span", { class: "tag " + (h.response === "fold" ? "good" : "warn"), text: "recorded action: " + h.response })),
-          M.guess === i ? el("div", { class: "muted", text: h.response === "fold" ? "Your guess was right." : "Not this one." }) : null) : null);
-      box.appendChild(row);
-    });
-    root.appendChild(box);
-    if (M.revealed && M.exhibit && M.exhibit.present) {
-      const two = M.exhibit.exhibit.two_shard.cohorts;
-      const ct = two.half_checked_through, ba = two.half_bettor_aggr, da = two.half_defender_aggr;
-      const ebox = el("div", { class: "card-box" }, el("h4", { text: "The turn history changes the answer" }),
-        el("p", { class: "hint", text: "Exact half-pot offers in the two demo shards (Takara 35 + 36), folds over opportunities:" }),
-        bars([["turn checked through", ct.folds / ct.opportunities, fo(ct)],
-              ["bettor bet/raised the turn", ba.folds / ba.opportunities, fo(ba)],
-              ["defender bet/raised the turn", da.folds / da.opportunities, fo(da)]]),
-        el("p", { class: "hint", text: `Across all 37 shards: ${fmt(M.exhibit.scan.eligible_unique)} unique eligible offers from ${fmt(M.exhibit.scan.rows)} hands; ${fmt(M.exhibit.scan.eligible_modelling)} exact half-pot offers with all three responses legal form the modelling cohort.` }));
-      root.appendChild(ebox);
-    }
-  }
-  function showDemoHand(i) {
-    const h = M.demo.hands[i];
-    const step = h.replay.steps[Math.min(h.decision_step, h.replay.steps.length - 1)];
-    const hand = step.state;
-    const viewer = 0;
-    const order = hand.players.slice().sort((a, b) => ((a.index - viewer + 100) % 100) - ((b.index - viewer + 100) % 100));
-    const slots = order.map((p) => ({ slot: p.index, seat: p.index + 1, name: p.name, stack: p.stack, player: p.index }));
-    P.state.prevHand = null;
-    P.renderTable({ hand, slots, viewer: null, reveal: false, bubble: { player: 1, text: `Bet ${fmt(h.bet)}`, kind: "aggr" }, payouts: false });
-    $("#centerMsg").innerHTML = "";
-    $("#centerMsg").appendChild(el("span", { html: `${h.defender.slice(0, 8)}… checks, faces ${fmt(h.bet)} into ${fmt(h.pot_before_bet)}<span class="sub">${M.revealed ? "recorded action: " + h.response : "what did they do?"}</span>` }));
-  }
-
-  function bars(rows) {
-    const root = el("div", { class: "bars" });
-    rows.forEach(([label, frac, val]) => root.appendChild(el("div", { class: "bar-row" }, el("span", { text: label }), el("div", { class: "track" }, el("div", { class: "fill", style: `width:${(100 * frac).toFixed(1)}%` })), el("span", { class: "val", text: val === undefined ? pct(frac) : val }))));
-    return root;
-  }
-  // "66.5% · 565/849" for a cohort of folds over opportunities
-  const fo = (c) => `${pct(c.folds / c.opportunities)} · ${c.folds.toLocaleString()}/${c.opportunities.toLocaleString()}`;
-
-  // ------------------------------------------------------------ step 2: filters
-  async function renderFilters() {
-    const root = $("#mirror-filters");
-    root.innerHTML = "";
-    if (!M.exhibit) { try { M.exhibit = await api("/api/mirror/exhibit"); } catch (e) { M.exhibit = { present: false }; } }
-    if (!M.exhibit.present) { root.appendChild(el("div", { class: "card-box hint", text: "Exhibit not generated yet (python -m pokersim mirror-prepare)." })); return; }
-    const two = M.exhibit.exhibit.two_shard.cohorts, full = M.exhibit.exhibit.full_corpus.cohorts;
-    const views = { all: ["all observed actions", "all_eligible"], known: ["only hands where the defender's cards became known", "defender_cards_known"], clean: ["only warning-free hands", "warning_free"] };
-    const box = el("div", { class: "card-box" }, el("h4", { text: "What a filter hides" }),
-      el("div", { class: "subtabs" }, ...Object.entries(views).map(([k, [label]]) => el("button", { class: M.filter === k ? "active" : "", onclick: () => { M.filter = k; renderFilters(); } }, label))));
-    const key = views[M.filter][1];
-    const t = two[key], f = full[key];
-    box.appendChild(el("div", { class: "tiles" },
-      P.tile("folds / offers (shards 35+36)", `${t.folds}/${t.opportunities}`, t.opportunities ? pct(t.folds / t.opportunities) : "no data"),
-      P.tile("folds / offers (all 37 shards)", `${f.folds}/${f.opportunities}`, f.opportunities ? pct(f.folds / f.opportunities) : "no data")));
-    const msg = M.filter === "known" ? "A fold never reaches a showdown, so a dataset filtered to hands with known cards contains zero folds. Only 18.9% of eligible offers in the two shards ever reveal the defender's cards; models that train on showdowns learn from players who did not fold."
-      : M.filter === "clean" ? "Dropping every hand with a replay warning also drops valid earlier decisions: here the warnings concern cards unknown at a later showdown, which says nothing about the river decision."
-      : "All recorded responses to a 40-60% pot bet on the river after a check, heads-up no-limit hold'em.";
-    box.appendChild(el("p", { class: "hint", text: msg }));
-    box.appendChild(el("p", { class: "muted", text: `Source: takara-ai/poker_hands @ ${(M.exhibit.scan.revision || "").slice(0, 10)}, generated ${M.exhibit.exhibit.generated}` }));
-    root.appendChild(box);
-    // style map (type layer): who these players are; descriptive only while the type gate fails
-    if (M.styles === undefined) { try { M.styles = await api("/api/mirror/styles"); } catch (e) { M.styles = null; } }
-    if (M.styles && M.styles.present && M.step === "filters" && root.isConnected) {
-      const g = M.styles.gate || {};
-      root.appendChild(el("div", { class: "card-box" }, el("h4", { text: "Style map: who these players are" }),
-        el("p", { class: "hint" }, el("span", { class: "tag warn", text: "description only" }),
-          ` Model estimate, not an observation. The type prior ${g.pass ? "passed" : "failed"} its gate, so live forecasts ignore player types.`),
-        styleMap(M.styles)));
-    }
-  }
-
-  // ------------------------------------------------------------ step 3: you defend
-  function forecastBox(pred, title) {
-    const p = pred.probs;
-    return el("div", { class: "forecast" }, el("h4", { text: title }),
-      bars([["fold", p.fold, `${pct(p.fold)} (90% band ${pct(pred.fold_p05)}–${pct(pred.fold_p95)})`], ["call", p.call, pct(p.call)], ["raise", p.raise, pct(p.raise)]]),
-      el("div", { class: "muted", text: `${pred.arm} arm · ${pred.observations} of your responses seen · ${pred.model_version}` }),
-      pred.type_posterior ? el("div", { class: "muted", text: "type: " + Object.entries(pred.type_posterior).map(([k, v]) => `${k} ${pct(v, 0)}`).join(", ") }) : null);
-  }
-
-  async function renderDrill() {
-    const root = $("#mirror-drill");
-    root.innerHTML = "";
-    const st = M.state || await refresh();
-    const d = st.drill.pending;
-    const box = el("div", { class: "card-box" }, el("h4", { text: "You defend: you checked the river and face a half-pot bet" }));
-    box.appendChild(tagRow(st));
-    if (!d) {
-      box.appendChild(el("p", { class: "hint", text: "Each spot commits a forecast of your response before you click. Deals alternate the turn history and your hand strength." }));
-      box.appendChild(el("div", { class: "row" }, el("button", { class: "btn primary", onclick: newDrill }, "Deal a spot"), el("span", { class: "muted", text: `${st.drill.drills} spots played` })));
-      if (M.lastDrill) box.appendChild(lastDrillBox(M.lastDrill));
-    } else {
-      box.appendChild(el("p", {}, el("b", { text: "Turn history: " }), d.extra.context_label, el("br"), el("span", { class: "muted", text: d.extra.story.join(" · ") })));
-      box.appendChild(forecastBox(d.prediction, "Committed forecast of your response"));
-      box.appendChild(el("div", { class: "row" },
-        el("button", { class: "btn danger", onclick: () => respond(d.decision_id, "fold") }, "Fold"),
-        el("button", { class: "btn", onclick: () => respond(d.decision_id, "call") }, `Call ${d.bet}`),
-        el("button", { class: "btn primary", onclick: () => respond(d.decision_id, "raise") }, `Raise to ${st.drill.raise_to}`)));
-      showSpot({ board: d.board, defenderCards: d.own_cards, bettorCards: ["XX", "XX"], defenderName: "You", bettorName: "Bettor", bettorBet: d.bet, pot: d.pot_before_bet, actor: 0, defenderHuman: true, bubble: { player: 1, text: `Bet ${d.bet}`, kind: "aggr" }, message: `Pot ${d.pot_before_bet}, bet ${d.bet} · ${d.extra.context_label}` }, 0);
-    }
-    root.appendChild(box);
-    root.appendChild(profileBox(st.profile));
-  }
-  const TAGS = [["practice", "practice"], ["calibration", "calibration (development)"], ["heldout", "held-out evaluation"]];
-  function tagRow(st) {
-    return el("div", { class: "tag-row" },
-      el("div", { class: "row" }, el("span", { class: "muted", text: "This judge's answers are for:" }),
-        ...TAGS.map(([t, label]) => el("button", { class: "chip-btn" + (st.tag === t ? " active" : ""), onclick: () => setTag(t) }, label))),
-      el("div", { class: "hint", text: st.tag === "heldout" ? "Held-out: someone who has not seen the model or its forecasts. Their answers are scored, never trained on."
-        : st.tag === "calibration" ? "Calibration: development sessions that teach the twin how hand strength changes responses."
-        : "Practice: nothing is used for evaluation. Raw answers never leave this laptop." }));
-  }
-  async function setTag(t) {
-    try { await api("/api/mirror/tag", body({ tag: t })); await refresh(); renderDrill(); } catch (e) { toast(e.message, true); }
-  }
-
-  function lastDrillBox(r) {
-    const dec = r.decision, pred = dec.prediction, out = r.outcome;
-    return el("div", { class: "result" }, el("h4", { text: "Last spot" }),
-      el("div", {}, `Forecast fold ${pct(pred.fold_mean)} (${pred.arm}, ${pred.observations} seen) → you ${dec.actual}. `, out ? `${out.result}. Bettor had ${out.bettor_cards.join(" ")}; your hand was ${out.your_bucket} (${pct(out.your_equity)} equity).` : ""),
-      el("div", { class: "muted", text: `Updated forecast for this history: fold ${pct(r.after.fold_mean)} after ${r.after.observations} responses.` }));
-  }
-  async function newDrill() {
-    try { const r = await api("/api/mirror/drill", body()); remember(r.token); await refresh(); renderDrill(); } catch (e) { toast(e.message, true); }
-  }
-  async function respond(id, action) {
-    try {
-      const r = await api("/api/mirror/respond", body({ decision_id: id, action }));
-      M.lastDrill = r;
-      await refresh();
-      const d = r.decision, out = r.outcome;
-      showSpot({ board: d.board, defenderCards: d.own_cards, bettorCards: out ? out.bettor_cards : ["XX", "XX"], defenderName: "You", bettorName: "Bettor",
-        bettorBet: action === "fold" ? 50 : 0, defenderFolded: action === "fold", defenderHuman: true, reveal: true, status: "finished",
-        bubble: { player: 0, text: action === "raise" ? "Raise to 100" : action === "call" ? "Call 50" : "Fold", kind: action === "raise" ? "aggr" : action === "fold" ? "fold" : "" },
-        message: `${out ? out.result : ""}<span class="sub">forecast was fold ${pct(d.prediction.fold_mean)}, you ${action}</span>` }, 0);
-      renderDrill();
-    } catch (e) { toast(e.message, true); }
-  }
-  function profileBox(prof) {
-    const box = el("div", { class: "card-box" }, el("h4", { text: `Your profile · ${prof.observations} responses · ${prof.arm} arm` }));
-    Object.entries(prof.contexts).forEach(([c, v]) => {
-      const pop = prof.population[c];
-      box.appendChild(el("div", { class: "ctx-row" }, el("div", { class: "muted", text: `${v.label} (${v.observations} seen)` }),
-        bars([["you: fold", v.probs.fold, `${pct(v.probs.fold)} [${pct(v.fold_p05, 0)}–${pct(v.fold_p95, 0)}]`], ["population: fold", pop.fold, pct(pop.fold)]])));
-    });
-    if (prof.type_posterior) box.appendChild(el("div", {}, el("b", { text: "Type: " }), prof.type_posterior.names.map((n, i) => `${n} ${pct(prof.type_posterior.weights[i], 0)}`).join(" · ")));
-    box.appendChild(el("div", { class: "muted", text: `Strength model: ${prof.strength_sources.prior} (${prof.strength_sources.calibration_sessions} calibration sessions)` + (prof.frozen ? ` · frozen twin ${prof.frozen}` : "") }));
-    box.appendChild(el("div", { class: "row" }, el("button", { class: "btn", onclick: freeze }, prof.frozen ? "Re-freeze twin" : "Freeze my twin")));
-    return box;
-  }
-  async function freeze() {
-    try { const r = await api("/api/mirror/freeze", body()); toast(`Twin frozen (${r.frozen.observations} observations, hash ${r.frozen.hash})`); await refresh(); renderCurrent(); } catch (e) { toast(e.message, true); }
-  }
-
-  // ------------------------------------------------------------ step 4: you bet vs your twin
-  async function renderPlay() {
-    const root = $("#mirror-play");
-    root.innerHTML = "";
-    const st = M.state || await refresh();
-    const v = st.play;
-    const real = st.opponent && st.opponent.kind === "real";
-    const box = el("div", { class: "card-box" }, el("h4", { text: real ? "You bet against a real player's twin" : "You bet against your frozen twin" }));
-    box.appendChild(await opponentPicker(st));
-    if (!st.frozen) box.appendChild(el("p", { class: "hint", text: "Freeze your profile first (step 3), or pick a real player from the dataset above. With no responses, your twin is the population player." }));
-    box.appendChild(el("div", { class: "row" }, el("button", { class: "btn primary", onclick: newSpot }, "New spot"), el("span", { class: "muted", text: v.frozen ? "twin " + v.frozen : "" })));
-    if (v.spot) {
-      const s = v.spot;
-      box.appendChild(el("p", {}, el("b", { text: "Turn history: " }), s.context_label, el("br"), el("span", { class: "muted", text: s.story.join(" · ") })));
-      if (v.advice && s.stage === 1) box.appendChild(adviceBox(v.advice));
-      if (s.stage === 1) box.appendChild(el("div", { class: "row" }, el("button", { class: "btn", onclick: () => act("check") }, "Check back"), el("button", { class: "btn primary", onclick: () => act("bet") }, `Bet ${s.bet}`)));
-      if (s.stage === 2) box.appendChild(el("div", { class: "row" }, el("span", { text: `${real ? "The player's twin" : "Your twin"} raised to ${s.raise_to}. ` }), el("button", { class: "btn danger", onclick: () => act("fold") }, "Fold"), el("button", { class: "btn primary", onclick: () => act("call") }, "Call 50")));
-      if (v.readout) box.appendChild(readoutBox(v.readout, v.response));
-      if (v.result) box.appendChild(el("div", { class: "result" }, el("b", { text: `Result: ${v.result.reward_chips >= 0 ? "+" : ""}${fmt(v.result.reward_chips)} chips` }), ` · twin had ${v.result.defender_cards.join(" ")} (${v.result.defender_bucket}).`));
-      const bettorBet = s.stage === 1 ? 0 : 50, defBet = s.stage === 2 ? 100 : (v.response === "call" ? 50 : 0);
-      const done = !!v.result;
-      showSpot({ board: s.board, bettorCards: s.own_cards, defenderCards: done ? v.result.defender_cards : ["XX", "XX"], defenderName: "Your twin", bettorName: "You",
-        bettorBet: done ? 0 : bettorBet, defenderBet: done ? 0 : defBet, actor: done ? null : 1, bettorHuman: true, reveal: done, status: done ? "finished" : "betting",
-        defenderFolded: v.response === "fold", bubble: v.response ? { player: 0, text: v.response === "raise" ? "Raise to 100" : v.response === "call" ? "Call 50" : "Fold", kind: v.response === "raise" ? "aggr" : v.response === "fold" ? "fold" : "" } : null,
-        message: done ? `${v.result.reward_chips >= 0 ? "+" : ""}${fmt(v.result.reward_chips)} chips` : `Pot ${s.pot} · ${s.context_label}` }, 1);
-    }
-    root.appendChild(box);
-    if (v.log && v.log.length) {
-      const lb = el("div", { class: "card-box" }, el("h4", { text: "Spots against the twin" }));
-      v.log.slice().reverse().forEach((x) => lb.appendChild(el("div", { class: "muted", text: `${x.board.join(" ")} · you ${x.own.join(" ")} · ${x.actions.join(", ")}${x.response ? " → " + x.response : ""} · ${x.reward_chips >= 0 ? "+" : ""}${fmt(x.reward_chips)}` })));
-      root.appendChild(lb);
-    }
-  }
-  function adviceBox(a) {
-    const f = a.forecast;
-    return el("div", { class: "advice" }, el("h4", { text: "EV advisor (opening pot = 100 chips)" }),
-      el("div", { class: "tiles" }, P.tile("check back", fmt(Math.round(a.ev_check * 100)), "chips, equity vs any two"),
-        P.tile("bet 50", fmt(Math.round(a.ev_bet * 100)) + (a.ev_bet_band ? ` (${fmt(Math.round(a.ev_bet_band[0] * 100))}…${fmt(Math.round(a.ev_bet_band[1] * 100))})` : ""), "chips, band from the fold interval")),
-      el("div", {}, el("b", { text: `Recommendation: ${a.recommend}. ` }), a.reason),
-      el("div", { class: "muted", text: `Forecast fold ${pct(f.fold)} [${pct(f.interval[0], 0)}–${pct(f.interval[1], 0)}] from the ${f.arm} arm (${f.observations} responses) · equity vs calling range ${pct(a.equity.vs_call_range)}, vs raising range ${pct(a.equity.vs_raise_range)} · pure bluff breaks even at ${pct(a.break_even_fold, 0)}` }));
-  }
-  function readoutBox(r, response) {
-    const box = el("div", { class: "readout" }, el("h4", { text: `Range X-ray after the twin's ${response}` }),
-      bars([["weak", r.buckets.weak, `${pct(r.buckets.weak)} (prior ${pct(r.prior_buckets.weak)})`], ["medium", r.buckets.medium, `${pct(r.buckets.medium)} (prior ${pct(r.prior_buckets.medium)})`], ["strong", r.buckets.strong, `${pct(r.buckets.strong)} (prior ${pct(r.prior_buckets.strong)})`]]),
-      el("div", { class: "muted", text: `Estimate at ${r.resolution}, ${r.holdings} holdings, from the twin's strength table. Not an observation.` }));
-    const ranks = "AKQJT98765432".split("");
-    const grid = el("div", { class: "grid13" });
-    ranks.forEach((r1, i) => ranks.forEach((r2, j) => {
-      const cls = i === j ? r1 + r2 : i < j ? r1 + r2 + "s" : r2 + r1 + "o";
-      const w = r.grid[cls] || 0;
-      const frac = r.grid_max ? w / r.grid_max : 0;
-      const own = r.own_cells.includes(cls);
-      grid.appendChild(el("div", { class: "cell" + (own ? " own" : ""), style: `background:${w ? P.seqColor(frac) : "transparent"};color:${frac > 0.5 ? "#fff" : "var(--ink-2)"}`, title: `${cls}: ${(100 * w).toFixed(2)}%`, text: cls }));
-    }));
-    box.appendChild(grid);
-    return box;
-  }
+  const ctxBettor = (c) => ({ checked_through: "both players checked the turn", bettor_aggr: "you bet the turn", defender_aggr: `${opp().the} bet the turn` }[c]);
   async function realPlayers() {
     if (!M.realPlayers) { try { M.realPlayers = await api("/api/mirror/real_players"); } catch (e) { M.realPlayers = { present: false, players: [] }; } }
     return M.realPlayers;
   }
-  async function opponentPicker(st) {
-    const o = st.opponent || { kind: "judge" };
-    const row = el("div", { class: "row" }, el("span", { class: "muted", text: o.kind === "real"
-      ? `Opponent: real player ${o.id} · ${o.venue} · ${o.decisions} recorded decisions · folds ${pct(o.fold_rate, 0)}` : "Opponent: your frozen twin" }));
-    const rp = await realPlayers();
-    if (rp.present && rp.players.length) {
-      const sel = el("select", { class: "small", title: "Players from the dataset with enough recorded river answers" });
-      rp.players.forEach((pl) => sel.appendChild(el("option", { value: pl.id, text: `${pl.id} · ${pl.venue} · ${pl.decisions} hands · folds ${pct(pl.fold_rate, 0)}` })));
-      if (o.kind === "real") sel.value = o.id;
-      row.appendChild(sel);
-      row.appendChild(el("button", { class: "btn small", onclick: () => loadReal(sel.value) }, "Play this real player"));
+  function setHead(root, eyebrow, h1Parts, lede) {
+    const h = $(".scene-head", root);
+    if (!h) return;
+    $(".scene-eyebrow", h).textContent = eyebrow;
+    const h1 = $("h1", h);
+    h1.innerHTML = "";
+    h1Parts.forEach((x) => h1.appendChild(typeof x === "string" ? document.createTextNode(x) : x));
+    const l = $(".lede", h);
+    if (l) l.textContent = lede;
+  }
+  const CTX_SHORT = { checked_through: "Turn checked through", bettor_aggr: "Bettor bet the turn", defender_aggr: "Defender bet the turn" };
+  const OPP_LABEL = { caller: ["Frequent caller", "folds 15% of the time"], folder: ["Frequent folder", "folds 65% of the time"], population: ["Population player", "the historical average"], strength: ["Strength-dependent", "folds weak, raises strong"] };
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+  // ------------------------------------------------------------ session
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode: fine */ } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
+  };
+  function token() { if (M.token === null) M.token = store.get("mirrorToken") || ""; return M.token; }
+  function remember(tok) { M.token = tok; store.set("mirrorToken", tok); }
+  const q = () => "?session=" + encodeURIComponent(token());
+  const body = (extra) => Object.assign({ session: token() }, extra || {});
+  async function refresh() {
+    const st = await api("/api/mirror/state" + q());
+    remember(st.token);
+    M.state = st;
+    paintJudge();
+    return st;
+  }
+  const heldout = () => M.state && M.state.tag === "heldout";
+  function frozenInfo() {
+    const st = M.state;
+    if (!st || !st.frozen) return null;
+    try { const f = JSON.parse(store.get("mirrorFrozen") || "null"); if (f && f.hash === st.frozen) return f; } catch (e) { /* ignore */ }
+    return { hash: st.frozen, observations: null };
+  }
+
+  // ------------------------------------------------------------ shell
+  function buildShell() {
+    const root = $("#view-mirror");
+    root.innerHTML = "";
+    const steps = el("nav", { class: "m-steps", "aria-label": "Poker Mirror steps" }, el("ol", {},
+      STEPS.map((s, i) => el("li", {}, el("button", { class: "m-step", "data-step": s.id, onclick: () => go(s.id, { focus: true }) },
+        el("span", { class: "m-n num", text: String(i + 1) }), el("span", { class: "m-l", text: s.label }))))));
+    const judge = el("div", { class: "m-judge" }, el("span", { class: "m-judge-id", id: "mJudge" }),
+      el("button", { class: "btn small ghost", id: "mOpBtn", "aria-expanded": "false", "aria-controls": "mOperator", onclick: toggleOperator }, "Operator"));
+    const head = el("header", { class: "m-head" }, steps, judge, el("div", { class: "m-operator", id: "mOperator", hidden: true, role: "region", "aria-label": "Operator controls" }));
+    root.appendChild(el("div", { class: "mirror" }, head, el("div", { class: "m-scene", id: "mScene" })));
+    M.built = true;
+  }
+  function paintJudge() {
+    const st = M.state;
+    const j = $("#mJudge");
+    if (!j || !st) return;
+    j.innerHTML = "";
+    j.appendChild(el("span", { class: "mono", text: "judge " + st.token.slice(0, 6) }));
+    j.appendChild(el("span", { "aria-hidden": "true", text: "·" }));
+    j.appendChild(el("span", { text: plural(st.profile.observations, "response") }));
+    if (st.tag !== "practice") j.appendChild(el("span", { class: "tag warn", text: st.tag === "heldout" ? "held-out" : st.tag }));
+    if (!$("#mOperator").hidden) paintOperator();
+  }
+  function toggleOperator() {
+    const op = $("#mOperator"), b = $("#mOpBtn");
+    op.hidden = !op.hidden;
+    b.setAttribute("aria-expanded", String(!op.hidden));
+    if (!op.hidden) { paintOperator(); const f = op.querySelector("button"); if (f) f.focus(); }
+  }
+  const TAGS = [["practice", "Practice", "Nothing is used for evaluation. Raw answers never leave this laptop."],
+    ["calibration", "Calibration", "Development sessions that teach the twin how hand strength changes responses."],
+    ["heldout", "Held-out", "Someone who has not seen the model or its forecasts. Forecasts stay hidden; answers are scored, never trained on."]];
+  function paintOperator() {
+    const op = $("#mOperator"), st = M.state;
+    if (!st) return;
+    op.innerHTML = "";
+    const cur = TAGS.find((t) => t[0] === st.tag) || TAGS[0];
+    op.appendChild(el("div", { class: "op-row" }, el("span", { class: "op-k", text: "This judge's answers are for" }),
+      el("div", { class: "seg", role: "group", "aria-label": "Session tag" }, TAGS.map(([t, label]) => el("button", { class: "seg-btn" + (st.tag === t ? " on" : ""), "aria-pressed": String(st.tag === t), onclick: () => setTag(t) }, label)))));
+    op.appendChild(el("p", { class: "hint", text: cur[2] }));
+    op.appendChild(el("div", { class: "op-row" },
+      el("span", { class: "mono muted", text: `session ${st.token} · ${plural(st.drill.drills, "spot")} · twin ${st.frozen ? "#" + st.frozen.slice(0, 7) : "not frozen"}` }),
+      el("button", { class: "btn small", onclick: restartDemo }, "Back to the opening"),
+      el("button", { class: "btn small danger", onclick: resetJudge }, "New judge"),
+      el("a", { class: "btn small ghost", href: "#evidence=sessions", onclick: (e) => { e.preventDefault(); openEvidence("sessions"); } }, "Session evidence")));
+  }
+  async function setTag(t) {
+    try { await api("/api/mirror/tag", body({ tag: t })); await refresh(); paintOperator(); if (M.step === "drill") renderScene(); } catch (e) { toast(e.message, true); }
+  }
+  async function resetJudge() {
+    try {
+      const st = await api("/api/mirror/reset", body());
+      remember(st.token);
+      M.lastDrill = null; M.guess = null; M.filter = "all"; M.rangeOpen = false;
+      store.del("mirrorFrozen"); store.del("mirrorGuess"); store.del("mirrorStep");
+      await refresh();
+      toast("New judge: fresh profile, no observations.");
+      go("reveal", { focus: true });
+    } catch (e) { toast(e.message, true); }
+  }
+  function restartDemo() { M.guess = null; M.filter = "all"; store.del("mirrorGuess"); go("reveal", { focus: true }); }
+  function openEvidence(topic) {
+    try { history.replaceState(null, "", "#evidence=" + topic); } catch (e) { /* ignore */ }
+    P.setTab("evidence");
+  }
+
+  // ------------------------------------------------------------ navigation
+  function go(step, opts) {
+    opts = opts || {};
+    if (!STEPS.some((s) => s.id === step)) step = "reveal";
+    M.step = step;
+    store.set("mirrorStep", step);
+    try { if (P.state.tab === "mirror") history.replaceState(null, "", "#mirror=" + step); } catch (e) { /* ignore */ }
+    $$(".m-step").forEach((b) => { const on = b.dataset.step === step; b.classList.toggle("active", on); if (on) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
+    return renderScene(opts);
+  }
+  async function renderScene(opts) {
+    opts = opts || {};
+    clearTimeout(M.pollTimer);
+    const fn = { reveal: sceneReveal, filters: sceneFilters, drill: sceneDrill, play: scenePlay, compare: sceneCompare }[M.step];
+    await fn(opts);
+    if (opts.focus) { const h = $("#mScene h1"); if (h) h.focus({ preventScroll: true }); window.scrollTo(0, 0); }
+  }
+  // Mount a scene root; returns {root, fresh}. Re-rendering the same scene keeps its root (and its table) in place.
+  function mount(id, build) {
+    const host = $("#mScene");
+    if (M.sceneId === id && host.firstChild) return { root: host.firstChild, fresh: false };
+    host.innerHTML = "";
+    M.sceneId = id;
+    M.hu = null;
+    const root = build();
+    host.appendChild(root);
+    V.anim(root, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 160 });
+    return { root, fresh: true };
+  }
+  function sceneHead(eyebrow, h1Parts, lede, extra) {
+    return el("div", { class: "scene-head" },
+      el("div", { class: "scene-eyebrow mono", text: eyebrow }),
+      el("h1", { class: "q", tabindex: "-1" }, ...h1Parts),
+      lede !== null && lede !== undefined ? el("p", { class: "lede", text: lede }) : null, extra || null);
+  }
+  function nextLink(label, step) {
+    return el("button", { class: "btn next-btn", onclick: () => go(step, { focus: true }) }, label, el("span", { "aria-hidden": "true", text: " →" }));
+  }
+  const evLink = (label, topic) => el("a", { class: "ev-link", href: "#evidence=" + topic, onclick: (e) => { e.preventDefault(); openEvidence(topic); } }, label);
+  function errorBox(root, msg) { root.appendChild(el("div", { class: "scene-error", role: "alert" }, msg)); }
+
+  // ------------------------------------------------------------ 1 · which river bet got the fold?
+  async function loadDemo() {
+    if (!M.demo) M.demo = await api("/api/mirror/demo_hands");
+    if (!M.exhibit) { try { M.exhibit = await api("/api/mirror/exhibit"); } catch (e) { M.exhibit = { present: false }; } }
+  }
+  async function sceneReveal() {
+    const { root, fresh } = mount("reveal", () => el("section", { class: "scene opening" }));
+    if (!fresh) return;
+    try { await loadDemo(); } catch (e) { errorBox(root, "Demo hands are not available: " + e.message); return; }
+    const hands = M.demo.hands || [];
+    if (hands.length < 2) { errorBox(root, "The two demo hands are not bundled. Run: python -m pokersim mirror-prepare"); return; }
+    const meta = (hands[0].replay.record || {}).meta || {};
+    const when = meta.month ? `${MONTHS[meta.month - 1]} ${meta.year}` : "";
+    root.appendChild(sceneHead(`${hands[0].venue || "Historical hands"} · 100NL${when ? " · " + when : ""}`,
+      ["Which river bet ", el("em", { text: "got the fold?" })],
+      "One player faced a half-pot river bet twice. Pick the hand they folded."));
+    const cohorts = M.exhibit && M.exhibit.present ? M.exhibit.exhibit.two_shard.cohorts : null;
+    const grid = el("div", { class: "op-hands" });
+    const result = el("div", { class: "op-result", hidden: true });
+    hands.slice(0, 2).forEach((h, i) => {
+      const letter = "AB"[i];
+      const c = cohorts && cohorts["half_" + h.context];
+      const verdict = el("div", { class: "op-verdict" }, el("span", { class: "v " + (h.response === "fold" ? "fold" : "call"), text: h.response === "fold" ? "Folded" : h.response === "call" ? "Called" : "Raised" }),
+        el("span", { class: "op-turn", text: " · " + (TURN[h.context] || h.context_label) }));
+      // supporting detail: inline on wide screens, behind a disclosure on a 1024px projector
+      const detail = [c ? el("p", {}, el("b", { class: "num", text: `${c.folds.toLocaleString()}/${c.opportunities.toLocaleString()}` }), ` comparable half-pot offers folded after this turn (${pct(c.folds / c.opportunities, 0)}). `,
+        el("button", { class: "link-btn", onclick: () => openDemoReplay(i) }, "Replay this hand")) : el("button", { class: "link-btn", onclick: () => openDemoReplay(i) }, "Replay this hand")];
+      const more = window.innerWidth >= 1100 ? el("div", { class: "op-more" }, ...detail) : el("details", { class: "op-more" }, el("summary", { text: "Comparable offers in the data" }), ...detail);
+      const reveal = el("div", { class: "op-reveal", hidden: true }, verdict, more);
+      const choice = el("button", { class: "op-choice", "data-i": i, onclick: () => makeGuess(i) }, `Hand ${letter} folded`);
+      grid.appendChild(el("article", { class: "op-hand", "data-i": i, "aria-label": `Hand ${letter}` },
+        el("div", { class: "op-hand-head" }, el("h2", { text: `Hand ${letter}` }), el("span", { class: "mono op-bet", text: `${fmt(h.bet)} into ${fmt(h.pot_before_bet)}` })),
+        V.board(h.board, "xl"), choice, reveal));
+    });
+    root.appendChild(grid);
+    root.appendChild(result);
+    root.appendChild(el("footer", { class: "scene-foot" },
+      el("span", { class: "mono muted", text: `Hand records: ${M.demo.source} · ${M.demo.license}` })));
+    const saved = store.get("mirrorGuess");
+    if (M.guess === null && saved !== null && saved !== "" && token()) M.guess = Number(saved);
+    if (M.guess !== null) showGuess(false);
+  }
+  function makeGuess(i) {
+    if (M.guess !== null) return;
+    M.guess = i;
+    store.set("mirrorGuess", String(i));
+    showGuess(true);
+  }
+  function showGuess(animate) {
+    const root = $("#mScene .opening");
+    if (!root) return;
+    const hands = M.demo.hands, i = M.guess;
+    const foldIdx = hands.findIndex((h) => h.response === "fold");
+    const right = i === foldIdx;
+    $$(".op-hand", root).forEach((card, k) => {
+      card.classList.toggle("picked", k === i);
+      card.classList.toggle("other", k !== i);
+      const btn = $(".op-choice", card);
+      btn.disabled = true;
+      btn.classList.toggle("selected", k === i);
+      btn.textContent = k === i ? `Your guess: Hand ${"AB"[k]} folded` : `Hand ${"AB"[k]} folded`;
+      const rev = $(".op-reveal", card);
+      rev.hidden = false;
+      if (animate) V.anim(rev, [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], { duration: 200, delay: k === i ? 0 : 40 });
+    });
+    const res = $(".op-result", root);
+    res.hidden = false;
+    res.innerHTML = "";
+    const L = (k) => "AB"[k];
+    const what = `Hand ${L(foldIdx)} folded; Hand ${L(1 - foldIdx)} was ${hands[1 - foldIdx].response === "call" ? "called" : "raised"}.`;
+    res.appendChild(el("p", { class: "op-verdict-line" }, el("b", { text: right ? "Right. " : "Not this time. " }), what,
+      " Same player, same bet size: what differed was the turn before it."));
+    const btn = nextLink("Next: where did the folds go?", "filters");
+    res.appendChild(btn);
+    if (animate) {
+      V.anim(res, [{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60 });
+      V.announce(`${right ? "Right." : "Not this time."} ${what}`);
+      btn.focus({ preventScroll: true });
     }
-    if (o.kind === "real") row.appendChild(el("button", { class: "btn small", onclick: async () => { await freeze(); await newSpot(); } }, "Back to my twin"));
-    return row;
+  }
+  async function openDemoReplay(i) {
+    const h = M.demo.hands[i];
+    if (!P.openReplay) { toast("Replay is not available in this build.", true); return; }
+    try { await P.openReplay({ source: "path", path: M.demo.source, i, step: Math.max(0, h.decision_step - 1) }); } catch (e) { toast(e.message, true); }
+  }
+
+  // ------------------------------------------------------------ 2 · where did the folds go?
+  const FILTERS = [
+    ["all", "All eligible offers", "all_eligible"],
+    ["known", "Known defender cards", "defender_cards_known"],
+    ["clean", "Warning-free hands", "warning_free"],
+  ];
+  const FILTER_TEXT = {
+    all: "Every recorded response to a 40–60% pot bet on the river after a check, heads-up no-limit hold'em.",
+    known: "A fold never reaches a showdown, so a dataset filtered to hands where the defender's cards became known contains no folds at all. A model trained only on revealed hands learns from players who did not fold.",
+    clean: "Dropping every hand with a replay warning removes continuing offers only: the warnings concern cards unknown at a later showdown, which says nothing about the river decision.",
+  };
+  async function sceneFilters() {
+    const { root, fresh } = mount("filters", () => el("section", { class: "scene filters" }));
+    if (!fresh) return;
+    try { await loadDemo(); } catch (e) { /* exhibit loaded below */ }
+    if (!M.exhibit || !M.exhibit.present) { errorBox(root, "The filter exhibit is not generated yet (python -m pokersim mirror-prepare)."); return; }
+    const ex = M.exhibit.exhibit, two = ex.two_shard.cohorts, full = ex.full_corpus.cohorts;
+    root.appendChild(sceneHead("Historical offers · filter exhibit", ["Where did the ", el("em", { text: "folds go?" })],
+      "River bets of 40–60% of the pot across two historical data shards. Pick a filter a modeller might apply."));
+    const strip = V.filterStrip(two);
+    const toggles = el("div", { class: "seg big", role: "group", "aria-label": "Filter" },
+      FILTERS.map(([k, label]) => el("button", { class: "seg-btn", "data-k": k, "aria-pressed": "false", onclick: () => setFilter(k) }, label)));
+    const big = el("div", { class: "fx-big" }, el("span", { class: "fx-num" }), el("span", { class: "fx-sub" }));
+    const before = el("div", { class: "fx-before" });
+    const expl = el("p", { class: "fx-expl" });
+    const fullLine = el("p", { class: "fx-full muted" });
+    root.appendChild(toggles);
+    root.appendChild(el("figure", { class: "fx-figure" }, big, before, strip.root, el("figcaption", { class: "sr-only", text: "Each offer keeps its position on the full 2,277-offer scale; offers a filter drops stay visible as hatching." })));
+    root.appendChild(expl);
+    const styleHost = el("div", { class: "fx-styles", id: "fxStyles", hidden: true });
+    const styleBtn = el("button", { class: "link-btn", "aria-expanded": "false", "aria-controls": "fxStyles", onclick: () => toggleStyles(styleBtn, styleHost) }, "Who these players are: the style map");
+    root.appendChild(el("div", { class: "fx-meta" }, fullLine, styleBtn));
+    root.appendChild(styleHost);
+    root.appendChild(el("footer", { class: "scene-foot" },
+      el("span", { class: "mono muted", text: `Takara · shards 35 and 36 · revision ${(M.exhibit.scan.revision || "").slice(0, 10)} · generated ${ex.generated}` }),
+      el("span", { class: "foot-links" }, el("button", { class: "link-btn", onclick: () => go("reveal", { focus: true }) }, "Back to the hands"), evLink("Evidence: the full table", "filter"), nextLink("Next: you defend", "drill"))));
+    function setFilter(k) {
+      M.filter = k;
+      $$(".seg-btn", toggles).forEach((b) => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+      strip.set(k);
+      const key = FILTERS.find((f) => f[0] === k)[2];
+      const t = two[key], f = full[key], a = two.all_eligible;
+      const num = $(".fx-num", big), sub = $(".fx-sub", big);
+      num.textContent = `${t.folds.toLocaleString()} of ${t.opportunities.toLocaleString()}`;
+      sub.textContent = `folded · ${t.opportunities ? pct(t.folds / t.opportunities, 0) : "no data"} of ${k === "all" ? "eligible" : "retained"} offers`;
+      before.textContent = k === "all" ? "Shards 35 and 36, no filter." : `${a.folds.toLocaleString()} of ${a.opportunities.toLocaleString()} folded before filtering.`;
+      V.anim(big, [{ opacity: 0.35 }, { opacity: 1 }], { duration: 160 });
+      expl.textContent = FILTER_TEXT[k];
+      fullLine.textContent = `All 37 shards, same filter: ${f.folds.toLocaleString()} of ${f.opportunities.toLocaleString()} folded (${f.opportunities ? pct(f.folds / f.opportunities, 1) : "no data"}).`;
+      V.announce(`${$(".fx-num", big).textContent} ${sub.textContent}.`);
+    }
+    setFilter(M.filter);
+  }
+
+  async function toggleStyles(btn, host) {
+    const open = host.hidden;
+    host.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (!open || host.dataset.built) return;
+    host.dataset.built = "1";
+    if (M.styles === undefined) { try { M.styles = await api("/api/mirror/styles"); } catch (e) { M.styles = null; } }
+    if (!M.styles || !M.styles.present || !window.Evidence) { host.appendChild(el("p", { class: "hint", text: "Style map not generated yet." })); return; }
+    const g = M.styles.gate || {};
+    host.appendChild(el("p", { class: "hint" }, el("span", { class: "tag warn", text: "description only" }),
+      ` A model estimate, not an observation. The type prior ${g.pass ? "passed" : "failed"} its gate, so live forecasts ${g.pass ? "use" : "ignore"} player types.`));
+    host.appendChild(window.Evidence.styleMap(M.styles));
+    host.appendChild(evLink("Evidence: are player types worth using?", "types"));
+  }
+
+  // ------------------------------------------------------------ heads-up table with stable card slots
+  function makeHU() {
+    const mkSeat = (pos) => {
+      const name = el("div", { class: "hu-name" }), meta = el("div", { class: "hu-meta" }), badge = el("div", { class: "hu-badge-slot" });
+      const slots = [el("div", { class: "cslot" }), el("div", { class: "cslot" })];
+      const label = el("div", { class: "hu-cards-label", hidden: true });
+      const say = el("div", { class: "hu-say", hidden: true, "aria-live": "off" });
+      const plate = el("div", { class: "hu-plate" }, name, meta, badge);
+      const seat = el("div", { class: "hu-seat " + pos }, plate, el("div", { class: "hu-hand" }, el("div", { class: "hu-cards" }, slots), label), say);
+      const wager = el("div", { class: "hu-wager " + pos });
+      return { seat, plate, name, meta, badge, slots, label, say, wager, amt: 0 };
+    };
+    const top = mkSeat("top"), bottom = mkSeat("bottom");
+    const boardSlots = Array.from({ length: 5 }, () => el("div", { class: "cslot board-slot" }));
+    const pot = el("div", { class: "hu-pot num" });
+    const note = el("div", { class: "hu-note" });
+    const actions = el("div", { class: "hu-actions", role: "group", "aria-label": "Your actions" });
+    const center = el("div", { class: "hu-center", hidden: true });
+    const felt = el("div", { class: "hu-felt" }, top.seat, top.wager, el("div", { class: "hu-mid" }, el("div", { class: "hu-board", role: "group" }, boardSlots), pot, note), bottom.wager, bottom.seat, center);
+    const root = el("div", { class: "hu" }, felt, actions);
+    let key = null;
+
+    function setSlot(slot, code, fresh, delay) {
+      code = code || "";
+      const cur = slot.dataset.code || "";
+      if (!fresh && cur === code) return;
+      slot.innerHTML = "";
+      slot.dataset.code = code;
+      if (!code) return;
+      const c = V.card(code, "md");
+      slot.appendChild(c);
+      if (fresh) V.anim(c, [{ opacity: 0, transform: "translateY(-10px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 180, delay });
+      else if (cur === "XX" && code !== "XX") V.flipIn(c);
+    }
+    function setWager(s, amt, fresh, delay) {
+      const prev = s.amt;
+      s.amt = amt;
+      if (amt === prev && !fresh) return;
+      s.wager.innerHTML = "";
+      if (!amt) return;
+      const n = Math.min(5, 1 + Math.floor(Math.log2(amt / 10 + 1)));
+      const stack = el("div", { class: "chips" }, Array.from({ length: n }, () => el("div", { class: "chip c25" })));
+      const w = el("div", { class: "hu-chip" }, stack, el("span", { class: "num", text: fmt(amt) }));
+      s.wager.appendChild(w);
+      const from = s.plate.getBoundingClientRect();
+      if (from.width) V.flyFrom(w, { left: from.left + from.width / 2 - 20, top: from.top }, { duration: 200, delay: delay || 0 });
+    }
+    function update(v) {
+      const fresh = v.key !== key;
+      key = v.key;
+      const base = v.dealDelay || 0;
+      [["top", top], ["bottom", bottom]].forEach(([pos, s]) => {
+        const sv = v[pos] || {};
+        s.name.textContent = sv.name || "";
+        s.meta.textContent = sv.meta || "";
+        if (sv.badge !== undefined) { s.badge.innerHTML = ""; if (sv.badge) s.badge.appendChild(sv.badge); }
+        s.seat.classList.toggle("actor", v.actor === pos);
+        s.seat.classList.toggle("folded", !!sv.folded);
+        s.seat.classList.toggle("you", !!sv.you);
+        const cards = sv.cards || [];
+        s.slots.forEach((slot, i) => setSlot(slot, cards[i], fresh, base + 260));
+        s.slots.forEach((slot) => slot.setAttribute("aria-label", ""));
+        s.label.hidden = !sv.cardsLabel;
+        s.label.textContent = sv.cardsLabel || "";
+        const sayText = sv.say ? sv.say.text : "";
+        if (s.say.textContent !== sayText) {
+          s.say.textContent = sayText;
+          if (sayText && !fresh) V.anim(s.say, [{ opacity: 0, transform: "scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 160 });
+        }
+        s.say.hidden = !sayText;
+        s.say.className = "hu-say " + (sv.say && sv.say.kind ? sv.say.kind : "");
+        setWager(s, (v.wager || {})[pos] || 0, fresh, fresh ? base + 340 : 0);
+      });
+      (v.board || []).forEach((c, i) => setSlot(boardSlots[i], c, fresh, base + 45 * i));
+      $(".hu-board", felt).setAttribute("aria-label", "Board: " + V.cardsName(v.board || []));
+      pot.textContent = v.pot !== undefined && v.pot !== null ? `Pot ${fmt(v.pot)}` : "";
+      note.textContent = v.note || "";
+      note.className = "hu-note " + (v.noteKind || "");
+      center.hidden = !v.center;
+      center.innerHTML = "";
+      if (v.center) center.appendChild(v.center);
+      actions.innerHTML = "";
+      (v.actions || []).forEach((a) => { if (a) actions.appendChild(a); });
+      return fresh;
+    }
+    return { root, update, top, bottom, actions };
+  }
+  function actBtn(label, k, cls, onclick, hint) {
+    return el("button", { class: "btn large " + (cls || ""), "data-key": k || "", onclick }, label, k ? el("kbd", { text: k.toUpperCase() }) : null, hint ? el("span", { class: "sr-only", text: hint }) : null);
+  }
+  function lockActions(on) { $$("#mScene .hu-actions button").forEach((b) => { b.disabled = on; }); }
+  function historyCard(story, riverLine, ctx) {
+    return el("section", { class: "side-card history", "aria-label": "Hand history" }, el("h3", { text: "How the hand got here" }),
+      el("ol", { class: "story" }, ...story.map((s) => {
+        const [street, ...rest] = s.split(":");
+        return el("li", { class: street.trim() === "turn" ? "turn" : "" }, el("span", { class: "st mono", text: street.trim() }), el("span", { text: rest.join(":").trim() }));
+      }), el("li", { class: "river" }, el("span", { class: "st mono", text: "river" }), el("span", { text: riverLine }))),
+      el("p", { class: "hint", text: "Turn history: " + ctx + "." }));
+  }
+  function ensureStage(root) {
+    if (!M.hu) {
+      M.hu = makeHU();
+      $(".ps-stage", root).appendChild(M.hu.root);
+    }
+    return M.hu;
+  }
+  function playLayout(cls, head) {
+    return el("section", { class: "scene play-scene " + cls }, head, el("div", { class: "ps-grid" }, el("div", { class: "ps-stage" }), el("aside", { class: "ps-side" })));
+  }
+
+  // ------------------------------------------------------------ 3 · you defend
+  async function sceneDrill() {
+    const { root } = mount("drill", () => playLayout("drill", sceneHead("Reverse the roles", ["Now the model predicts ", el("em", { text: "you." })],
+      "You checked the river and face a half-pot bet. The forecast of your response is committed before you click.")));
+    const st = M.state || await refresh();
+    const hu = ensureStage(root);
+    const side = $(".ps-side", root);
+    side.innerHTML = "";
+    const d = st.drill.pending, last = M.lastDrill;
+    const ho = heldout();
+    if (d) {
+      hu.update({
+        key: "drill:" + d.decision_id, actor: "bottom",
+        top: { name: "Bettor", meta: "acts first on the river", cards: ["XX", "XX"], say: { text: `Bets ${fmt(d.bet)}`, kind: "aggr" }, badge: null },
+        bottom: { name: "You", meta: "defender · checked", cards: d.own_cards, you: true, badge: null },
+        board: d.board, pot: d.pot_before_bet, wager: { top: d.bet, bottom: 0 },
+        note: `${fmt(d.bet)} to call into ${fmt(d.pot_before_bet)}`,
+        actions: [
+          d.legal.fold ? actBtn("Fold", "f", "danger", () => respond(d.decision_id, "fold")) : null,
+          d.legal.call ? actBtn(`Call ${fmt(st.drill.to_call || d.bet)}`, "c", "", () => respond(d.decision_id, "call")) : null,
+          d.legal.raise ? actBtn(`Raise to ${fmt(st.drill.raise_to)}`, "r", "", () => respond(d.decision_id, "raise")) : null,
+        ],
+      });
+      side.appendChild(forecastCard(d.prediction, null, null, ho));
+      side.appendChild(historyCard(d.extra.story, `you check, the bettor bets ${fmt(d.bet)} into ${fmt(d.pot_before_bet)}`, d.extra.context_label));
+      side.appendChild(profileCard(st, false));
+    } else if (last) {
+      const dec = last.decision, out = last.outcome || {}, a = dec.actual;
+      const sayMe = a === "fold" ? { text: "Folds", kind: "fold" } : a === "call" ? { text: `Calls ${fmt(dec.bet)}`, kind: "" } : { text: `Raises to ${fmt(st.drill.raise_to || 100)}`, kind: "aggr" };
+      hu.update({
+        key: "drill:" + dec.decision_id, actor: null,
+        top: { name: "Bettor", meta: "acted first on the river", cards: out.bettor_cards || ["XX", "XX"], cardsLabel: out.bettor_cards ? "shown after the hand" : "", say: { text: `Bet ${fmt(dec.bet)}`, kind: "aggr" } },
+        bottom: { name: "You", meta: `your hand: ${out.your_bucket || "?"}`, cards: dec.own_cards, you: true, folded: a === "fold", say: sayMe },
+        board: dec.board, pot: dec.pot_before_bet, wager: { top: dec.bet, bottom: a === "call" ? dec.bet : a === "raise" ? (st.drill.raise_to || 100) : 0 },
+        note: out.result ? cap(out.result) : "", noteKind: "result",
+        actions: [actBtn("Next spot", "n", "primary", newDrill), freezeButton(st, "Freeze my twin")],
+      });
+      side.appendChild(forecastCard(dec.prediction, last.after, a, ho, !last.shown));
+      side.appendChild(outcomeCard(dec, out, ho));
+      side.appendChild(profileCard(st, true));
+      last.shown = true;
+    } else {
+      hu.update({
+        key: "drill:empty", actor: null, top: { name: "Bettor", meta: "", cards: [] }, bottom: { name: "You", meta: "defender", cards: [], you: true },
+        board: [], pot: null, wager: {}, note: "",
+        center: el("div", { class: "hu-intro" }, el("p", { text: `Each spot deals you a hand on a finished board. You check, the bettor bets half the pot. Fold, call or raise — the model has already written down what it thinks you'll do.` })),
+        actions: [actBtn(st.drill.drills ? "Deal another spot" : "Deal a spot", "n", "primary", newDrill)],
+      });
+      side.appendChild(el("section", { class: "side-card" }, el("h3", { text: "What the model knows about you" }),
+        el("p", { class: "hint", text: st.profile.observations ? `${plural(st.profile.observations, "response")} so far. Each new response updates the forecast for the next similar spot.` : "Nothing yet. Its first forecast is the population starting point: how 2009 players responded in the same spot." })));
+      side.appendChild(profileCard(st, false));
+    }
+  }
+  const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  function forecastCard(pred, after, actual, ho, animate) {
+    const card = el("section", { class: "side-card forecast", "aria-label": "Model forecast" });
+    if (ho) {
+      card.appendChild(el("h3", { text: actual ? "Response recorded" : "Forecast recorded" }));
+      card.appendChild(el("p", { class: "recorded" }, el("span", { class: "lock", "aria-hidden": "true", text: "●" }),
+        actual ? " Your answer and the model's sealed forecast are both stored." : " The model has committed its forecast. It stays sealed during held-out sessions."));
+      card.appendChild(el("p", { class: "hint", text: "Held-out forecasts are scored later in Evidence, never shown to the judge." }));
+      return card;
+    }
+    const zero = !pred.observations;
+    card.appendChild(el("div", { class: "fc-head" }, el("h3", { text: "Committed forecast" }),
+      el("span", { class: "tag " + (zero ? "" : "good"), text: zero ? "Population starting point" : `After ${plural(pred.observations, "of your responses")}` })));
+    const scale = V.forecastScale(pred, { title: "Chance you fold", beforeLabel: "Before your action" });
+    card.appendChild(scale.root);
+    card.appendChild(V.responseSplit(pred.probs, actual));
+    if (after) {
+      scale.showNext(after, animate);
+      card.appendChild(el("p", { class: "fc-next" }, "Next estimate for this turn history: ", el("b", { class: "num", text: pct(after.fold_mean, 0) }),
+        el("span", { class: "muted", text: ` (90% band ${pct(after.fold_p05, 0)}–${pct(after.fold_p95, 0)}, after ${plural(after.observations, "response")})` })));
+    }
+    card.appendChild(el("p", { class: "src mono", text: `${pred.arm} model · ${pred.model_version}` }));
+    return card;
+  }
+  function outcomeCard(dec, out, ho) {
+    const a = dec.actual;
+    return el("section", { class: "side-card outcome" }, el("h3", { text: "What happened" }),
+      el("p", {}, el("b", { text: `You ${a === "fold" ? "folded" : a === "call" ? "called" : "raised"}.` }), " ",
+        out.result ? cap(out.result) + ". " : "",
+        out.bettor_cards ? el("span", {}, "The bettor had ", P.cardsInline(out.bettor_cards), ". ") : null),
+      out.your_bucket ? el("p", { class: "hint", text: `Your hand counted as ${out.your_bucket} (${pct(out.your_equity, 0)} equity against a random hand).` }) : null,
+      ho ? null : evLink("Evidence: how well these forecasts score", "forecast"));
+  }
+  function freezeButton(st, label) {
+    const n = st.profile.observations;
+    return el("button", { class: "btn large amber freeze-btn", "data-key": "z", onclick: (e) => freezeAndPlay(e.currentTarget) }, label, el("span", { class: "freeze-n", text: ` · ${plural(n, "response")}` }));
+  }
+  function profileCard(st, responded) {
+    const prof = st.profile, n = prof.observations;
+    const card = el("section", { class: "side-card profile", "aria-label": "Your profile" });
+    const chip = el("div", { class: "twin-chip" }, el("span", { class: "tc-mark", "aria-hidden": "true", text: "♠" }), el("span", { text: "Your profile" }), el("b", { class: "num", text: plural(n, "response") }));
+    card.appendChild(el("div", { class: "row between" }, chip, responded ? null : el("button", { class: "btn small", onclick: (e) => freezeAndPlay(chip) }, st.frozen ? "Re-freeze twin" : "Freeze my twin")));
+    if (!heldout()) {
+      const rows = el("div", { class: "pf-rows" });
+      Object.entries(prof.contexts).forEach(([c, v]) => {
+        const pop = prof.population[c];
+        rows.appendChild(el("div", { class: "pf-row" }, el("span", { class: "pf-k", text: CTX_SHORT[c] }),
+          el("span", { class: "pf-v" }, "fold ", el("b", { class: "num", text: pct(v.probs.fold, 0) }), el("span", { class: "muted", text: ` · population ${pct(pop.fold, 0)} · ${v.observations} seen` }))));
+      });
+      card.appendChild(rows);
+    }
+    card.appendChild(el("p", { class: "hint", text: st.frozen ? `Twin frozen as #${st.frozen.slice(0, 7)}. Freezing again replaces it.` : "Freezing copies this profile into an opponent you can bet against." }));
+    return card;
+  }
+  async function newDrill() {
+    if (M.busy) return;
+    M.busy = true; lockActions(true);
+    try { const r = await api("/api/mirror/drill", body()); remember(r.token); M.lastDrill = null; await refresh(); await sceneDrill(); focusAction(); }
+    catch (e) { toast(e.message, true); lockActions(false); }
+    finally { M.busy = false; }
+  }
+  async function respond(id, action) {
+    if (M.busy) return;
+    M.busy = true; lockActions(true);
+    try {
+      const r = await api("/api/mirror/respond", body({ decision_id: id, action }));
+      M.lastDrill = r;
+      await refresh();
+      await sceneDrill();
+      const out = r.outcome || {};
+      V.announce(`You ${action === "fold" ? "folded" : action === "call" ? "called" : "raised"}. ${out.result ? cap(out.result) + "." : ""}` +
+        (heldout() ? "" : ` The forecast before your action was fold ${pct(r.decision.prediction.fold_mean, 0)}; next estimate ${pct(r.after.fold_mean, 0)}.`));
+      focusAction();
+    } catch (e) {
+      // A repeated click or an interrupted request: trust the server's record of this decision before allowing another action.
+      try { await refresh(); } catch (e2) { /* keep the error below */ }
+      const p = M.state && M.state.drill.pending;
+      if (!p || p.decision_id !== id) toast("That spot was already answered. Showing the latest state.");
+      else toast(e.message, true);
+      await sceneDrill();
+    } finally { M.busy = false; }
+  }
+  function focusAction() { const b = $("#mScene .hu-actions button:not([disabled])"); if (b) b.focus({ preventScroll: true }); }
+
+  // ------------------------------------------------------------ freeze: the profile marker moves into the opponent's nameplate
+  async function freezeAndPlay(srcEl) {
+    if (M.busy) return;
+    M.busy = true;
+    lockActions(true);
+    const marker = $("#mScene .twin-chip") || srcEl;
+    const from = marker ? marker.getBoundingClientRect() : null;
+    const ghost = marker && from && from.width && !V.reduceMotion() ? marker.cloneNode(true) : null;
+    try {
+      const r = await api("/api/mirror/freeze", body());
+      store.set("mirrorFrozen", JSON.stringify({ hash: r.frozen.hash, observations: r.frozen.observations }));
+      const s = await api("/api/mirror/play/new", body());
+      remember(s.token);
+      await refresh();
+      M.flyFrom = ghost ? { ghost, from } : null;
+      M.busy = false;
+      await go("play", { focus: true });
+      V.announce(`Twin frozen from ${plural(r.frozen.observations, "response")}. You are now the bettor.`);
+      setTimeout(focusAction, M.flyFrom === null ? 420 : 0);
+    } catch (e) { toast(e.message, true); M.busy = false; lockActions(false); }
+  }
+  function twinBadge(info) {
+    return el("div", { class: "twin-badge" }, el("span", { class: "tc-mark", "aria-hidden": "true", text: "♠" }),
+      el("span", { class: "tb-text" }, el("b", { text: "Frozen twin" }), el("span", { class: "mono", text: `${info.observations === null ? "" : plural(info.observations, "response") + " · "}#${info.hash.slice(0, 7)}` })));
+  }
+  function runFly() {
+    const f = M.flyFrom;
+    M.flyFrom = null;
+    const target = $("#mScene .hu-seat.top .twin-badge");
+    if (!f || !target) return;
+    const to = target.getBoundingClientRect();
+    const g = f.ghost;
+    g.classList.add("fly-ghost");
+    Object.assign(g.style, { left: f.from.left + "px", top: f.from.top + "px", width: f.from.width + "px", height: f.from.height + "px" });
+    document.body.appendChild(g);
+    target.style.visibility = "hidden";
+    const a = V.anim(g, [{ transform: "none", opacity: 1 }, { transform: `translate(${to.left - f.from.left}px, ${to.top - f.from.top}px)`, opacity: 1 }], { duration: 380, fill: "forwards" });
+    const done = () => { g.remove(); target.style.visibility = ""; V.anim(target, [{ boxShadow: "0 0 0 3px rgba(255,213,140,.7)" }, { boxShadow: "0 0 0 0 rgba(255,213,140,0)" }], { duration: 420 }); };
+    if (a) a.finished.then(done, done); else done();
+  }
+
+  // ------------------------------------------------------------ 4 · you bet against the frozen twin
+  async function scenePlay(opts) {
+    const st = M.state || await refresh();
+    const info = frozenInfo();
+    const O = opp();
+    await realPlayers();
+    const { root } = mount("play", () => playLayout("play", sceneHead("", [""], "")));
+    if (O.real) setHead(root, "You are the bettor · real player", ["Bet into ", el("em", { text: "a real player's twin." })],
+      `The defender answers the way player ${O.o.id} answered ${O.o.decisions} recorded river bets (${O.o.venue}). You hold the bettor's cards.`);
+    else setHead(root, "You are now the bettor", ["Bet into ", el("em", { text: "your twin." })],
+      "The opponent is a frozen copy of the profile you just built. You hold the bettor's cards; the twin defends.");
+    const hu = ensureStage(root);
+    const side = $(".ps-side", root);
+    side.innerHTML = "";
+    const v = st.play;
+    if (!info) {
+      hu.update({ key: "play:none", actor: null, top: { name: "Your twin", meta: "not frozen yet", cards: [], badge: null }, bottom: { name: "You", meta: "bettor", cards: [], you: true }, board: [], pot: null, wager: {},
+        center: el("div", { class: "hu-intro" }, el("p", { text: `Freeze your profile first${M.realPlayers.present ? ", or pick a real player from the dataset" : ""}. With ${plural(st.profile.observations, "response")} your twin ${st.profile.observations ? "leans on what you did" : "is the population player"}.` })),
+        actions: [freezeButton(st, "Freeze my twin")] });
+      side.appendChild(profileCard(st, true));
+      const pick = pickerCard(st);
+      if (pick) side.appendChild(pick);
+      return;
+    }
+    const badge = O.real ? realBadge(O.o) : twinBadge(info.observations === null && v.advice ? { hash: info.hash, observations: v.advice.forecast.observations } : info);
+    if (!v.spot) {
+      hu.update({ key: "play:idle:" + info.hash, actor: null, top: { name: O.name, meta: "defender", cards: [], badge }, bottom: { name: "You", meta: "bettor", cards: [], you: true }, board: [], pot: null, wager: {},
+        center: el("div", { class: "hu-intro" }, el("p", { text: `Each spot deals a fresh river. You can check back or bet half the pot; ${O.the} answers the way ${O.real ? "that player's record" : "your profile"} says it would.` })),
+        actions: [actBtn("Deal a betting spot", "n", "primary", () => newSpot(false))] });
+      side.appendChild(twinCard(st, info));
+      if (M.flyFrom) runFly();
+      return;
+    }
+    const s = v.spot, done = !!v.result, res = v.result;
+    const resp = v.response;
+    const sayTwin = resp === "fold" ? { text: "Folds", kind: "fold" } : resp === "call" ? { text: "Calls 50", kind: "" } : resp === "raise" ? { text: `Raises to ${fmt(s.raise_to)}`, kind: "aggr" } : (s.stage === 1 ? { text: "Checks", kind: "" } : null);
+    const myActs = v.actions || [];
+    const sayMe = myActs.length ? (myActs[myActs.length - 1] === "bet" ? { text: `Bet ${fmt(s.bet)}`, kind: "aggr" } : myActs[myActs.length - 1] === "check" ? { text: "Checks back", kind: "" } : myActs[myActs.length - 1] === "fold" ? { text: "Folds", kind: "fold" } : { text: "Calls", kind: "" }) : null;
+    const betMe = myActs.includes("bet") ? s.bet + (myActs.includes("call") ? s.raise_to - s.bet : 0) : 0;
+    const betTwin = resp === "call" ? s.bet : resp === "raise" ? s.raise_to : 0;
+    let actions;
+    if (done) actions = [actBtn("New spot", "n", "primary", () => newSpot(false)), el("button", { class: "btn large", onclick: () => go("compare", { focus: true }) }, "Compare two bettors on this deal →")];
+    else if (s.stage === 1) actions = [actBtn("Check back", "k", "", () => act("check")), actBtn(`Bet ${fmt(s.bet)}`, "b", "", () => act("bet"))];
+    else if (s.stage === 2) actions = [actBtn("Fold", "f", "danger", () => act("fold")), actBtn(`Call ${fmt(s.raise_to - s.bet)}`, "c", "", () => act("call"))];
+    const fresh = hu.update({
+      key: "play:" + s.board.join("") + s.own_cards.join(""), actor: done ? null : "bottom", dealDelay: M.flyFrom ? 380 : 0,
+      top: { name: O.name, meta: "defender · checked", cards: done ? res.defender_cards : ["XX", "XX"], cardsLabel: done ? "shown after the hand" : "", badge, say: sayTwin, folded: resp === "fold" },
+      bottom: { name: "You", meta: `bettor · ${s.bettor_bucket} hand`, cards: s.own_cards, you: true, say: sayMe, folded: myActs.includes("fold") },
+      board: s.board, pot: s.pot, wager: { top: done ? betTwin : betTwin, bottom: betMe },
+      note: done ? `${res.reward_chips >= 0 ? "+" : "−"}${fmt(Math.abs(res.reward_chips))} chips` : s.stage === 2 ? `${O.The} raised to ${fmt(s.raise_to)}` : `Pot ${fmt(s.pot)} · ${ctxBettor(s.context) || s.context_label}`,
+      noteKind: done ? (res.reward_chips >= 0 ? "result win" : "result loss") : "",
+      actions,
+    });
+    if (fresh) M.rangeOpen = false;
+    if (v.advice && s.stage === 1) side.appendChild(adviceCard(v.advice));
+    if (v.readout) side.appendChild(readoutCard(v.readout, resp, res));
+    else if (done) side.appendChild(el("section", { class: "side-card" }, el("h3", { text: "No response to read" }), el("p", { class: "hint", text: `You checked back, so ${O.the} never had to answer a bet. Its range stays at the prior.` })));
+    side.appendChild(historyCard(s.story, done ? "you act after the twin checks" : "the twin checks to you", ctxBettor(s.context) || s.context_label));
+    side.appendChild(twinCard(st, info, v.log));
+    if (M.flyFrom) runFly();
+    else if (opts && opts.announce) V.announce(opts.announce);
+  }
+  function realBadge(o) {
+    return el("div", { class: "twin-badge real" }, el("span", { class: "tc-mark", "aria-hidden": "true", text: "♠" }),
+      el("span", { class: "tb-text" }, el("b", { text: "Real player's twin" }), el("span", { class: "mono", text: `${o.decisions} answers · folds ${pct(o.fold_rate, 0)}` })));
+  }
+  function twinCard(st, info, log) {
+    const O = opp();
+    const card = O.real
+      ? el("section", { class: "side-card twin" }, el("h3", { text: "Opponent: a real player's twin" }),
+        el("p", {}, el("span", { class: "mono", text: O.o.id }), ` · ${O.o.venue} · ${O.o.decisions} recorded river answers · folds ${pct(O.o.fold_rate, 0)}.`),
+        el("p", { class: "hint", text: "Built from that player's recorded answers on every table size, so no drills are needed. Its cards still come from a strength model: a revealed hand and an estimated range carry different labels." }))
+      : el("section", { class: "side-card twin" }, el("h3", { text: "Opponent: your frozen twin" }),
+        el("p", {}, `Snapshot `, el("span", { class: "mono", text: "#" + info.hash.slice(0, 12) }), info.observations === null ? "" : ` from ${plural(info.observations, "response")}.`),
+        el("p", { class: "hint", text: "It answers bets the way your profile predicted. Its cards come from a strength model, so a revealed hand and an estimated range carry different labels." }));
+    const pick = pickerControls(st);
+    if (pick) card.appendChild(pick);
+    if (log && log.length) {
+      const total = log.reduce((a, x) => a + x.reward_chips, 0);
+      card.appendChild(el("details", { class: "twin-log" }, el("summary", {}, `${plural(log.length, "spot")} played · `, el("b", { class: "num", text: `${total >= 0 ? "+" : "−"}${fmt(Math.abs(total))} chips` })),
+        el("ol", {}, log.slice().reverse().map((x) => el("li", {}, P.cardsInline(x.own), el("span", { class: "muted", text: ` ${x.actions.join(", ")}${x.response ? " → " + x.response : ""} ` }), el("b", { class: "num", text: `${x.reward_chips >= 0 ? "+" : "−"}${fmt(Math.abs(x.reward_chips))}` }))))));
+    }
+    return card;
+  }
+  // Real players from the dataset with enough river answers to build a twin (summaries only; answers stay on the server).
+  function pickerControls(st) {
+    const rp = M.realPlayers;
+    const O = opp();
+    if (!rp || !rp.present || !rp.players.length) return null;
+    const id = "realPick";
+    const sel = el("select", { id, class: "rp-select" }, rp.players.map((pl) => el("option", { value: pl.id, text: `${pl.id} · ${pl.venue} · ${pl.decisions} answers · folds ${pct(pl.fold_rate, 0)}` })));
+    if (O.real) sel.value = O.o.id;
+    return el("div", { class: "rp-pick" },
+      el("label", { for: id, class: "rp-label", text: O.real ? "Switch to another real player" : "Or bet against a real player's twin" }),
+      el("div", { class: "rp-row" }, sel, el("button", { class: "btn small", onclick: () => loadReal(sel.value) }, "Play this player")),
+      O.real ? el("button", { class: "btn small ghost rp-back", onclick: () => freezeAndPlay(null) }, `Back to my twin (${plural(st.profile.observations, "response")})`) : null,
+      el("p", { class: "hint", text: `${rp.eligible_players} players with at least ${rp.min_decisions} answers. ${rp.label}.` }));
+  }
+  function pickerCard(st) {
+    const c = pickerControls(st);
+    return c ? el("section", { class: "side-card" }, el("h3", { text: "No drills? Use a real player" }), c) : null;
   }
   async function loadReal(id) {
-    try { const r = await api("/api/mirror/real/load", body({ player_id: id })); remember(r.token); toast(`Twin of ${id} loaded`); await refresh(); await newSpot(); } catch (e) { toast(e.message, true); }
+    if (M.busy || !id) return;
+    M.busy = true; lockActions(true);
+    try {
+      const r = await api("/api/mirror/real/load", body({ player_id: id }));
+      remember(r.token);
+      store.set("mirrorFrozen", JSON.stringify({ hash: r.frozen.hash, observations: r.frozen.observations }));
+      await api("/api/mirror/play/new", body());
+      await refresh();
+      M.busy = false;
+      if (M.step !== "play") await go("play", { focus: true }); else await scenePlay();
+      const b = $("#mScene .hu-seat.top .twin-badge");
+      if (b) V.anim(b, [{ boxShadow: "0 0 0 3px rgba(255,213,140,.7)" }, { boxShadow: "0 0 0 0 rgba(255,213,140,0)" }], { duration: 420 });
+      V.announce(`You are betting against the twin of real player ${id}.`);
+      focusAction();
+    } catch (e) { toast(e.message, true); lockActions(false); M.busy = false; }
   }
-  async function newSpot() { try { const r = await api("/api/mirror/play/new", body()); remember(r.token); await refresh(); renderPlay(); } catch (e) { toast(e.message, true); } }
-  async function act(a) { try { await api("/api/mirror/play/act", body({ action: a })); await refresh(); renderPlay(); } catch (e) { toast(e.message, true); } }
+  function adviceCard(a) {
+    const f = a.forecast;
+    return el("section", { class: "side-card advice", "aria-label": "EV advisor" },
+      el("div", { class: "fc-head" }, el("h3", { text: "EV advisor" }), el("span", { class: "tag", text: "opening pot = 100 chips" })),
+      V.evCompare(a),
+      el("p", { class: "adv-rec" }, el("b", { text: `Recommendation: ${a.recommend === "bet" ? "bet 50" : "check back"}. ` }), a.reason),
+      el("p", { class: "hint" }, `${opp().The} folds `, el("b", { class: "num", text: pct(f.fold, 0) }), ` (90% band ${pct(f.interval[0], 0)}–${pct(f.interval[1], 0)}, ${f.arm} arm, ${plural(f.observations, "response")}). Equity against its calling range ${pct(a.equity.vs_call_range, 0)}, raising range ${pct(a.equity.vs_raise_range, 0)}.`),
+      el("p", { class: "hint", text: a.pure_bluff ? "A pure bluff breaks even when the twin folds one time in three: 50 / (100 + 50)." : `A pure bluff would break even at ${pct(a.break_even_fold, 0)} folds; this hand also wins some showdowns.` }));
+  }
+  function readoutCard(r, response, res) {
+    const card = el("section", { class: "side-card readout", "aria-label": "Range X-ray" },
+      el("div", { class: "fc-head" }, el("h3", { text: `Range X-ray after the twin ${response === "fold" ? "folded" : response === "call" ? "called" : "raised"}` }), el("span", { class: "tag warn", text: "estimate" })),
+      V.bucketBars(r.prior_buckets, r.buckets),
+      el("p", { class: "hint", text: `A model estimate at ${r.resolution} over ${r.holdings} holdings, from the twin's strength table. Not an observation.` }));
+    if (res && res.defender_cards) card.appendChild(el("p", { class: "revealed" }, el("span", { class: "tag", text: "revealed" }), " The twin actually held ", P.cardsInline(res.defender_cards), ` (${res.defender_bucket}).`));
+    const det = el("details", { class: "range-more" }, el("summary", { text: "Inspect the 13 × 13 estimated range" }));
+    det.open = M.rangeOpen;
+    let built = false;
+    const build = () => { if (built) return; built = true; det.appendChild(V.rangeGrid(r)); };
+    if (det.open) build();
+    det.addEventListener("toggle", () => { M.rangeOpen = det.open; if (det.open) build(); });
+    card.appendChild(det);
+    card.appendChild(evLink("Evidence: checking the range readout", "range"));
+    return card;
+  }
+  async function newSpot(afterFreeze) {
+    if (M.busy) return;
+    M.busy = true; lockActions(true);
+    try { const r = await api("/api/mirror/play/new", body()); remember(r.token); await refresh(); await scenePlay(); if (!afterFreeze) focusAction(); else setTimeout(focusAction, 420); }
+    catch (e) { toast(e.message, true); lockActions(false); }
+    finally { M.busy = false; }
+  }
+  async function act(a) {
+    if (M.busy) return;
+    M.busy = true; lockActions(true);
+    try {
+      await api("/api/mirror/play/act", body({ action: a }));
+      await refresh();
+      const v = M.state.play;
+      const msg = v.result ? `${v.response ? opp().The + " " + (v.response === "fold" ? "folded" : v.response === "call" ? "called" : "raised") + ". " : ""}${v.result.reward_chips >= 0 ? "You won" : "You lost"} ${fmt(Math.abs(v.result.reward_chips))} chips.` : v.spot && v.spot.stage === 2 ? `${opp().The} raised to 100.` : "";
+      await scenePlay({ announce: msg });
+      focusAction();
+    } catch (e) {
+      try { await refresh(); } catch (e2) { /* ignore */ }
+      toast(e.message, true);
+      await scenePlay();
+    } finally { M.busy = false; }
+  }
 
-  // ------------------------------------------------------------ step 5: bots
-  async function renderCompare() {
-    const root = $("#mirror-compare");
-    root.innerHTML = "";
+  // ------------------------------------------------------------ 5 · two bettors, same deal
+  const NICE = { bet_half: "Bet 50", check_back: "Check back", fold: "Fold", call: "Call" };
+  async function sceneCompare() {
+    const { root, fresh } = mount("compare", () => el("section", { class: "scene compare" },
+      sceneHead("", [""], ""), el("div", { class: "cmp-body" })));
+    const O = opp();
+    setHead(root, "Same deal, two bettors", ["Does knowing ", el("em", { text: O.real ? "this player" : "your twin" }), " change the bet?"],
+      `Two Q-learning bettors, 20,000 simulated rivers each, same seeds and deal distribution. One learned against the population, one against ${O.real ? `the twin of real player ${O.o.id}` : "your frozen twin"}. Values are simulated chips; the opening pot is 100.`);
+    const bodyEl = $(".cmp-body", root);
     let c;
-    try { c = await api("/api/mirror/compare" + q()); } catch (e) { root.appendChild(el("div", { class: "card-box hint", text: e.message })); return; }
-    const box = el("div", { class: "card-box" }, el("h4", { text: "Two counter-bots, same deal" }),
-      el("p", { class: "hint", text: "Tabular Q-learning, 20,000 simulated river episodes each, same seeds and deal distribution. One learned against the population twin, one against your frozen twin. Values are simulated estimates in chips." }));
+    try { c = await api("/api/mirror/compare" + q()); } catch (e) { bodyEl.innerHTML = ""; errorBox(bodyEl, e.message); return; }
+    if (!M.evidence) { try { M.evidence = await api("/api/mirror/evidence"); } catch (e) { M.evidence = null; } }
+    bodyEl.innerHTML = "";
     const t = c.training || {};
-    box.appendChild(el("div", { class: "row" }, el("button", { class: "btn primary", onclick: startTraining, disabled: t.status === "running" }, t.status === "done" ? "Retrain personal bot" : "Train bot vs my twin"),
-      el("span", { class: "muted", text: t.status === "running" ? `training… ${t.progress}/${t.episodes}` : t.status === "done" ? `trained on twin ${t.profile_hash} · validation ${t.validation} pots · oracle ${t.oracle && t.oracle.pass ? "pass" : "fail"}` : t.status === "error" ? "error: " + t.error : "" })));
-    if (c.deal) {
+    if (!c.deal) {
+      bodyEl.appendChild(el("div", { class: "cmp-empty" }, el("p", { text: `Play a betting spot against ${O.the} first; both bettors are then asked about that exact deal.` }), nextLink("Go to: you bet", "play")));
+    } else {
       const d = c.deal;
-      const table = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "bettor" }), el("th", { text: "action" }), el("th", { text: "Q check / bet (chips)" }), el("th", { text: "visits" }), el("th", { text: "oracle" }))));
-      const tb = el("tbody");
-      ["population", "personal"].forEach((k) => {
-        const b = c.on_deal && c.on_deal[k];
-        const nice = (a) => ({ bet_half: "bet 50", check_back: "check", fold: "fold", call: "call" }[a] || a);
-        tb.appendChild(el("tr", {}, el("td", { text: k }), el("td", { text: b ? nice(b.action) : "(not trained)" }), el("td", { text: b ? b.q_chips.join(" / ") : "" }), el("td", { text: b ? b.visits.join(" / ") : "" }), el("td", { text: b && b.oracle ? (b.oracle.pass ? "pass" : "fail") : "" })));
-      });
-      if (c.advice) tb.appendChild(el("tr", {}, el("td", { text: "EV advisor" }), el("td", { text: c.advice.recommend }), el("td", { text: `${fmt(Math.round(c.advice.ev_check * 100))} / ${fmt(Math.round(c.advice.ev_bet * 100))}` }), el("td", { text: "closed form" }), el("td", { text: "" })));
-      table.appendChild(tb);
-      box.appendChild(el("div", {}, el("b", { text: `Deal: ${d.board.join(" ")} · you ${d.bettor_cards.join(" ")} (${d.bettor_bucket}) · ${CTX_LABEL[d.context]}` })));
-      box.appendChild(table);
-      box.appendChild(el("p", { class: "hint", text: "Identical actions are a valid result: the twin may not differ from the population in this spot." }));
-    } else box.appendChild(el("p", { class: "hint", text: "Play a spot in step 4 to compare the bots on it." }));
-    root.appendChild(box);
-    [["population", c.population_chart, c.population_meta], ["personal", c.personal_chart, c.personal_meta]].forEach(([name, chart, meta]) => {
-      if (!chart) return;
-      const cb = el("div", { class: "card-box" }, el("h4", { text: `${name} bot policy chart (stage 1: check back vs bet)` }));
-      const tbl = el("table", { class: "matrix" }, el("tr", {}, el("th", { text: "turn ↓ strength →" }), ...["weak", "medium", "strong"].map((b) => el("th", { text: b }))));
-      Object.entries(chart["1"]).forEach(([ctx, row]) => {
-        const tr = el("tr", {}, el("th", { text: CTX_LABEL[ctx] }));
-        ["weak", "medium", "strong"].forEach((b) => { const cell = row[b]; tr.appendChild(el("td", { class: cell.action === "bet_half" ? "pc-bet" : "", html: `<b>${cell.action === "bet_half" ? "bet" : "check"}</b><br><span class="muted">${cell.q.map((x) => Math.round(x * 100)).join(" / ")}</span><br><span class="muted">${cell.visits.join("+")}</span>` })); });
-        tbl.appendChild(tr);
-      });
-      cb.appendChild(tbl);
-      if (meta) cb.appendChild(el("div", { class: "muted", text: `${meta.episodes} episodes, seed ${meta.seed}, ${meta.train_seconds}s · oracle check ${meta.oracle_check ? (meta.oracle_check.pass ? "pass" : meta.oracle_check.failures + " cell(s) off") : "n/a"}` }));
-      root.appendChild(cb);
-    });
-    if (t.status === "running") { clearTimeout(M.pollTimer); M.pollTimer = setTimeout(renderCompare, 1500); }
-  }
-  async function startTraining() { try { await api("/api/mirror/train", body({ episodes: 20000 })); renderCompare(); } catch (e) { toast(e.message, true); } }
-
-  // ------------------------------------------------------------ evidence: Phase 6 (every table size, real players)
-  const sg = (x, d = 2) => (x === null || x === undefined ? "-" : (x > 0 ? "+" : x < 0 ? "\u2212" : "") + Math.abs(x).toFixed(d));
-  const ci = (v, d = 2) => (v ? `${sg(v[0], d)} to ${sg(v[1], d)}` : "-");
-  const fmtN = (n) => (n === null || n === undefined ? "-" : Number(n).toLocaleString("en-GB"));
-  const ARM_LABEL = { pooled: "one rate for everyone", population: "average player, by context", situation: "situation model",
-    personal: "this player's history", situation_personal: "situation + this player", personal_online: "this player's history",
-    situation_personal_online: "situation + this player", neural: "neural network" };
-  const verdict = (b) => (b.better ? "real gain" : b.worse ? "real loss" : "no clear effect");
-  function miniTable(head, rows) {
-    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, ...head.map((h) => el("th", { text: h })))));
-    const tb = el("tbody");
-    rows.forEach((r) => tb.appendChild(el("tr", {}, ...r.map((c) => el("td", { text: c === null || c === undefined ? "-" : String(c) })))));
-    t.appendChild(tb);
-    return t;
-  }
-  function wideScanBox(d) {
-    const rows = Object.entries(d.by_table_size || {}).map(([k, v]) => [k === "2" ? "two players" : `${k} players`, fmtN(v.any), fmtN(v.band), fmtN(v.main)]);
-    const m = d.main_cohort || {};
-    return el("div", {}, miniTable(["table size", "any bet", "bet 40-60% of pot", "main cohort"], rows),
-      el("p", { text: `Main cohort: ${fmtN(m.decisions)} decisions by ${fmtN(m.players)} players, ${fmtN(m.train)} to train and ${fmtN(m.test)} to test. The original cohort had 12,407 decisions from two-player tables.` }),
-      el("div", { class: "muted", text: `${fmtN(d.rows)} rows scanned, ${fmtN(d.kept)} unique river spots, ${d.seconds} s.` }));
-  }
-  function forecastWideBox(d) {
-    const out = el("div", {});
-    [["frozen", "History up to the cutoff (as before)"], ["online", "Learning as you go"]].forEach(([proto, title]) => {
-      const pr = (d.protocols || {})[proto];
-      if (!pr) return;
-      out.appendChild(el("h5", { text: title }));
-      out.appendChild(miniTable(["forecaster", "log loss"], ["pooled", "population", "situation", "personal", "situation_personal"].map((a) => [ARM_LABEL[a], pr.overall[a].toFixed(4)])));
-      const L = pr.lift_log_loss || {};
-      [["situation_vs_population", "Situation over the average player"], ["personal_vs_population", "Player history over the average player"],
-        ["situation_personal_vs_situation", "Player history on top of the situation"]].forEach(([k, label]) => {
-        const b = L[k];
-        if (b) out.appendChild(el("div", { text: `${label}: ${sg(b.mean, 4)} (95% ${ci(b.ci95, 4)}), ${verdict(b)}.` }));
-      });
-    });
-    out.appendChild(el("div", { class: "muted", text: `${fmtN((d.cohort || {}).test)} test decisions by ${fmtN((d.cohort || {}).test_players)} players. ${d.label}.` }));
-    return out;
-  }
-  function bluffBox(d) {
-    const pr = (d.protocols || {}).online || (d.protocols || {}).frozen;
-    const c = pr.chips_per_decision, br = pr.bluff_rate || {};
-    const rows = [["never", "never bluff"], ["always", "always bluff"], ["population", "average-player forecast"], ["situation", "situation model"],
-      ["personal", "player history"], ["situation_personal", "situation + player"], ["perfect", "perfect foresight (ceiling)"]]
-      .filter(([k]) => c[k] !== undefined).map(([k, label]) => [label, c[k].toFixed(2), k === "always" ? "100%" : k === "never" ? "0%" : br[k] !== undefined ? pct(br[k], 0) : "-"]);
-    const out = el("div", {}, miniTable(["the bluffer uses", "chips per decision", "bluffs"], rows));
-    [["situation", "Situation model"], ["personal", "Player history"], ["situation_personal", "Situation + player"]].forEach(([k, label]) => {
-      const b = (pr.vs_population || {})[k];
-      if (b) out.appendChild(el("div", { text: `${label} vs the average-player forecast: ${sg(b.mean)} chips per decision (95% ${ci(b.ci95)}), ${pct(b.decisions_changed, 0)} of decisions changed, ${verdict(b)}.` }));
-    });
-    out.appendChild(el("div", { class: "muted", text: `${fmtN(d.decisions)} held-out decisions by ${fmtN(d.players)} players, learning as you go. Rule: ${d.rule}. Pot = 100 chips.` }));
-    return out;
-  }
-  function realBenchBox(d) {
-    const rows = (d.rows || []).map((r) => [r.probes, sg(r.mean_gain_chips), ci(r.ci95), pct(r.share_helped, 0), pct(r.share_hurt, 0), pct(r.decisions_changed, 0)]);
-    const out = el("div", {}, miniTable(["answers seen", "gain, chips per decision", "95% interval", "players helped", "players hurt", "decisions changed"], rows));
-    const g = d.by_true_fold_rate || {};
-    out.appendChild(el("div", { text: "By how often the player really folds: " + Object.entries(g).map(([k, v]) => `${k} ${sg(v.mean_gain_chips)} (${v.players} players)`).join(" · ") }));
-    out.appendChild(el("div", { class: "muted", text: `Sanity: with 0 answers seen the two bettors are ${d.zero_probe_identical ? "identical, as they must be" : "NOT identical, check the setup"}.` }));
-    const q = d.qlearning_check;
-    if (q) out.appendChild(el("div", { class: "muted", text: `Q-learning re-check on ${q.players.length} players: ${q.cells_agree} of ${q.cells} first-decision cells match the exact best response; value gap ${sg(q.mean_value_gap_chips)} chips.` }));
-    out.appendChild(el("div", { class: "muted", text: `${d.players} real players. ${d.label}.` }));
-    return out;
-  }
-  function strengthBox(d) {
-    const c = d.check || {};
-    return el("div", {}, el("p", { text: `Fitted on ${d.fit_spots} Pluribus spots and checked on the other ${d.check_spots}. Readout log score ${c.log_score_default} with the default table and ${c.log_score_calibrated} calibrated: ${sg(c.improvement, 3)} (95% ${ci(c.ci95, 3)}). The top bucket is right ${pct(c.top_bucket_right_default, 0)} of the time with the default and ${pct(c.top_bucket_right_calibrated, 0)} calibrated.` }),
-      el("div", { text: d.use ? "Used by the twins." : "Not used: the improvement is not clear, so the twins keep the labelled default." }), el("div", { class: "muted", text: d.rule }));
-  }
-  function neuralBox(d) {
-    const out = el("div", {}, miniTable(["forecaster", "test log loss"], Object.entries(d.test_log_loss || {}).map(([k, v]) => [ARM_LABEL[k] || k.replace(/_/g, " "), v.toFixed(4)])));
-    Object.entries(d.neural_lift_vs || {}).forEach(([k, b]) => out.appendChild(el("div", { text: `Network vs ${ARM_LABEL[k] || k.replace(/_/g, " ")}: ${sg(b.mean, 4)} (95% ${ci(b.ci95, 4)}), ${verdict(b)}.` })));
-    if (d.bluff_vs_population) out.appendChild(el("div", { text: `Bluff test: ${sg(d.bluff_vs_population.mean)} chips per decision against the average-player forecast (95% ${ci(d.bluff_vs_population.ci95)}).` }));
-    out.appendChild(el("div", { class: "muted", text: `${d.device}${d.quick ? ", quick check only" : ""}. ${d.label}.` }));
-    return out;
-  }
-  function typeGateWideBox(d) {
-    const g = d.gate || {}, a = g.type_vs_population_zero_history || {}, b = g.type_vs_personal || {};
-    return el("div", {}, el("p", {}, el("b", { text: g.pass ? "Gate passed. " : "Gate failed. " }),
-      `Players with no river history, type prior vs average player: ${sg(a.lift, 4)} (95% ${ci(a.ci95, 4)}, ${fmtN(a.players)} players). Types plus history vs history alone: ${sg(b.lift, 4)} (95% ${ci(b.ci95, 4)}).`),
-      el("div", { class: "muted", text: g.rule || "" }));
-  }
-  function phase6Panels(root, p, panel) {
-    root.appendChild(el("div", { class: "card-box" }, el("h4", { text: "Every table size and real players" }),
-      el("p", { class: "hint", text: "Two-player river pots from every table size, scored against real players' recorded answers. The original two-player-table panels follow." })));
-    const W = (key, title, fn) => { const x = p[key]; if (x) root.appendChild(panel(title, x.present, x.source, x.generated, x.present ? fn(x.data) : null)); };
-    W("wide_scan", "A · Data from every table size", wideScanBox);
-    W("forecast_wide", "B · Forecasts: situation, person, both", forecastWideBox);
-    W("bluff_test", "C · Bluff test on real decisions", bluffBox);
-    W("benchmark_real", "D · RL bettors against real players", realBenchBox);
-    W("strength_pluribus", "E · Strength table from Pluribus hands", strengthBox);
-    W("neural_forecaster", "F · Neural forecaster (GPU)", neuralBox);
-    W("type_gate_wide", "G · Player types on every table size", typeGateWideBox);
-  }
-
-  // ------------------------------------------------------------ evidence
-  async function renderEvidence() {
-    const root = $("#evidencePanels");
-    root.innerHTML = "";
-    let ev;
-    try { ev = await api("/api/mirror/evidence"); } catch (e) { root.appendChild(el("div", { class: "card-box hint", text: e.message })); return; }
-    const p = ev.panels;
-    const panel = (title, present, source, generated, content) => el("div", { class: "card-box" }, el("div", { class: "row between" }, el("h4", { text: title }), el("span", { class: "tag " + (present ? "good" : "warn"), text: present ? "generated" : "missing" })),
-      present ? content : el("p", { class: "hint", text: "Not generated yet." }), el("div", { class: "muted", text: `source: ${source}${generated ? " · " + generated : ""}` }));
-    phase6Panels(root, p, panel);
-    // 1 filter exhibit
-    const fe = p.filter_exhibit;
-    root.appendChild(panel("1 · Filter exhibit", fe.present, fe.source, fe.generated, fe.present ? (() => {
-      const rows = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "cohort" }), el("th", { text: "shards 35+36" }), el("th", { text: "all 37 shards" }))));
-      const tb = el("tbody");
-      const labels = { all_eligible: "all eligible offers", half_checked_through: "half pot, turn checked through", half_bettor_aggr: "half pot, bettor bet the turn",
-        half_defender_aggr: "half pot, defender bet the turn", defender_cards_known: "defender's cards became known", warning_free: "warning-free hands" };
-      const cnt = (c) => `${c.folds.toLocaleString()}/${c.opportunities.toLocaleString()}`;
-      Object.keys(fe.data.full_corpus.cohorts).forEach((k) => { const a = fe.data.two_shard.cohorts[k], b = fe.data.full_corpus.cohorts[k]; tb.appendChild(el("tr", {}, el("td", { text: labels[k] || k }), el("td", { text: cnt(a) }), el("td", { text: cnt(b) }))); });
-      rows.appendChild(tb);
-      return el("div", {}, rows, el("div", { class: "muted", text: `${fmt(fe.scan.rows)} rows scanned, ${fmt(fe.scan.eligible_unique)} unique eligible offers, ${fmt(fe.scan.eligible_modelling)} in the modelling cohort; train ${fmt(fe.scan.manifest.train)} / test ${fmt(fe.scan.manifest.test)}` }));
-    })() : null));
-    // 2 forecast ladder
-    const fl = p.forecast_ladder;
-    root.appendChild(panel("2 · Forecast ladder (held-out test)", fl.present, fl.source, fl.generated, fl.present ? ladderTable(fl.data) : null));
-    // 3 type gate + style map
-    const tg = p.type_gate;
-    let st = null;
-    try { st = await api("/api/mirror/styles"); } catch (e) { st = null; }
-    root.appendChild(panel("3 · Player types and the type-prior gate", tg.present, tg.source, tg.generated, tg.present ? (() => {
-      const g = tg.data.gate || {};
-      return el("div", {},
-        el("p", {}, el("b", { text: `${tg.data.k} types from ${(st && st.players_used || 0).toLocaleString()} players with at least ${st && st.n_min} hands. Gate ${g.pass ? "passed" : "failed"}.` })),
-        el("p", { class: "hint", text: gateText(g) }),
-        st && st.present ? styleMap(st) : null);
-    })() : null));
-    // 4 benchmark
-    const db = p.decision_benchmark;
-    root.appendChild(panel("4 · Decision benchmark (matched deals)", db.present, db.source, db.generated, db.present ? benchTable(db.data) : null));
-    // 5 range checks
-    const rc = p.range_checks;
-    root.appendChild(panel("5 · Range readout checks", rc.present, rc.source, rc.generated, rc.present ? rangeChecksBox(rc.data) : null));
-    // population bot
-    const pb = p.population_bot;
-    root.appendChild(panel("Population bot training", pb.present, pb.source, pb.generated, pb.present ? el("div", {}, el("div", { text: `${pb.data.meta.episodes} episodes, seed ${pb.data.meta.seed}, ${pb.data.meta.train_seconds}s, oracle check ${pb.data.meta.oracle_check ? (pb.data.meta.oracle_check.pass ? "pass" : "fail") : "n/a"}` }),
-      el("div", { class: "muted", text: "checkpoints: " + pb.data.checkpoints.map((c) => `${c.episode}: ${c.validation_mean_reward}`).join(" · ") })) : null));
-    // training sufficiency
-    const ts = p.training_sufficiency;
-    root.appendChild(panel("Training sufficiency (three seeds)", ts.present, ts.source, ts.generated, ts.present ? el("div", {},
-      el("div", { text: `Seeds agree on ${pct(ts.data.stage1_agreement, 0)} of first-decision cells. Disagreements only on near-ties: ${ts.data.disagreements_are_near_ties ? "yes" : "no"}. Every seed passes the oracle: ${ts.data.all_oracle_pass ? "yes" : "no"}.` })) : null));
-    // human sessions
-    const ss = p.sessions;
-    root.appendChild(panel("6 · Human sessions", true, ss.source, ss.generated, sessionsBox(ss.data)));
-  }
-
-  function rangeChecksBox(d) {
-    const out = el("div", {});
-    const h = d.held_out_sessions || {};
-    out.appendChild(el("p", {}, el("b", { text: "Held-out humans: " }), h.decisions
-      ? `${h.sessions} session(s), ${h.decisions} hands. Log score of the true strength bucket ${h.mean_log_score_readout} with the readout, ${h.mean_log_score_blind} without it.`
-      : "none yet, so nothing is claimed about humans."));
-    const pl = d.pluribus;
-    if (pl) {
-      const r = pl.by_response || {};
-      const line = ["fold", "call", "raise"].filter((k) => r[k]).map((k) => `${k} ${pct(r[k].mean_equity, 0)} (${r[k].n} spots)`).join(", ");
-      out.appendChild(el("p", {}, el("b", { text: "Pluribus, every card known: " }),
-        `${pl.spots} heads-up river spots. Mean defender equity by response: ${line}. ` +
-        (pl.monotone ? "Weaker hands fold more, which is what the readout assumes." : "The ordering does not hold, so treat the readout with care.")));
+      bodyEl.appendChild(el("div", { class: "cmp-deal" }, V.board(d.board, "md"),
+        el("div", { class: "cmp-hands" },
+          el("div", {}, el("span", { class: "muted", text: "Bettor (you) " }), P.cardsInline(d.bettor_cards), el("span", { class: "muted", text: ` ${d.bettor_bucket}` })),
+          el("div", {}, el("span", { class: "muted", text: O.real ? "Player's twin " : "Twin " }), P.cardsInline(d.defender_cards), el("span", { class: "muted", text: ` ${d.defender_bucket} · revealed` })),
+          el("div", { class: "muted", text: cap(ctxBettor(d.context) || TURN[d.context] || d.context) + "." }))));
+      const pop = c.on_deal && c.on_deal.population, per = c.on_deal && c.on_deal.personal;
+      const cols = el("div", { class: "cmp-cols" }, botCol("Population bettor", "trained against the 2009 population", pop, null),
+        botCol(O.real ? `Bettor trained on ${O.o.id}'s twin` : "Bettor trained on your twin", `twin #${(M.state && M.state.frozen || "").slice(0, 7)}`, per, t), advisorCol(c.advice));
+      if (pop && per) {
+        const same = pop.action === per.action;
+        bodyEl.appendChild(el("div", { class: "cmp-verdict", role: "status" }, el("span", { class: "cv-k", text: same ? "Same action" : "Different actions" }),
+          el("span", { text: same ? ` Both bettors choose ${NICE[pop.action].toLowerCase()}. On this deal, knowing your twin does not change the decision — a valid result, not a failure.`
+            : ` The population bettor would ${NICE[pop.action].toLowerCase()}; the bettor trained on your twin would ${NICE[per.action].toLowerCase()}.` }),
+          per.oracle && !per.oracle.pass ? el("span", { class: "cv-warn" }, el("span", { class: "tag warn", text: "✗ oracle check failed" }),
+            ` The twin-trained bettor missed its own best response in ${plural(per.oracle.failures, "cell")}, so its choice is a training miss, not evidence. Use the EV advisor (${c.advice ? (c.advice.recommend === "bet" ? "bet 50" : "check back") : "right"}) for ${O.the}.`) : null));
+      } else if (pop) {
+        bodyEl.appendChild(el("div", { class: "cmp-verdict pending", role: "status" }, el("span", { class: "cv-k", text: "Personal bettor pending" }), el("span", { text: ` Until it is trained, the EV advisor on the right is the comparison available for ${O.the}.` })));
+      }
+      bodyEl.appendChild(cols);
     }
-    const t = d.twin_unit_check;
-    if (t) out.appendChild(el("p", { class: "muted", text: `Unit check on the twin's own responses: log score ${t.mean_log_score_readout} with the readout, ${t.mean_log_score_blind} without; top bucket right ${pct(t.top_bucket_accuracy, 0)} of the time. This only tests the code.` }));
-    return out;
-  }
-
-  function gateText(g) {
-    const a = g.type_vs_population_zero_history, b = g.type_vs_personal;
-    if (!a || !b) return `Log-loss lift over the population model ${g.lift_vs_population_log_loss}, 95% interval ${(g.ci95 || []).join(" to ")}.`;
-    const show = (c) => (c && c.ci95 ? `${c.lift} per decision, 95% interval ${c.ci95.join(" to ")}, ${c.players} players` : "no data");
-    return `Players with no river history, type prior against the population model: ${show(a)}. All test decisions, types plus history against history alone: ${show(b)}. ` +
-      (g.pass ? "Both intervals sit above zero, so the live model uses types."
-        : "Types ship only if both intervals sit above zero, so the live model ignores them and the map below only describes how people play.");
-  }
-
-  function sessionsBox(d) {
-    const lc = d.live_counts || {};
-    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "tag" }), el("th", { text: "sessions" }), el("th", { text: "decisions" }))));
-    const tb = el("tbody");
-    TAGS.forEach(([tag, label]) => tb.appendChild(el("tr", {}, el("td", { text: label }), el("td", { text: (lc[tag] || {}).sessions || 0 }), el("td", { text: (lc[tag] || {}).decisions || 0 }))));
-    t.appendChild(tb);
-    const ev = d.evaluation;
-    let res = el("p", { class: "hint", text: "No held-out scores yet. Tag judges in step 3 (calibration first, then held-out) and recompute. Nothing is claimed about humans until then." });
-    if (ev && ev.heldout_forecast && ev.heldout_forecast.decisions) {
-      const f = ev.heldout_forecast, r = ev.heldout_readout;
-      res = el("div", {},
-        el("p", { text: `Held-out: ${f.sessions} session(s), ${f.decisions} decisions. Log loss per decision: population ${f.log_loss.population}, personal ${f.log_loss.personal}.` + (f.lift_ci95_over_sessions ? ` Lift 95% interval over sessions: ${f.lift_ci95_over_sessions.join(" to ")}.` : " An interval needs at least three held-out sessions.") }),
-        r && r.decisions ? el("p", { text: `Range readout on held-out hands: log score ${r.mean_log_score_readout} against ${r.mean_log_score_blind} for the response-blind prior (strength table: ${r.strength_table}).` }) : null);
+    // broader result: the prepared benchmark
+    const bm = M.evidence && M.evidence.panels.decision_benchmark;
+    if (bm && bm.present) {
+      const rows = bm.data.rows.filter((r) => r.probes === 64).map((r) => ({ label: (OPP_LABEL[r.opponent] || [r.opponent])[0], sub: (OPP_LABEL[r.opponent] || [, ""])[1], mean: r.mean_diff_chips, lo: r.ci95_chips[0], hi: r.ci95_chips[1], failed: r.oracle_pass === false, note: "oracle failed: training miss" }));
+      bodyEl.appendChild(el("section", { class: "cmp-broad" },
+        el("h2", { class: "q-sm", text: "Beyond this deal: when does knowing the opponent help?" }),
+        el("p", { class: "hint", text: `Change in chips per spot when the bettor trains on 64 probes of a simulated opponent instead of the population, ${bm.data.pairs.toLocaleString()} matched deals per row, 95% intervals.` }),
+        V.intervalPlot(rows, { xTitle: "Δ chips per spot vs the population bettor (opening pot = 100)", unit: "chips per spot", aria: "Benchmark at 64 probes", width: Math.min(900, bodyEl.clientWidth || 820), labelW: 200, valueW: 190 }),
+        el("p", { class: "src mono", text: `${bm.source} · ${bm.data.label} · generated ${bm.generated}` }),
+        evLink("Evidence: the full benchmark, all probe counts", "benchmark")));
     }
-    const cal = d.calibration;
-    return el("div", {}, t, res,
-      el("div", { class: "muted", text: cal ? `Strength calibration: ${cal.sessions} session(s), ${cal.decisions} decisions.` : "Strength table: synthetic default until calibration sessions exist." }),
-      el("div", { class: "row" }, el("button", { class: "btn small", onclick: recompute }, "Recompute from sessions")));
+    const charts = [["Population bettor", c.population_chart, c.population_meta], ["Bettor trained on your twin", c.personal_chart, c.personal_meta]].filter((x) => x[1]);
+    if (charts.length) {
+      const det = el("details", { class: "cmp-charts" }, el("summary", { text: "Policy charts: what each bettor does with every hand strength and turn history" }));
+      charts.forEach(([name, chart, meta]) => det.appendChild(policyChart(name, chart, meta)));
+      bodyEl.appendChild(det);
+    }
+    if (t.status === "running" && M.step === "compare") M.pollTimer = setTimeout(() => { if (M.step === "compare" && P.state.tab === "mirror") sceneCompare(); }, 1500);
+    if (fresh) { /* first paint only */ }
   }
-  async function recompute() {
-    try { await api("/api/mirror/sessions/recompute", {}); toast("Recomputed calibration and held-out scores from the session logs."); renderEvidence(); } catch (e) { toast(e.message, true); }
+  function botCol(title, sub, b, training) {
+    const col = el("article", { class: "cmp-col" + (b ? "" : " pending") }, el("h3", { text: title }), el("p", { class: "muted cmp-sub", text: sub }));
+    if (b) {
+      col.appendChild(el("div", { class: "cmp-action", text: NICE[b.action] || b.action }));
+      col.appendChild(qScale(b.q_chips));
+      col.appendChild(el("dl", { class: "cmp-meta" },
+        el("dt", { text: "training visits" }), el("dd", { class: "num", text: `${b.visits[0].toLocaleString()} check / ${b.visits[1].toLocaleString()} bet` }),
+        el("dt", { text: "oracle check" }), el("dd", {}, b.oracle ? el("span", { class: "tag " + (b.oracle.pass ? "good" : "warn"), text: b.oracle.pass ? "✓ passed" : `✗ ${b.oracle.failures} cell(s) off` }) : "n/a"),
+        el("dt", { text: "episodes" }), el("dd", { class: "num", text: (b.episodes || 0).toLocaleString() })));
+    } else {
+      const t = training || {};
+      const running = t.status === "running";
+      col.appendChild(el("div", { class: "cmp-action muted", text: running ? "Training…" : t.status === "error" ? "Training failed" : "Not trained yet" }));
+      if (running) col.appendChild(el("div", { class: "progress", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": t.episodes, "aria-valuenow": t.progress }, el("div", { style: `width:${(100 * (t.progress || 0) / (t.episodes || 1)).toFixed(1)}%` })));
+      col.appendChild(el("p", { class: "hint", text: running ? `${(t.progress || 0).toLocaleString()} of ${(t.episodes || 0).toLocaleString()} episodes against your twin.` : t.status === "error" ? t.error : "About 90 seconds on this laptop. Uses the same seed and deals as the population bettor." }));
+      if (!running) col.appendChild(el("button", { class: "btn primary", onclick: startTraining }, "Train against my twin"));
+    }
+    return col;
   }
-
-  // Small multiples: one panel per type, that type highlighted and everyone else grey (no colour has to carry identity).
-  function styleMap(st) {
-    const pts = st.map_points || [];
-    const wrap = el("div", { class: "stylemap" });
-    if (!pts.length) return el("p", { class: "hint", text: "No map points." });
-    const xs = pts.map((p) => p.x).sort((a, b) => a - b), ys = pts.map((p) => p.y).sort((a, b) => a - b);
-    const qt = (arr, f) => arr[Math.max(0, Math.min(arr.length - 1, Math.floor(f * (arr.length - 1))))];
-    const x0 = qt(xs, 0.01), x1 = qt(xs, 0.99), y0 = qt(ys, 0.01), y1 = qt(ys, 0.99);
-    const W = 240, H = 170, m = 10;
-    const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
-    const sx = (x) => m + (W - 2 * m) * (clamp(x, x0, x1) - x0) / ((x1 - x0) || 1);
-    const sy = (y) => H - m - (H - 2 * m) * (clamp(y, y0, y1) - y0) / ((y1 - y0) || 1);
-    const ns = "http://www.w3.org/2000/svg";
-    const mk = (tag, attrs) => { const e = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
-    st.names.forEach((name, t) => {
-      const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${name}: ${pct(st.shares[t], 0)} of players` });
-      const mine = [];
-      pts.forEach((p) => { if (p.type !== t) svg.appendChild(mk("circle", { cx: sx(p.x).toFixed(1), cy: sy(p.y).toFixed(1), r: 1.3, fill: "var(--muted)", "fill-opacity": 0.3 })); else mine.push(p); });
-      mine.forEach((p) => svg.appendChild(mk("circle", { cx: sx(p.x).toFixed(1), cy: sy(p.y).toFixed(1), r: 1.6, fill: "var(--series-1)", "fill-opacity": 0.75 })));
-      const cxy = st.centroid_xy[t];
-      svg.appendChild(mk("circle", { cx: sx(cxy[0]).toFixed(1), cy: sy(cxy[1]).toFixed(1), r: 6, fill: "var(--series-1)", stroke: "var(--surface)", "stroke-width": 2 }));
-      const c = st.centroids[t];
-      const tip = el("div", { class: "chart-tip", hidden: true });
-      const cell = el("div", { class: "stylemap-cell" },
-        el("div", { class: "row between" }, el("b", { text: name }), el("span", { class: "muted", text: `${pct(st.shares[t], 0)} of players` })),
-        svg,
-        el("div", { class: "muted", text: `VPIP ${pct(c.vpip, 0)} · PFR ${pct(c.pfr, 0)} · aggression ${pct(c.af, 0)} · folds to bets ${pct(c.fold_to_bet, 0)}` }),
-        tip);
-      svg.addEventListener("mousemove", (e) => {
-        const rect = svg.getBoundingClientRect();
-        const mx = (e.clientX - rect.left) * W / rect.width, my = (e.clientY - rect.top) * H / rect.height;
-        let best = null, bd = 64;
-        mine.forEach((p) => { const d = (sx(p.x) - mx) ** 2 + (sy(p.y) - my) ** 2; if (d < bd) { bd = d; best = p; } });
-        if (!best) { tip.hidden = true; return; }
-        tip.hidden = false;
-        tip.textContent = `${name} · ${best.venue} · ${best.hands} hands`;
-        tip.style.left = Math.min(e.clientX - cell.getBoundingClientRect().left + 10, cell.clientWidth - 150) + "px";
-        tip.style.top = (e.clientY - cell.getBoundingClientRect().top + 10) + "px";
-      });
-      svg.addEventListener("mouseleave", () => { tip.hidden = true; });
-      wrap.appendChild(cell);
+  function qScale(q) {
+    return V.evCompare({ ev_check: q[0] / 100, ev_bet: q[1] / 100, ev_bet_band: null, recommend: q[1] > q[0] ? "bet" : "check" });
+  }
+  function advisorCol(a) {
+    const col = el("article", { class: "cmp-col advisor" }, el("h3", { text: "EV advisor" }), el("p", { class: "muted cmp-sub", text: "closed form, from the twin's forecast" }));
+    if (!a) { col.appendChild(el("p", { class: "hint", text: "No advice for this deal." })); return col; }
+    col.appendChild(el("div", { class: "cmp-action", text: a.recommend === "bet" ? "Bet 50" : "Check back" }));
+    col.appendChild(V.evCompare(a));
+    col.appendChild(el("p", { class: "hint", text: a.reason }));
+    return col;
+  }
+  function policyChart(name, chart, meta) {
+    const tbl = el("table", { class: "matrix policy" }, el("caption", { text: `${name}: first decision (check back or bet), Q values in chips, training visits` }),
+      el("tr", {}, el("th", { text: "turn ↓ strength →" }), ...["weak", "medium", "strong"].map((b) => el("th", { text: b }))));
+    Object.entries(chart["1"]).forEach(([ctx, row]) => {
+      const tr = el("tr", {}, el("th", { text: CTX_SHORT[ctx] || ctx }));
+      ["weak", "medium", "strong"].forEach((b) => { const cell = row[b]; tr.appendChild(el("td", { class: cell.action === "bet_half" ? "pc-bet" : "" }, el("b", { text: cell.action === "bet_half" ? "bet" : "check" }), el("br"), el("span", { class: "num muted", text: cell.q.map((x) => Math.round(x * 100)).join(" / ") }), el("br"), el("span", { class: "num muted", text: cell.visits.join(" + ") }))); });
+      tbl.appendChild(tr);
     });
-    return el("div", {}, wrap, el("div", { class: "muted", text: "Each dot is a player (3,000 sampled). Position summarises five style statistics: players close together play alike. Highlighted: the type named above the panel; grey: everyone else." }));
+    return el("div", { class: "policy-wrap" }, tbl, meta ? el("p", { class: "src mono", text: `${meta.episodes.toLocaleString()} episodes · seed ${meta.seed} · ${meta.train_seconds}s · oracle ${meta.oracle_check ? (meta.oracle_check.pass ? "pass" : meta.oracle_check.failures + " cell(s) off") : "n/a"}` }) : null);
   }
-  function ladderTable(d) {
-    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "earlier obs." }), el("th", { text: "n" }), el("th", { text: "pooled" }), el("th", { text: "population" }), el("th", { text: "type + history" }), el("th", { text: "history" }))));
-    const tb = el("tbody");
-    (d.ladder || []).forEach((r) => tb.appendChild(el("tr", {}, el("td", { text: r.bin }), el("td", { text: r.n }), ...["pooled", "population", "type", "personal"].map((k) => el("td", { text: r.log_loss && r.log_loss[k] !== undefined && r.log_loss[k] !== null ? r.log_loss[k].toFixed(4) : "-" })))));
-    t.appendChild(tb);
-    return el("div", {}, el("div", { class: "muted", text: "three-action log loss per decision (lower is better); Brier scores in the artifact" }), t);
-  }
-  function benchTable(d) {
-    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "opponent" }), el("th", { text: "probes" }), el("th", { text: "Δ chips / spot" }), el("th", { text: "95% CI" }), el("th", { text: "changed" }))));
-    const tb = el("tbody");
-    const sg = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
-    const ci = (v) => `${sg(v[0])} .. ${sg(v[1])}`;
-    const missed = (d.rows || []).filter((r) => r.oracle_pass === false);
-    (d.rows || []).forEach((r) => {
-      const miss = r.oracle_pass === false;
-      tb.appendChild(el("tr", miss ? { class: "muted" } : {}, el("td", { text: r.opponent }), el("td", { text: r.probes }),
-        el("td", { text: sg(r.mean_diff_chips) + (miss ? " *" : "") }), el("td", { text: ci(r.ci95_chips) }), el("td", { text: pct(r.fraction_changed) })));
-    });
-    t.appendChild(tb);
-    const c = d.control;
-    return el("div", {}, t,
-      missed.length ? el("div", { class: "muted", text: `* This bot failed its oracle check: it did not learn its own best response, so the row shows a training miss, not the value of knowing the opponent (${missed.length} of ${d.rows.length} rows).` }) : null,
-      c ? el("div", { text: `Control: the same population bot trained with another seed changes ${pct(c.fraction_changed)} of decisions, ${sg(c.mean_diff_chips)} chips per spot (interval ${ci(c.ci95_chips)}). An effect must be larger than this to count.` }) : null,
-      d.zero_probe_identical !== undefined && d.zero_probe_identical !== null ? el("div", { class: "muted", text: `Sanity: with 0 probes the two bettors are ${d.zero_probe_identical ? "identical, as they must be" : "NOT identical, check the setup"}.` }) : null,
-      el("div", { class: "muted", text: d.label || "" }));
+  async function startTraining() { try { await api("/api/mirror/train", body({ episodes: 20000 })); sceneCompare(); } catch (e) { toast(e.message, true); } }
+
+  // ------------------------------------------------------------ returning judge
+  function resumeChoice(st) {
+    const host = $("#mScene");
+    host.innerHTML = "";
+    M.sceneId = null;
+    const saved = store.get("mirrorStep") || "drill";
+    const stepLabel = (STEPS.find((s) => s.id === saved) || STEPS[2]).label;
+    const facts = [plural(st.profile.observations, "response"), plural(st.drill.drills, "spot")];
+    if (st.frozen) facts.push("twin frozen");
+    const card = el("section", { class: "scene resume", role: "dialog", "aria-modal": "false", "aria-labelledby": "resumeH" },
+      el("div", { class: "scene-eyebrow mono", text: "judge " + st.token.slice(0, 6) }),
+      el("h1", { class: "q", id: "resumeH", tabindex: "-1" }, "Welcome ", el("em", { text: "back." })),
+      el("p", { class: "lede", text: `This laptop still holds a judge with ${facts.join(", ")}. Carry on with them, or start clean for someone new.` }),
+      el("div", { class: "row resume-actions" },
+        el("button", { class: "btn large primary", onclick: () => { M.resumeChecked = true; go(saved, { focus: true }); } }, `Resume at “${stepLabel}”`),
+        el("button", { class: "btn large", onclick: () => { M.resumeChecked = true; resetJudge(); } }, "Start fresh as a new judge")));
+    host.appendChild(card);
+    $$(".m-step").forEach((b) => b.classList.remove("active"));
+    $("#resumeH").focus({ preventScroll: true });
   }
 
-  // ------------------------------------------------------------ wiring
-  function renderCurrent() {
-    const fn = { reveal: renderReveal, filters: renderFilters, drill: renderDrill, play: renderPlay, compare: renderCompare }[M.step];
-    return fn ? fn() : null;
-  }
-  function selectStep(step) {
-    M.step = step;
-    $$("#mirrorSteps button").forEach((x) => x.classList.toggle("active", x.dataset.step === step));
-    $$(".mstep").forEach((p) => p.classList.toggle("active", p.id === "mirror-" + step));
-  }
+  // ------------------------------------------------------------ keyboard: F/C/R, K/B, N, Z act on the visible scene's buttons
+  document.addEventListener("keydown", (e) => {
+    if (P.state.tab !== "mirror") return;
+    if (e.key === "Escape" && !$("#mOperator").hidden) { toggleOperator(); $("#mOpBtn").focus(); return; }
+    if (e.metaKey || e.ctrlKey || e.altKey || e.target.matches("input, select, textarea, [contenteditable]")) return;
+    const k = e.key.toLowerCase();
+    if (k.length !== 1) return;
+    const b = $(`#mScene .hu-actions button[data-key="${k}"]:not([disabled])`);
+    if (b) { e.preventDefault(); b.click(); }
+  });
 
-  async function onShow(tab) {
-    if (tab === "evidence") { renderEvidence(); return; }
-    try { await refresh(); } catch (e) { toast("Mirror backend unavailable: " + e.message, true); return; }
-    P.showOverlay(false);
-    if (!$("#seats").children.length && M.step !== "drill" && M.step !== "play") P.showOverlay(true, "Poker Mirror: use the steps on the right.");
-    // deep links for demos and screenshots: #mirror=<step>&deal=1&spot=1&reveal=1
+  // ------------------------------------------------------------ entry
+  async function onShow() {
+    if (!M.built) buildShell();
+    try { await refresh(); } catch (e) { $("#mScene").innerHTML = ""; errorBox($("#mScene"), "Mirror backend unavailable: " + e.message); return; }
     const params = new URLSearchParams(location.hash.replace(/^#/, ""));
     if (params.has("mirror") && !M.deepLinked) {
+      // deep links for demos and screenshots: #mirror=<step>&deal=1 | &respond=<fold|call|raise> | &spot=1&act=<check|bet> | &real=<id>&act=<a> | &reveal=1
       M.deepLinked = true;
-      selectStep(params.get("mirror") || "reveal");
-      if (params.has("reveal")) { M.revealed = true; M.guess = 0; }
-      if (params.has("deal")) await newDrill();
-      else if (params.has("respond")) { await newDrill(); const d = M.state.drill.pending; if (d) await respond(d.decision_id, params.get("respond")); }
-      else if (params.has("spot")) { await freeze(); await newSpot(); if (params.has("act")) await act(params.get("act")); }
-      else if (params.has("real")) { const rp = await realPlayers(); const id = params.get("real") || (rp.players[0] || {}).id; if (id) await loadReal(id); if (params.has("act")) await act(params.get("act")); }
-      if (params.has("deal") || params.has("respond")) return;  // the drill renderers already drew the table
-      if ((params.has("spot") || params.has("real")) && M.step === "play") return;
+      M.resumeChecked = true;
+      const step = params.get("mirror") || "reveal";
+      if (params.has("reveal")) { M.guess = 0; }
+      if (params.has("deal") || params.has("respond")) {
+        await go("drill");
+        await newDrill();
+        if (params.has("respond") && M.state.drill.pending) await respond(M.state.drill.pending.decision_id, params.get("respond"));
+        return;
+      }
+      if (params.has("real")) {
+        const rp = await realPlayers();
+        const id = params.get("real") || (rp.players[0] || {}).id;
+        await go("play");
+        if (id) await loadReal(id);
+        if (params.has("act")) await act(params.get("act"));
+        return;
+      }
+      if (params.has("spot")) {
+        const r = await api("/api/mirror/freeze", body());
+        store.set("mirrorFrozen", JSON.stringify({ hash: r.frozen.hash, observations: r.frozen.observations }));
+        await refresh();
+        await go("play");
+        await newSpot(false);
+        if (params.has("act")) await act(params.get("act"));
+        return;
+      }
+      await go(step, { focus: true });
+      return;
     }
-    await renderCurrent();
-    if (M.step === "reveal" && M.revealed && M.demo) showDemoHand(0);
+    const st = M.state;
+    const returning = st.profile.observations > 0 || st.drill.drills > 0 || !!st.frozen;
+    if (returning && !M.resumeChecked) { resumeChoice(st); return; }
+    M.resumeChecked = true;
+    await go(M.step);
   }
-  $$("#mirrorSteps button").forEach((b) => b.addEventListener("click", () => { selectStep(b.dataset.step); renderCurrent(); }));
-  $("#mirrorReset").addEventListener("click", async () => {
-    try { const st = await api("/api/mirror/reset", body()); remember(st.token); M.state = st; M.lastDrill = null; M.revealed = false; M.guess = null; toast("Judge reset: new profile, no observations."); renderCurrent(); } catch (e) { toast(e.message, true); }
-  });
-  window.Mirror = { onShow, state: M };
+  function onHide() { clearTimeout(M.pollTimer); }
+  window.Mirror = { onShow, onHide, state: M };
 })();

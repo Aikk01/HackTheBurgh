@@ -1,0 +1,147 @@
+/* Simulator tools: Play, Replay + Fork, Evaluate and Simulate stages. Tokens come from style.css. */
+
+/* ------------------------------------------------------------ table motion
+   Wagers move with the Web Animations API (app.js renderTable), so the CSS pop is off for them.
+   .no-anim is set while scrubbing or jumping: the requested step is drawn directly. */
+#view-simulator .seats .bet { animation: none; }
+#view-simulator .bet.ghost { pointer-events: none; z-index: 3; }
+#view-simulator .no-anim .card, #view-simulator .no-anim .bet, #view-simulator .no-anim .bubble, #view-simulator .no-anim .payout { animation: none !important; }
+#view-simulator .no-anim .payout { opacity: 0.9; }
+
+/* the seat whose turn it is: amber ring (style.css) plus a label, so it is never colour alone */
+#view-simulator .tag.act { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10px; }
+
+/* ------------------------------------------------------------ table sizing
+   Seats sit on the rail and overhang the table box by ~30px top and bottom, so the box gets margins,
+   and its height is capped so the actions (or the replay transport) stay in the first viewport
+   at 1280×720 and 1024×768. Width stays 100%; renderTable reads the real box size. */
+#view-simulator .table-wrap { margin: 30px 0 22px; max-height: calc(100vh - 300px); min-height: 360px; }
+
+/* action bar: info + bet-size shortcuts on one row, the decision buttons on the next */
+#view-simulator .action-bar { position: relative; padding: 10px 14px 12px; }
+#view-simulator .action-info { min-height: 26px; display: flex; align-items: center; padding-right: 360px; }
+#view-simulator .action-buttons { flex-wrap: nowrap; }
+#view-simulator .raise-group { flex-wrap: nowrap; }
+#view-simulator .raise-group .quick { position: absolute; top: 10px; right: 14px; }
+#view-simulator .raise-group input[type=number] { width: 84px; }
+#view-simulator .action-buttons .btn { white-space: nowrap; }
+
+/* ------------------------------------------------------------ play */
+#view-simulator .sim-h { font-family: var(--font-serif); font-weight: 400; font-size: 26px; margin: 0 0 2px; line-height: 1.1; color: var(--ink); }
+#view-simulator .play-quick .hint { margin: 2px 0 12px; }
+#view-simulator .play-quick .btn { width: 100%; }
+#view-simulator #overlayDeal { margin-top: 14px; }
+#view-simulator .overlay-card p { color: var(--ink-2); line-height: 1.5; margin: 0; }
+
+/* ------------------------------------------------------------ replay transport + action strip */
+#view-simulator .transport { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 8px; min-width: 0; }
+#view-simulator .action-strip { min-width: 0; }
+#view-simulator .tp-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#view-simulator .tp-row input[type=range] { flex: 1; min-width: 140px; accent-color: var(--amber); }
+#view-simulator .tp-row select { background: var(--page-deep); border: 1px solid var(--line-2); border-radius: 8px; padding: 4px; }
+#view-simulator .action-strip { display: flex; gap: 16px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+#view-simulator .action-strip:empty { display: none; }
+#view-simulator .as-street { flex: none; display: flex; flex-direction: column; gap: 5px; }
+#view-simulator .as-label { font: 500 11px var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border-left: 2px solid var(--line-2); padding-left: 6px; }
+#view-simulator .as-chips { display: flex; gap: 4px; align-items: center; }
+#view-simulator .as-chip { flex: none; white-space: nowrap; font: inherit; font-size: 12.5px; line-height: 1; padding: 6px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-2); color: var(--muted); cursor: pointer; display: inline-flex; gap: 5px; align-items: center; }
+#view-simulator .as-chip:hover { border-color: var(--ink-2); color: var(--ink); }
+#view-simulator .as-chip.past { color: var(--ink-2); }
+#view-simulator .as-chip.decision { font-weight: 600; }
+#view-simulator .as-chip.k-dot { width: 11px; height: 11px; padding: 0; border-radius: 50%; }
+#view-simulator .as-chip.k-board { background: rgba(255, 248, 231, 0.09); color: var(--ink); letter-spacing: 0.02em; }
+#view-simulator .as-chip.k-fold { font-weight: 500; }
+#view-simulator .as-lens { font-size: 11px; font-weight: 700; }
+#view-simulator .as-chip.agree .as-lens { color: var(--good); }
+#view-simulator .as-chip.disagree .as-lens { color: var(--critical); }
+/* where we are: amber fill. The pending decision (actor to act): amber outline. */
+#view-simulator .as-chip.cur { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); }
+#view-simulator .as-chip.cur .as-lens { color: var(--amber-ink); }
+#view-simulator .as-chip.next { border: 1.5px solid var(--amber); color: var(--ink); background: var(--amber-soft); }
+
+/* ------------------------------------------------------------ evaluate / simulate stage */
+#view-simulator .sim-stage { background: rgba(18, 58, 51, 0.6); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 26px 18px; min-height: 440px; position: relative; }
+#view-simulator .stage-head { margin-bottom: 14px; }
+#view-simulator .stage-title { font-family: var(--font-serif); font-weight: 400; font-size: clamp(28px, 2.5vw, 40px); line-height: 1.05; margin: 0 0 6px; color: var(--ink); }
+#view-simulator .stage-sub { color: var(--ink-2); margin: 0; font-size: 15px; line-height: 1.5; }
+#view-simulator .stage-sub b { color: var(--ink); }
+#view-simulator .stage-empty { max-width: 560px; margin: 70px auto; text-align: center; }
+#view-simulator .stage-empty p { color: var(--ink-2); line-height: 1.55; font-size: 15px; }
+#view-simulator .eyebrow { font: 500 11px var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+/* evaluate: confusion matrix + the selected disagreement */
+#view-simulator .eval-grid { display: grid; grid-template-columns: auto minmax(260px, 1fr); gap: 24px; align-items: start; }
+#view-simulator .eval-fig { margin: 0; overflow-x: auto; }
+#view-simulator .eval-fig figcaption { margin-top: 8px; max-width: 520px; }
+#view-simulator table.cm { border-collapse: separate; border-spacing: 3px; font-size: 15px; }
+#view-simulator table.cm th { color: var(--muted); font-weight: 500; font-size: 13px; padding: 4px 8px; text-align: center; }
+#view-simulator table.cm th[scope=row] { text-align: right; padding-right: 10px; }
+#view-simulator table.cm .cm-corner { text-align: left; font-size: 11px; line-height: 1.35; white-space: nowrap; }
+#view-simulator table.cm .cm-corner span { display: block; }
+#view-simulator table.cm td { width: 62px; height: 48px; padding: 0; text-align: center; border-radius: 6px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+#view-simulator table.cm td > span { display: flex; align-items: center; justify-content: center; height: 100%; }
+#view-simulator table.cm td.diag { box-shadow: inset 0 0 0 1.5px rgba(255, 248, 231, 0.5); font-weight: 500; }
+#view-simulator table.cm td.on { box-shadow: 0 0 0 2px var(--amber); }
+#view-simulator .cm-cell { all: unset; box-sizing: border-box; display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; }
+#view-simulator .cm-cell:hover { box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+#view-simulator .cm-cell:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#view-simulator .eval-pick { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px 18px; }
+#view-simulator .eval-pick .row { margin: 0 0 6px; }
+#view-simulator .pick-title { font-family: var(--font-serif); font-weight: 400; font-size: 30px; margin: 2px 0 2px; color: var(--ink); }
+#view-simulator .pick-cards { display: flex; gap: 6px; margin: 12px 0 10px; }
+#view-simulator .pick-cards .card { animation: none; }
+#view-simulator .pick-facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0 0 12px; font-size: 14px; }
+#view-simulator .pick-facts dt { color: var(--muted); }
+#view-simulator .pick-facts dd { margin: 0; }
+#view-simulator .pick-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+#view-simulator .pv { background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 12px; }
+#view-simulator .pv.model { border-color: var(--ink-2); }
+#view-simulator .pv-l { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+#view-simulator .pv-v { font-size: 20px; font-weight: 600; color: var(--ink); }
+#view-simulator .pick-reason { font-style: italic; color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+#view-simulator .mismatch-list { max-height: 360px; border-radius: 8px; }
+#view-simulator .mismatch-list:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#view-simulator .mismatch { align-items: center; border-radius: 6px; }
+#view-simulator .mismatch.sel { background: var(--surface-3); box-shadow: inset 3px 0 0 var(--amber); }
+
+/* simulate: the cumulative chart owns the stage */
+#view-simulator .sim-chart { margin: 0 0 6px; position: relative; }
+#view-simulator .sim-svg { display: block; width: 100%; height: auto; overflow: visible; }
+#view-simulator .sim-svg:focus { outline: none; }
+#view-simulator .sim-svg:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
+#view-simulator .sim-svg .tick { fill: var(--muted); font: 12px var(--font-mono); font-variant-numeric: tabular-nums; }
+#view-simulator .sim-svg .axis-title { fill: var(--ink-2); font-size: 13px; font-weight: 500; font-family: var(--font-sans); }
+#view-simulator .sim-svg .end-label { fill: var(--ink); font-size: 13px; font-weight: 600; font-family: var(--font-sans); }
+#view-simulator .sim-svg .end-label.dim { fill: var(--muted); font-weight: 500; }
+#view-simulator .sim-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+#view-simulator .sim-lg { background: transparent; border: 1px solid var(--line-2); border-radius: 999px; padding: 5px 11px; color: var(--ink-2); cursor: pointer; display: inline-flex; gap: 7px; align-items: center; font-size: 13px; }
+#view-simulator .sim-lg:hover { border-color: var(--ink-2); color: var(--ink); }
+#view-simulator .sim-lg.on { border-color: var(--amber); color: var(--ink); background: var(--amber-soft); }
+#view-simulator .sim-key { width: 14px; height: 3px; border-radius: 2px; background: var(--c); display: inline-block; vertical-align: middle; margin-right: 4px; }
+#view-simulator .sim-readout { font-size: 14px; color: var(--ink-2); margin: 8px 0 14px; min-height: 1.5em; line-height: 1.6; }
+#view-simulator .sim-readout b { color: var(--ink); }
+#view-simulator .sim-readout .ro-sel { color: var(--ink); font-weight: 600; }
+#view-simulator .sim-table { font-size: 14px; }
+#view-simulator .sim-table .r { text-align: right; }
+#view-simulator .sim-table td b { font-weight: 600; }
+#view-simulator .sim-table tr.sel td { background: var(--amber-soft); }
+#view-simulator .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); margin-right: 8px; vertical-align: 0; }
+
+/* ------------------------------------------------------------ fork: card assumptions */
+#forkModal .modal-card { max-height: calc(100vh - 32px); overflow-y: auto; }
+#forkModal #forkSeats .seat-row:has(select:disabled) { opacity: 0.55; }
+#forkModal .fork-assume { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px 8px; margin: 10px 0; }
+#forkModal .fork-assume h4 { margin: 4px 0 6px; }
+#forkModal .fa-row, #forkModal .fa-board { display: grid; grid-template-columns: minmax(80px, 120px) auto 1fr; gap: 10px; align-items: center; padding: 3px 0; font-size: 13px; }
+#forkModal .fa-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#forkModal .fa-note { color: var(--muted); }
+#forkModal .fa-random, #forkModal .fa-cards, #forkModal .fa-runout { display: inline-flex; gap: 2px; align-items: center; }
+#forkModal .fa-random .card.inline { width: 26px; height: 36px; border-width: 2px; }
+#forkModal .fa-random .card.inline::after { font-size: 13px; }
+
+@media (max-width: 1100px) {
+  #view-simulator .eval-grid { grid-template-columns: 1fr; }
+  #view-simulator .sim-stage { padding: 16px 16px 14px; }
+}
+
+#view-simulator .chip-fx { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
