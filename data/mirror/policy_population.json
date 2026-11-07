@@ -1,0 +1,1123 @@
+{
+ "version": "qtable-v1",
+ "env_version": "river-v1",
+ "action_encoding": {
+  "1": [
+   "check_back",
+   "bet_half"
+  ],
+  "2": [
+   "fold",
+   "call"
+  ]
+ },
+ "bucket_cuts": [
+  0.33,
+  0.67
+ ],
+ "q": {
+  "1|checked_through|weak": [
+   0.18471337579617836,
+   0.5185904550499445
+  ],
+  "1|checked_through|medium": [
+   0.4966442953020132,
+   0.6101473858643428
+  ],
+  "1|checked_through|strong": [
+   0.8157894736842105,
+   0.8855601739133162
+  ],
+  "1|bettor_aggr|weak": [
+   0.16347992351816448,
+   0.3066164604626146
+  ],
+  "1|bettor_aggr|medium": [
+   0.5387168141592923,
+   0.5465192341790321
+  ],
+  "1|bettor_aggr|strong": [
+   0.789370078740158,
+   0.9660536267565446
+  ],
+  "1|defender_aggr|weak": [
+   0.1851851851851852,
+   0.302915451895044
+  ],
+  "1|defender_aggr|medium": [
+   0.4644039735099338,
+   0.4888451443569551
+  ],
+  "1|defender_aggr|strong": [
+   0.8606382978723413,
+   0.9395843902544075
+  ],
+  "2|checked_through|weak": [
+   -0.5,
+   -1.0
+  ],
+  "2|checked_through|medium": [
+   -0.5,
+   -0.625
+  ],
+  "2|checked_through|strong": [
+   -0.5,
+   0.35365853658536583
+  ],
+  "2|bettor_aggr|weak": [
+   -0.5,
+   -0.91
+  ],
+  "2|bettor_aggr|medium": [
+   -0.5,
+   -0.5125000000000001
+  ],
+  "2|bettor_aggr|strong": [
+   -0.5,
+   0.6834532374100717
+  ],
+  "2|defender_aggr|weak": [
+   -0.5,
+   -1.0
+  ],
+  "2|defender_aggr|medium": [
+   -0.5,
+   -1.0
+  ],
+  "2|defender_aggr|strong": [
+   -0.5,
+   0.5319148936170213
+  ]
+ },
+ "visits": {
+  "1|checked_through|weak": [
+   471,
+   1802
+  ],
+  "1|checked_through|medium": [
+   447,
+   1604
+  ],
+  "1|checked_through|strong": [
+   532,
+   1844
+  ],
+  "1|bettor_aggr|weak": [
+   523,
+   1859
+  ],
+  "1|bettor_aggr|medium": [
+   452,
+   1587
+  ],
+  "1|bettor_aggr|strong": [
+   508,
+   1829
+  ],
+  "1|defender_aggr|weak": [
+   459,
+   1715
+  ],
+  "1|defender_aggr|medium": [
+   604,
+   1524
+  ],
+  "1|defender_aggr|strong": [
+   470,
+   1770
+  ],
+  "2|checked_through|weak": [
+   34,
+   6
+  ],
+  "2|checked_through|medium": [
+   35,
+   16
+  ],
+  "2|checked_through|strong": [
+   18,
+   41
+  ],
+  "2|bettor_aggr|weak": [
+   137,
+   50
+  ],
+  "2|bettor_aggr|medium": [
+   65,
+   40
+  ],
+  "2|bettor_aggr|strong": [
+   38,
+   139
+  ],
+  "2|defender_aggr|weak": [
+   80,
+   18
+  ],
+  "2|defender_aggr|medium": [
+   56,
+   10
+  ],
+  "2|defender_aggr|strong": [
+   14,
+   47
+  ]
+ },
+ "meta": {
+  "episodes": 20000,
+  "seed": 7,
+  "alpha_exponent": 1.0,
+  "epsilon_final": 0.05,
+  "defender": {
+   "kind": "twin",
+   "name": "twin:population",
+   "profile_hash": "9264f1f6bc9e",
+   "arm": "population",
+   "observations": 0,
+   "synthetic": false
+  },
+  "profile_hash": "9264f1f6bc9e",
+  "pool_size": 4000,
+  "env_version": "river-v1",
+  "train_seconds": 53.4,
+  "oracle_check": {
+   "pass": true,
+   "failures": 0,
+   "pool": "training deals",
+   "tolerance": 0.1,
+   "min_visits": 100
+  },
+  "oracle_detail": {
+   "cells": [
+    {
+     "state": "1|checked_through|weak",
+     "learned": [
+      0.1847,
+      0.5186
+     ],
+     "q_star": [
+      0.1718,
+      0.5171
+     ],
+     "visits": [
+      471,
+      1802
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0129,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "1|checked_through|medium",
+     "learned": [
+      0.4966,
+      0.6101
+     ],
+     "q_star": [
+      0.5024,
+      0.5815
+     ],
+     "visits": [
+      447,
+      1604
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0286,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": true,
+     "ok": true
+    },
+    {
+     "state": "1|checked_through|strong",
+     "learned": [
+      0.8158,
+      0.8856
+     ],
+     "q_star": [
+      0.8089,
+      0.889
+     ],
+     "visits": [
+      532,
+      1844
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0069,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": true,
+     "ok": true
+    },
+    {
+     "state": "1|bettor_aggr|weak",
+     "learned": [
+      0.1635,
+      0.3066
+     ],
+     "q_star": [
+      0.167,
+      0.2791
+     ],
+     "visits": [
+      523,
+      1859
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0276,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "1|bettor_aggr|medium",
+     "learned": [
+      0.5387,
+      0.5465
+     ],
+     "q_star": [
+      0.5558,
+      0.5405
+     ],
+     "visits": [
+      452,
+      1587
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0171,
+     "greedy_learned": "bet_half",
+     "greedy_star": "check_back",
+     "near_tie": true,
+     "ok": true
+    },
+    {
+     "state": "1|bettor_aggr|strong",
+     "learned": [
+      0.7894,
+      0.9661
+     ],
+     "q_star": [
+      0.8175,
+      0.9329
+     ],
+     "visits": [
+      508,
+      1829
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0332,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "1|defender_aggr|weak",
+     "learned": [
+      0.1852,
+      0.3029
+     ],
+     "q_star": [
+      0.1696,
+      0.3036
+     ],
+     "visits": [
+      459,
+      1715
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0155,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "1|defender_aggr|medium",
+     "learned": [
+      0.4644,
+      0.4888
+     ],
+     "q_star": [
+      0.4803,
+      0.4695
+     ],
+     "visits": [
+      604,
+      1524
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0193,
+     "greedy_learned": "bet_half",
+     "greedy_star": "check_back",
+     "near_tie": true,
+     "ok": true
+    },
+    {
+     "state": "1|defender_aggr|strong",
+     "learned": [
+      0.8606,
+      0.9396
+     ],
+     "q_star": [
+      0.8422,
+      0.9428
+     ],
+     "visits": [
+      470,
+      1770
+     ],
+     "supported": true,
+     "max_abs_diff": 0.0184,
+     "greedy_learned": "bet_half",
+     "greedy_star": "bet_half",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|checked_through|weak",
+     "learned": [
+      -0.5,
+      -1.0
+     ],
+     "q_star": [
+      -0.5,
+      -0.9735
+     ],
+     "visits": [
+      34,
+      6
+     ],
+     "supported": false,
+     "max_abs_diff": 0.0265,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|checked_through|medium",
+     "learned": [
+      -0.5,
+      -0.625
+     ],
+     "q_star": [
+      -0.5,
+      -0.8644
+     ],
+     "visits": [
+      35,
+      16
+     ],
+     "supported": false,
+     "max_abs_diff": 0.2394,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|checked_through|strong",
+     "learned": [
+      -0.5,
+      0.3537
+     ],
+     "q_star": [
+      -0.5,
+      0.4913
+     ],
+     "visits": [
+      18,
+      41
+     ],
+     "supported": false,
+     "max_abs_diff": 0.1377,
+     "greedy_learned": "call",
+     "greedy_star": "call",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|bettor_aggr|weak",
+     "learned": [
+      -0.5,
+      -0.91
+     ],
+     "q_star": [
+      -0.5,
+      -0.9364
+     ],
+     "visits": [
+      137,
+      50
+     ],
+     "supported": false,
+     "max_abs_diff": 0.0264,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|bettor_aggr|medium",
+     "learned": [
+      -0.5,
+      -0.5125
+     ],
+     "q_star": [
+      -0.5,
+      -0.6025
+     ],
+     "visits": [
+      65,
+      40
+     ],
+     "supported": false,
+     "max_abs_diff": 0.09,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|bettor_aggr|strong",
+     "learned": [
+      -0.5,
+      0.6835
+     ],
+     "q_star": [
+      -0.5,
+      0.7047
+     ],
+     "visits": [
+      38,
+      139
+     ],
+     "supported": false,
+     "max_abs_diff": 0.0212,
+     "greedy_learned": "call",
+     "greedy_star": "call",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|defender_aggr|weak",
+     "learned": [
+      -0.5,
+      -1.0
+     ],
+     "q_star": [
+      -0.5,
+      -0.9529
+     ],
+     "visits": [
+      80,
+      18
+     ],
+     "supported": false,
+     "max_abs_diff": 0.0471,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|defender_aggr|medium",
+     "learned": [
+      -0.5,
+      -1.0
+     ],
+     "q_star": [
+      -0.5,
+      -0.7441
+     ],
+     "visits": [
+      56,
+      10
+     ],
+     "supported": false,
+     "max_abs_diff": 0.2559,
+     "greedy_learned": "fold",
+     "greedy_star": "fold",
+     "near_tie": false,
+     "ok": true
+    },
+    {
+     "state": "2|defender_aggr|strong",
+     "learned": [
+      -0.5,
+      0.5319
+     ],
+     "q_star": [
+      -0.5,
+      0.6621
+     ],
+     "visits": [
+      14,
+      47
+     ],
+     "supported": false,
+     "max_abs_diff": 0.1302,
+     "greedy_learned": "call",
+     "greedy_star": "call",
+     "near_tie": false,
+     "ok": true
+    }
+   ],
+   "failures": 0,
+   "min_visits": 100,
+   "tolerance": 0.1,
+   "pass": true
+  },
+  "q_star_training": {
+   "1|checked_through|weak": [
+    0.17177242888402625,
+    0.5170979473552582
+   ],
+   "1|checked_through|medium": [
+    0.5024154589371981,
+    0.5815239445290363
+   ],
+   "1|checked_through|strong": [
+    0.8089171974522293,
+    0.8890450062192625
+   ],
+   "1|bettor_aggr|weak": [
+    0.16701902748414377,
+    0.2790552183222038
+   ],
+   "1|bettor_aggr|medium": [
+    0.5558252427184466,
+    0.5405157972459349
+   ],
+   "1|bettor_aggr|strong": [
+    0.8174946004319654,
+    0.9328878006949998
+   ],
+   "1|defender_aggr|weak": [
+    0.16964285714285715,
+    0.3035743311686259
+   ],
+   "1|defender_aggr|medium": [
+    0.4802784222737819,
+    0.4695052064797159
+   ],
+   "1|defender_aggr|strong": [
+    0.8422273781902552,
+    0.9428243120897105
+   ],
+   "2|checked_through|weak": [
+    -0.5,
+    -0.9734812807197044
+   ],
+   "2|checked_through|medium": [
+    -0.5,
+    -0.8643514096077938
+   ],
+   "2|checked_through|strong": [
+    -0.5,
+    0.491347981392062
+   ],
+   "2|bettor_aggr|weak": [
+    -0.5,
+    -0.9364259739610242
+   ],
+   "2|bettor_aggr|medium": [
+    -0.5,
+    -0.6024919297162782
+   ],
+   "2|bettor_aggr|strong": [
+    -0.5,
+    0.7046703356714115
+   ],
+   "2|defender_aggr|weak": [
+    -0.5,
+    -0.9528698941927629
+   ],
+   "2|defender_aggr|medium": [
+    -0.5,
+    -0.7441348094648282
+   ],
+   "2|defender_aggr|strong": [
+    -0.5,
+    0.6621058874607767
+   ]
+  },
+  "q_star_validation": {
+   "1|checked_through|weak": [
+    0.11052631578947368,
+    0.4323121220738522
+   ],
+   "1|checked_through|medium": [
+    0.453125,
+    0.502182206295705
+   ],
+   "1|checked_through|strong": [
+    0.8943089430894309,
+    0.9763413216343262
+   ],
+   "1|bettor_aggr|weak": [
+    0.11650485436893204,
+    0.23532487638732688
+   ],
+   "1|bettor_aggr|medium": [
+    0.5045045045045045,
+    0.46715170828217845
+   ],
+   "1|bettor_aggr|strong": [
+    0.8149606299212598,
+    0.9314505707162952
+   ],
+   "1|defender_aggr|weak": [
+    0.18859649122807018,
+    0.39014634033791346
+   ],
+   "1|defender_aggr|medium": [
+    0.5541666666666667,
+    0.5848448678480769
+   ],
+   "1|defender_aggr|strong": [
+    0.8333333333333334,
+    0.951835067436767
+   ],
+   "2|checked_through|weak": [
+    -0.5,
+    -0.9857442491059015
+   ],
+   "2|checked_through|medium": [
+    -0.5,
+    -0.893758117964052
+   ],
+   "2|checked_through|strong": [
+    -0.5,
+    0.8010942422721372
+   ],
+   "2|bettor_aggr|weak": [
+    -0.5,
+    -0.9583487411251327
+   ],
+   "2|bettor_aggr|medium": [
+    -0.5,
+    -0.6444422574424827
+   ],
+   "2|bettor_aggr|strong": [
+    -0.5,
+    0.6872841306165374
+   ],
+   "2|defender_aggr|weak": [
+    -0.5,
+    -0.9344351138103314
+   ],
+   "2|defender_aggr|medium": [
+    -0.5,
+    -0.6331756301107317
+   ],
+   "2|defender_aggr|strong": [
+    -0.5,
+    0.7808692592664397
+   ]
+  }
+ },
+ "checkpoints": [
+  {
+   "episode": 1000,
+   "seconds": 3.6,
+   "visits": {
+    "1|checked_through|weak": [
+     57,
+     43
+    ],
+    "1|checked_through|medium": [
+     50,
+     54
+    ],
+    "1|checked_through|strong": [
+     65,
+     62
+    ],
+    "1|bettor_aggr|weak": [
+     54,
+     67
+    ],
+    "1|bettor_aggr|medium": [
+     53,
+     56
+    ],
+    "1|bettor_aggr|strong": [
+     56,
+     69
+    ],
+    "1|defender_aggr|weak": [
+     49,
+     59
+    ],
+    "1|defender_aggr|medium": [
+     58,
+     45
+    ],
+    "1|defender_aggr|strong": [
+     48,
+     55
+    ],
+    "2|checked_through|weak": [
+     1,
+     0
+    ],
+    "2|checked_through|medium": [
+     2,
+     3
+    ],
+    "2|checked_through|strong": [
+     2,
+     3
+    ],
+    "2|bettor_aggr|weak": [
+     2,
+     1
+    ],
+    "2|bettor_aggr|medium": [
+     3,
+     1
+    ],
+    "2|bettor_aggr|strong": [
+     4,
+     4
+    ],
+    "2|defender_aggr|weak": [
+     1,
+     2
+    ],
+    "2|defender_aggr|medium": [
+     1,
+     2
+    ],
+    "2|defender_aggr|strong": [
+     1,
+     0
+    ]
+   },
+   "validation_mean_reward": 0.617,
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "check_back",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "call",
+    "2|checked_through|medium": "call",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "call",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   }
+  },
+  {
+   "episode": 5000,
+   "seconds": 16.1,
+   "visits": {
+    "1|checked_through|weak": [
+     233,
+     317
+    ],
+    "1|checked_through|medium": [
+     242,
+     295
+    ],
+    "1|checked_through|strong": [
+     264,
+     339
+    ],
+    "1|bettor_aggr|weak": [
+     254,
+     339
+    ],
+    "1|bettor_aggr|medium": [
+     226,
+     275
+    ],
+    "1|bettor_aggr|strong": [
+     260,
+     356
+    ],
+    "1|defender_aggr|weak": [
+     233,
+     306
+    ],
+    "1|defender_aggr|medium": [
+     230,
+     288
+    ],
+    "1|defender_aggr|strong": [
+     225,
+     318
+    ],
+    "2|checked_through|weak": [
+     6,
+     3
+    ],
+    "2|checked_through|medium": [
+     6,
+     8
+    ],
+    "2|checked_through|strong": [
+     7,
+     6
+    ],
+    "2|bettor_aggr|weak": [
+     17,
+     20
+    ],
+    "2|bettor_aggr|medium": [
+     8,
+     7
+    ],
+    "2|bettor_aggr|strong": [
+     15,
+     24
+    ],
+    "2|defender_aggr|weak": [
+     10,
+     7
+    ],
+    "2|defender_aggr|medium": [
+     10,
+     4
+    ],
+    "2|defender_aggr|strong": [
+     4,
+     10
+    ]
+   },
+   "validation_mean_reward": 0.617,
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "bet_half",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "call",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "call",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   }
+  },
+  {
+   "episode": 10000,
+   "seconds": 29.5,
+   "visits": {
+    "1|checked_through|weak": [
+     391,
+     751
+    ],
+    "1|checked_through|medium": [
+     378,
+     680
+    ],
+    "1|checked_through|strong": [
+     442,
+     749
+    ],
+    "1|bettor_aggr|weak": [
+     418,
+     773
+    ],
+    "1|bettor_aggr|medium": [
+     377,
+     629
+    ],
+    "1|bettor_aggr|strong": [
+     417,
+     756
+    ],
+    "1|defender_aggr|weak": [
+     384,
+     700
+    ],
+    "1|defender_aggr|medium": [
+     505,
+     558
+    ],
+    "1|defender_aggr|strong": [
+     383,
+     709
+    ],
+    "2|checked_through|weak": [
+     14,
+     3
+    ],
+    "2|checked_through|medium": [
+     9,
+     14
+    ],
+    "2|checked_through|strong": [
+     12,
+     17
+    ],
+    "2|bettor_aggr|weak": [
+     46,
+     40
+    ],
+    "2|bettor_aggr|medium": [
+     14,
+     20
+    ],
+    "2|bettor_aggr|strong": [
+     27,
+     56
+    ],
+    "2|defender_aggr|weak": [
+     30,
+     14
+    ],
+    "2|defender_aggr|medium": [
+     19,
+     7
+    ],
+    "2|defender_aggr|strong": [
+     11,
+     22
+    ]
+   },
+   "validation_mean_reward": 0.62,
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "bet_half",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "fold",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "fold",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   }
+  },
+  {
+   "episode": 20000,
+   "seconds": 51.5,
+   "visits": {
+    "1|checked_through|weak": [
+     471,
+     1802
+    ],
+    "1|checked_through|medium": [
+     447,
+     1604
+    ],
+    "1|checked_through|strong": [
+     532,
+     1844
+    ],
+    "1|bettor_aggr|weak": [
+     523,
+     1859
+    ],
+    "1|bettor_aggr|medium": [
+     452,
+     1587
+    ],
+    "1|bettor_aggr|strong": [
+     508,
+     1829
+    ],
+    "1|defender_aggr|weak": [
+     459,
+     1715
+    ],
+    "1|defender_aggr|medium": [
+     604,
+     1524
+    ],
+    "1|defender_aggr|strong": [
+     470,
+     1770
+    ],
+    "2|checked_through|weak": [
+     34,
+     6
+    ],
+    "2|checked_through|medium": [
+     35,
+     16
+    ],
+    "2|checked_through|strong": [
+     18,
+     41
+    ],
+    "2|bettor_aggr|weak": [
+     137,
+     50
+    ],
+    "2|bettor_aggr|medium": [
+     65,
+     40
+    ],
+    "2|bettor_aggr|strong": [
+     38,
+     139
+    ],
+    "2|defender_aggr|weak": [
+     80,
+     18
+    ],
+    "2|defender_aggr|medium": [
+     56,
+     10
+    ],
+    "2|defender_aggr|strong": [
+     14,
+     47
+    ]
+   },
+   "validation_mean_reward": 0.62,
+   "greedy": {
+    "1|checked_through|weak": "bet_half",
+    "1|checked_through|medium": "bet_half",
+    "1|checked_through|strong": "bet_half",
+    "1|bettor_aggr|weak": "bet_half",
+    "1|bettor_aggr|medium": "bet_half",
+    "1|bettor_aggr|strong": "bet_half",
+    "1|defender_aggr|weak": "bet_half",
+    "1|defender_aggr|medium": "bet_half",
+    "1|defender_aggr|strong": "bet_half",
+    "2|checked_through|weak": "fold",
+    "2|checked_through|medium": "fold",
+    "2|checked_through|strong": "call",
+    "2|bettor_aggr|weak": "fold",
+    "2|bettor_aggr|medium": "fold",
+    "2|bettor_aggr|strong": "call",
+    "2|defender_aggr|weak": "fold",
+    "2|defender_aggr|medium": "fold",
+    "2|defender_aggr|strong": "call"
+   }
+  }
+ ]
+}

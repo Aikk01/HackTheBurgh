@@ -1,3 +1,5 @@
-# The simulator itself only needs the Python standard library (3.11+).
+# Runtime: the simulator itself needs only the Python standard library (3.11+).
+# Poker Mirror practice and RL transitions use PokerKit.
+pokerkit==0.7.7
 # Optional: Claude agent
 anthropic>=1.0

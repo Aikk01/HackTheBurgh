@@ -1,0 +1,644 @@
+{
+ "revision": "6acb5afb6f43082e6a468fde578890d9188be393",
+ "generated": "2026-11-07T18:12:19",
+ "shards_scanned": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36
+ ],
+ "shards_missing": [],
+ "rows": 21616175,
+ "prefiltered": 361779,
+ "eligible_before_dedupe": 22320,
+ "dedupe": {
+  "kept": 22320
+ },
+ "eligible_unique": 22320,
+ "eligible_modelling": 12407,
+ "manifest": {
+  "path": "data\\cache\\mirror\\manifest.csv",
+  "train": 9925,
+  "test": 2482,
+  "cutoffs": {
+   "Absolute Poker": "2009-07-17T05:50:46",
+   "Full Tilt Poker": "2009-07-19T01:01:48",
+   "PartyPoker": "2009-07-14T19:11:30",
+   "PokerStars": "2009-07-16T12:54:16"
+  },
+  "revision": "6acb5afb6f43082e6a468fde578890d9188be393"
+ },
+ "per_shard": [
+  {
+   "shard": 0,
+   "rows": 450337,
+   "prefiltered": 12463,
+   "eligible": 651,
+   "duplicates": 0,
+   "rejections": {
+    "variant": 76,
+    "players": 384985,
+    "no_river": 52798,
+    "no_river_response": 9170,
+    "sequence": 538,
+    "ratio": 2097,
+    "defender_short": 7,
+    "venue_or_hand": 15
+   },
+   "seconds": 28.5
+  },
+  {
+   "shard": 1,
+   "rows": 450337,
+   "prefiltered": 15559,
+   "eligible": 721,
+   "duplicates": 0,
+   "rejections": {
+    "players": 350608,
+    "no_river": 84167,
+    "no_river_response": 11634,
+    "ratio": 2683,
+    "sequence": 519,
+    "venue_or_hand": 3,
+    "defender_short": 2
+   },
+   "seconds": 33.3
+  },
+  {
+   "shard": 2,
+   "rows": 450337,
+   "prefiltered": 4922,
+   "eligible": 231,
+   "duplicates": 0,
+   "rejections": {
+    "players": 415666,
+    "no_river_response": 3677,
+    "no_river": 29749,
+    "ratio": 842,
+    "sequence": 165,
+    "warnings": 7
+   },
+   "seconds": 17.0
+  },
+  {
+   "shard": 3,
+   "rows": 450337,
+   "prefiltered": 7091,
+   "eligible": 451,
+   "duplicates": 0,
+   "rejections": {
+    "players": 401659,
+    "no_river": 41587,
+    "no_river_response": 5173,
+    "ratio": 1205,
+    "sequence": 255,
+    "defender_short": 7
+   },
+   "seconds": 20.3
+  },
+  {
+   "shard": 4,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 9.8
+  },
+  {
+   "shard": 5,
+   "rows": 450337,
+   "prefiltered": 929,
+   "eligible": 72,
+   "duplicates": 0,
+   "rejections": {
+    "players": 444656,
+    "no_river_response": 670,
+    "no_river": 4752,
+    "ratio": 157,
+    "sequence": 29,
+    "defender_short": 1
+   },
+   "seconds": 11.4
+  },
+  {
+   "shard": 6,
+   "rows": 450337,
+   "prefiltered": 20586,
+   "eligible": 1315,
+   "duplicates": 0,
+   "rejections": {
+    "players": 323758,
+    "no_river": 105993,
+    "no_river_response": 15106,
+    "ratio": 3464,
+    "sequence": 688,
+    "defender_short": 13
+   },
+   "seconds": 41.9
+  },
+  {
+   "shard": 7,
+   "rows": 450337,
+   "prefiltered": 20883,
+   "eligible": 1333,
+   "duplicates": 0,
+   "rejections": {
+    "players": 321657,
+    "no_river": 107797,
+    "ratio": 3469,
+    "no_river_response": 15338,
+    "sequence": 735,
+    "defender_short": 8
+   },
+   "seconds": 43.0
+  },
+  {
+   "shard": 8,
+   "rows": 450337,
+   "prefiltered": 12254,
+   "eligible": 739,
+   "duplicates": 0,
+   "rejections": {
+    "players": 373386,
+    "no_river": 64697,
+    "no_river_response": 9049,
+    "ratio": 2035,
+    "sequence": 426,
+    "defender_short": 5
+   },
+   "seconds": 27.9
+  },
+  {
+   "shard": 9,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 10.1
+  },
+  {
+   "shard": 10,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 9.9
+  },
+  {
+   "shard": 11,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 10.1
+  },
+  {
+   "shard": 12,
+   "rows": 450337,
+   "prefiltered": 21915,
+   "eligible": 1529,
+   "duplicates": 0,
+   "rejections": {
+    "players": 356247,
+    "no_river": 72175,
+    "no_river_response": 15699,
+    "sequence": 1020,
+    "ratio": 3652,
+    "defender_short": 15
+   },
+   "seconds": 43.4
+  },
+  {
+   "shard": 13,
+   "rows": 450337,
+   "prefiltered": 52764,
+   "eligible": 3752,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 37811,
+    "players": 224754,
+    "no_river": 172819,
+    "sequence": 2628,
+    "ratio": 8544,
+    "defender_short": 29
+   },
+   "seconds": 74.2
+  },
+  {
+   "shard": 14,
+   "rows": 450337,
+   "prefiltered": 50680,
+   "eligible": 3611,
+   "duplicates": 0,
+   "rejections": {
+    "players": 227873,
+    "no_river": 171784,
+    "no_river_response": 36316,
+    "sequence": 2327,
+    "ratio": 8409,
+    "defender_short": 17
+   },
+   "seconds": 72.7
+  },
+  {
+   "shard": 15,
+   "rows": 675506,
+   "prefiltered": 23239,
+   "eligible": 1508,
+   "duplicates": 0,
+   "rejections": {
+    "players": 560210,
+    "no_river": 92057,
+    "no_river_response": 16863,
+    "sequence": 1002,
+    "ratio": 3854,
+    "defender_short": 6,
+    "warnings": 6
+   },
+   "seconds": 49.8
+  },
+  {
+   "shard": 16,
+   "rows": 675505,
+   "prefiltered": 4107,
+   "eligible": 227,
+   "duplicates": 0,
+   "rejections": {
+    "players": 645625,
+    "no_river": 25773,
+    "ratio": 686,
+    "no_river_response": 3034,
+    "warnings": 5,
+    "sequence": 153,
+    "defender_short": 2
+   },
+   "seconds": 19.4
+  },
+  {
+   "shard": 17,
+   "rows": 675506,
+   "prefiltered": 12168,
+   "eligible": 559,
+   "duplicates": 0,
+   "rejections": {
+    "players": 590865,
+    "no_river": 72473,
+    "sequence": 418,
+    "no_river_response": 9145,
+    "ratio": 2041,
+    "defender_short": 4,
+    "warnings": 1
+   },
+   "seconds": 32.0
+  },
+  {
+   "shard": 18,
+   "rows": 675505,
+   "prefiltered": 15813,
+   "eligible": 884,
+   "duplicates": 0,
+   "rejections": {
+    "players": 570517,
+    "no_river": 89175,
+    "no_river_response": 11673,
+    "ratio": 2702,
+    "sequence": 539,
+    "defender_short": 15
+   },
+   "seconds": 39.1
+  },
+  {
+   "shard": 19,
+   "rows": 675506,
+   "prefiltered": 19179,
+   "eligible": 1168,
+   "duplicates": 0,
+   "rejections": {
+    "players": 561036,
+    "no_river_response": 14236,
+    "no_river": 95291,
+    "ratio": 3140,
+    "sequence": 624,
+    "defender_short": 11
+   },
+   "seconds": 43.7
+  },
+  {
+   "shard": 20,
+   "rows": 675505,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675505
+   },
+   "seconds": 12.2
+  },
+  {
+   "shard": 21,
+   "rows": 675506,
+   "prefiltered": 76,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 674679,
+    "no_river": 751,
+    "no_river_response": 51,
+    "ratio": 11,
+    "warnings": 9,
+    "sequence": 5
+   },
+   "seconds": 12.7
+  },
+  {
+   "shard": 22,
+   "rows": 675505,
+   "prefiltered": 187,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 673525,
+    "no_river": 1793,
+    "no_river_response": 149,
+    "ratio": 24,
+    "warnings": 9,
+    "sequence": 5
+   },
+   "seconds": 14.2
+  },
+  {
+   "shard": 23,
+   "rows": 675506,
+   "prefiltered": 1164,
+   "eligible": 62,
+   "duplicates": 0,
+   "rejections": {
+    "players": 667944,
+    "no_river": 6398,
+    "no_river_response": 886,
+    "warnings": 1,
+    "ratio": 159,
+    "sequence": 56
+   },
+   "seconds": 16.5
+  },
+  {
+   "shard": 24,
+   "rows": 675505,
+   "prefiltered": 1225,
+   "eligible": 78,
+   "duplicates": 0,
+   "rejections": {
+    "players": 667434,
+    "no_river": 6846,
+    "no_river_response": 918,
+    "ratio": 186,
+    "sequence": 43
+   },
+   "seconds": 16.7
+  },
+  {
+   "shard": 25,
+   "rows": 675506,
+   "prefiltered": 437,
+   "eligible": 23,
+   "duplicates": 0,
+   "rejections": {
+    "players": 672477,
+    "no_river": 2592,
+    "no_river_response": 336,
+    "ratio": 53,
+    "sequence": 24,
+    "warnings": 1
+   },
+   "seconds": 14.4
+  },
+  {
+   "shard": 26,
+   "rows": 675505,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675505
+   },
+   "seconds": 13.8
+  },
+  {
+   "shard": 27,
+   "rows": 675506,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675506
+   },
+   "seconds": 14.3
+  },
+  {
+   "shard": 28,
+   "rows": 675505,
+   "prefiltered": 1366,
+   "eligible": 80,
+   "duplicates": 0,
+   "rejections": {
+    "players": 669413,
+    "no_river": 4726,
+    "no_river_response": 995,
+    "ratio": 223,
+    "sequence": 67,
+    "defender_short": 1
+   },
+   "seconds": 16.8
+  },
+  {
+   "shard": 29,
+   "rows": 675506,
+   "prefiltered": 2335,
+   "eligible": 142,
+   "duplicates": 0,
+   "rejections": {
+    "players": 665440,
+    "no_river": 7731,
+    "no_river_response": 1734,
+    "ratio": 344,
+    "sequence": 114,
+    "defender_short": 1
+   },
+   "seconds": 18.1
+  },
+  {
+   "shard": 30,
+   "rows": 675505,
+   "prefiltered": 2419,
+   "eligible": 135,
+   "duplicates": 0,
+   "rejections": {
+    "players": 665268,
+    "no_river": 7818,
+    "ratio": 367,
+    "no_river_response": 1790,
+    "sequence": 124,
+    "defender_short": 3
+   },
+   "seconds": 18.4
+  },
+  {
+   "shard": 31,
+   "rows": 675506,
+   "prefiltered": 2321,
+   "eligible": 151,
+   "duplicates": 0,
+   "rejections": {
+    "players": 665449,
+    "no_river": 7736,
+    "sequence": 141,
+    "no_river_response": 1691,
+    "ratio": 337,
+    "defender_short": 1
+   },
+   "seconds": 18.3
+  },
+  {
+   "shard": 32,
+   "rows": 675505,
+   "prefiltered": 2510,
+   "eligible": 161,
+   "duplicates": 0,
+   "rejections": {
+    "players": 664484,
+    "no_river": 8511,
+    "no_river_response": 1819,
+    "ratio": 385,
+    "sequence": 145
+   },
+   "seconds": 18.0
+  },
+  {
+   "shard": 33,
+   "rows": 675506,
+   "prefiltered": 2317,
+   "eligible": 173,
+   "duplicates": 0,
+   "rejections": {
+    "players": 665211,
+    "no_river_response": 1654,
+    "no_river": 7978,
+    "ratio": 346,
+    "defender_short": 1,
+    "sequence": 143
+   },
+   "seconds": 17.4
+  },
+  {
+   "shard": 34,
+   "rows": 675505,
+   "prefiltered": 4672,
+   "eligible": 287,
+   "duplicates": 0,
+   "rejections": {
+    "players": 652814,
+    "ratio": 753,
+    "no_river": 18019,
+    "no_river_response": 3404,
+    "sequence": 228
+   },
+   "seconds": 19.1
+  },
+  {
+   "shard": 35,
+   "rows": 675505,
+   "prefiltered": 23138,
+   "eligible": 1220,
+   "duplicates": 0,
+   "rejections": {
+    "players": 525879,
+    "no_river": 126488,
+    "no_river_response": 17267,
+    "ratio": 3890,
+    "sequence": 752,
+    "defender_short": 9
+   },
+   "seconds": 30.6
+  },
+  {
+   "shard": 36,
+   "rows": 675505,
+   "prefiltered": 23060,
+   "eligible": 1057,
+   "duplicates": 0,
+   "rejections": {
+    "players": 539461,
+    "no_river": 112982,
+    "no_river_response": 17525,
+    "sequence": 730,
+    "ratio": 3736,
+    "defender_short": 12,
+    "venue_or_hand": 2
+   },
+   "seconds": 29.7
+  }
+ ],
+ "seconds": 77.8,
+ "responses_unique": {
+  "call": 8698,
+  "fold": 12570,
+  "raise": 1052
+ },
+ "contexts_modelling": {
+  "defender_aggr": 1227,
+  "checked_through": 8869,
+  "bettor_aggr": 2311
+ },
+ "venues": {
+  "Absolute Poker": 2647,
+  "Full Tilt Poker": 1828,
+  "PokerStars": 16932,
+  "PartyPoker": 913
+ }
+}

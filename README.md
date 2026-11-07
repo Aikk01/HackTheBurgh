@@ -130,6 +130,34 @@ aggressive), per-street and per-action breakdown, a confusion matrix, mean `|log
 human size)|` when both bet, latency, and a per-decision CSV. In the UI every disagreement is a
 link that opens the hand at that exact spot with the model's suggestion overlaid on the table.
 
+## Poker Mirror (hackathon demo)
+
+The **Mirror** tab asks one question: after accounting for the board and the public betting, how
+much does knowing *this* opponent help a bettor decide whether to bluff? Scope: heads-up no-limit
+river, the defender checks and faces a half-pot bet. The spec is [PLAN.md](PLAN.md); the order of
+work and the build log are [CHECKLIST.md](CHECKLIST.md) and [PROGRESS.md](PROGRESS.md).
+
+Five steps in the UI: (1) two recorded river decisions by the same player, guess which one folded;
+(2) what a filter hides (folds never reach a showdown); (3) you defend, with a forecast committed
+before every click; (4) you bet against your frozen twin with an EV advisor and a range X-ray;
+(5) two Q-learning counter-bots, one trained against the population twin and one against yours.
+The **Evidence** tab shows every generated artifact with its source and denominator.
+
+Offline preparation (needs `pip install -r requirements-prep.txt`, 1.3 GB download):
+
+```bash
+python scripts/fetch_takara.py                      # 37 Parquet shards -> data/cache/takara/
+python -m pokersim mirror-prepare --styles          # river spots, exhibit, manifests, population, style table
+python -m pokersim mirror-cluster                   # player types + the type-prior gate -> data/mirror/styles.json
+python -m pokersim mirror-train --profile population --episodes 20000 --seed 7 --out data/mirror/policy_population.json
+python -m pokersim mirror-benchmark                 # personalised vs population bettor -> data/mirror/benchmark.json
+python -m pokersim mirror-eval --pluribus-shard data/cache/takara/train-00000-of-00037.parquet
+python -m pokersim mirror-check-ranges              # equity / readout / advisor sanity checks
+```
+
+The demo itself needs only the standard library plus `pokerkit`; everything it shows is read from
+`data/mirror/`.
+
 ## Layout
 
 ```

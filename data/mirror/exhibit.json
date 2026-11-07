@@ -1,0 +1,1342 @@
+{
+ "revision": "6acb5afb6f43082e6a468fde578890d9188be393",
+ "generated": "2026-11-07T18:12:19",
+ "per_shard": {
+  "0": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 368,
+     "opportunities": 651
+    },
+    "half_checked_through": {
+     "folds": 172,
+     "opportunities": 244
+    },
+    "half_bettor_aggr": {
+     "folds": 45,
+     "opportunities": 81
+    },
+    "half_defender_aggr": {
+     "folds": 19,
+     "opportunities": 34
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 118
+    },
+    "warning_free": {
+     "folds": 368,
+     "opportunities": 484
+    }
+   },
+   "responses": {
+    "call": 253,
+    "fold": 368,
+    "raise": 30
+   },
+   "n": 651
+  },
+  "1": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 391,
+     "opportunities": 721
+    },
+    "half_checked_through": {
+     "folds": 161,
+     "opportunities": 243
+    },
+    "half_bettor_aggr": {
+     "folds": 18,
+     "opportunities": 50
+    },
+    "half_defender_aggr": {
+     "folds": 18,
+     "opportunities": 40
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 137
+    },
+    "warning_free": {
+     "folds": 391,
+     "opportunities": 539
+    }
+   },
+   "responses": {
+    "raise": 40,
+    "fold": 391,
+    "call": 290
+   },
+   "n": 721
+  },
+  "2": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 126,
+     "opportunities": 231
+    },
+    "half_checked_through": {
+     "folds": 47,
+     "opportunities": 69
+    },
+    "half_bettor_aggr": {
+     "folds": 8,
+     "opportunities": 18
+    },
+    "half_defender_aggr": {
+     "folds": 6,
+     "opportunities": 9
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 46
+    },
+    "warning_free": {
+     "folds": 126,
+     "opportunities": 175
+    }
+   },
+   "responses": {
+    "fold": 126,
+    "call": 94,
+    "raise": 11
+   },
+   "n": 231
+  },
+  "3": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 254,
+     "opportunities": 451
+    },
+    "half_checked_through": {
+     "folds": 110,
+     "opportunities": 158
+    },
+    "half_bettor_aggr": {
+     "folds": 12,
+     "opportunities": 28
+    },
+    "half_defender_aggr": {
+     "folds": 11,
+     "opportunities": 25
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 87
+    },
+    "warning_free": {
+     "folds": 254,
+     "opportunities": 343
+    }
+   },
+   "responses": {
+    "raise": 19,
+    "fold": 254,
+    "call": 178
+   },
+   "n": 451
+  },
+  "4": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "5": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 32,
+     "opportunities": 72
+    },
+    "half_checked_through": {
+     "folds": 12,
+     "opportunities": 24
+    },
+    "half_bettor_aggr": {
+     "folds": 3,
+     "opportunities": 5
+    },
+    "half_defender_aggr": {
+     "folds": 2,
+     "opportunities": 3
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 20
+    },
+    "warning_free": {
+     "folds": 32,
+     "opportunities": 52
+    }
+   },
+   "responses": {
+    "fold": 32,
+    "call": 35,
+    "raise": 5
+   },
+   "n": 72
+  },
+  "6": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 722,
+     "opportunities": 1315
+    },
+    "half_checked_through": {
+     "folds": 325,
+     "opportunities": 473
+    },
+    "half_bettor_aggr": {
+     "folds": 32,
+     "opportunities": 81
+    },
+    "half_defender_aggr": {
+     "folds": 37,
+     "opportunities": 64
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 248
+    },
+    "warning_free": {
+     "folds": 722,
+     "opportunities": 988
+    }
+   },
+   "responses": {
+    "fold": 722,
+    "call": 523,
+    "raise": 70
+   },
+   "n": 1315
+  },
+  "7": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 750,
+     "opportunities": 1333
+    },
+    "half_checked_through": {
+     "folds": 360,
+     "opportunities": 519
+    },
+    "half_bettor_aggr": {
+     "folds": 49,
+     "opportunities": 109
+    },
+    "half_defender_aggr": {
+     "folds": 23,
+     "opportunities": 54
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 246
+    },
+    "warning_free": {
+     "folds": 750,
+     "opportunities": 1000
+    }
+   },
+   "responses": {
+    "fold": 750,
+    "call": 527,
+    "raise": 56
+   },
+   "n": 1333
+  },
+  "8": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 408,
+     "opportunities": 739
+    },
+    "half_checked_through": {
+     "folds": 179,
+     "opportunities": 258
+    },
+    "half_bettor_aggr": {
+     "folds": 26,
+     "opportunities": 56
+    },
+    "half_defender_aggr": {
+     "folds": 19,
+     "opportunities": 33
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 135
+    },
+    "warning_free": {
+     "folds": 408,
+     "opportunities": 541
+    }
+   },
+   "responses": {
+    "call": 299,
+    "fold": 408,
+    "raise": 32
+   },
+   "n": 739
+  },
+  "9": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "10": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "11": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "12": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 846,
+     "opportunities": 1529
+    },
+    "half_checked_through": {
+     "folds": 442,
+     "opportunities": 674
+    },
+    "half_bettor_aggr": {
+     "folds": 101,
+     "opportunities": 197
+    },
+    "half_defender_aggr": {
+     "folds": 45,
+     "opportunities": 94
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 315
+    },
+    "warning_free": {
+     "folds": 846,
+     "opportunities": 1172
+    }
+   },
+   "responses": {
+    "call": 612,
+    "fold": 846,
+    "raise": 71
+   },
+   "n": 1529
+  },
+  "13": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 2126,
+     "opportunities": 3752
+    },
+    "half_checked_through": {
+     "folds": 1064,
+     "opportunities": 1638
+    },
+    "half_bettor_aggr": {
+     "folds": 242,
+     "opportunities": 439
+    },
+    "half_defender_aggr": {
+     "folds": 121,
+     "opportunities": 226
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 703
+    },
+    "warning_free": {
+     "folds": 2126,
+     "opportunities": 2833
+    }
+   },
+   "responses": {
+    "fold": 2126,
+    "call": 1446,
+    "raise": 180
+   },
+   "n": 3752
+  },
+  "14": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 2011,
+     "opportunities": 3611
+    },
+    "half_checked_through": {
+     "folds": 1015,
+     "opportunities": 1582
+    },
+    "half_bettor_aggr": {
+     "folds": 244,
+     "opportunities": 481
+    },
+    "half_defender_aggr": {
+     "folds": 120,
+     "opportunities": 215
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 664
+    },
+    "warning_free": {
+     "folds": 2011,
+     "opportunities": 2701
+    }
+   },
+   "responses": {
+    "fold": 2011,
+    "raise": 176,
+    "call": 1424
+   },
+   "n": 3611
+  },
+  "15": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 850,
+     "opportunities": 1508
+    },
+    "half_checked_through": {
+     "folds": 412,
+     "opportunities": 625
+    },
+    "half_bettor_aggr": {
+     "folds": 92,
+     "opportunities": 181
+    },
+    "half_defender_aggr": {
+     "folds": 52,
+     "opportunities": 75
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 281
+    },
+    "warning_free": {
+     "folds": 850,
+     "opportunities": 1138
+    }
+   },
+   "responses": {
+    "call": 578,
+    "fold": 850,
+    "raise": 80
+   },
+   "n": 1508
+  },
+  "16": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 127,
+     "opportunities": 227
+    },
+    "half_checked_through": {
+     "folds": 54,
+     "opportunities": 67
+    },
+    "half_bettor_aggr": {
+     "folds": 2,
+     "opportunities": 7
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 2
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 38
+    },
+    "warning_free": {
+     "folds": 127,
+     "opportunities": 162
+    }
+   },
+   "responses": {
+    "fold": 127,
+    "call": 91,
+    "raise": 9
+   },
+   "n": 227
+  },
+  "17": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 306,
+     "opportunities": 559
+    },
+    "half_checked_through": {
+     "folds": 107,
+     "opportunities": 156
+    },
+    "half_bettor_aggr": {
+     "folds": 13,
+     "opportunities": 34
+    },
+    "half_defender_aggr": {
+     "folds": 9,
+     "opportunities": 20
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 98
+    },
+    "warning_free": {
+     "folds": 306,
+     "opportunities": 413
+    }
+   },
+   "responses": {
+    "call": 221,
+    "fold": 306,
+    "raise": 32
+   },
+   "n": 559
+  },
+  "18": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 528,
+     "opportunities": 884
+    },
+    "half_checked_through": {
+     "folds": 214,
+     "opportunities": 294
+    },
+    "half_bettor_aggr": {
+     "folds": 25,
+     "opportunities": 47
+    },
+    "half_defender_aggr": {
+     "folds": 18,
+     "opportunities": 30
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 147
+    },
+    "warning_free": {
+     "folds": 528,
+     "opportunities": 689
+    }
+   },
+   "responses": {
+    "fold": 528,
+    "call": 322,
+    "raise": 34
+   },
+   "n": 884
+  },
+  "19": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 616,
+     "opportunities": 1168
+    },
+    "half_checked_through": {
+     "folds": 239,
+     "opportunities": 371
+    },
+    "half_bettor_aggr": {
+     "folds": 57,
+     "opportunities": 122
+    },
+    "half_defender_aggr": {
+     "folds": 38,
+     "opportunities": 81
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 236
+    },
+    "warning_free": {
+     "folds": 616,
+     "opportunities": 867
+    }
+   },
+   "responses": {
+    "call": 498,
+    "fold": 616,
+    "raise": 54
+   },
+   "n": 1168
+  },
+  "20": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "21": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "22": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "23": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 43,
+     "opportunities": 62
+    },
+    "half_checked_through": {
+     "folds": 28,
+     "opportunities": 34
+    },
+    "half_bettor_aggr": {
+     "folds": 3,
+     "opportunities": 4
+    },
+    "half_defender_aggr": {
+     "folds": 1,
+     "opportunities": 1
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 8
+    },
+    "warning_free": {
+     "folds": 43,
+     "opportunities": 53
+    }
+   },
+   "responses": {
+    "fold": 43,
+    "call": 16,
+    "raise": 3
+   },
+   "n": 62
+  },
+  "24": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 49,
+     "opportunities": 78
+    },
+    "half_checked_through": {
+     "folds": 23,
+     "opportunities": 31
+    },
+    "half_bettor_aggr": {
+     "folds": 3,
+     "opportunities": 6
+    },
+    "half_defender_aggr": {
+     "folds": 2,
+     "opportunities": 4
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 12
+    },
+    "warning_free": {
+     "folds": 49,
+     "opportunities": 63
+    }
+   },
+   "responses": {
+    "raise": 4,
+    "fold": 49,
+    "call": 25
+   },
+   "n": 78
+  },
+  "25": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 17,
+     "opportunities": 23
+    },
+    "half_checked_through": {
+     "folds": 7,
+     "opportunities": 9
+    },
+    "half_bettor_aggr": {
+     "folds": 1,
+     "opportunities": 1
+    },
+    "half_defender_aggr": {
+     "folds": 1,
+     "opportunities": 1
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 17,
+     "opportunities": 18
+    }
+   },
+   "responses": {
+    "fold": 17,
+    "call": 5,
+    "raise": 1
+   },
+   "n": 23
+  },
+  "26": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "27": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_checked_through": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_bettor_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "half_defender_aggr": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 0
+    },
+    "warning_free": {
+     "folds": 0,
+     "opportunities": 0
+    }
+   },
+   "responses": {},
+   "n": 0
+  },
+  "28": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 57,
+     "opportunities": 80
+    },
+    "half_checked_through": {
+     "folds": 29,
+     "opportunities": 36
+    },
+    "half_bettor_aggr": {
+     "folds": 6,
+     "opportunities": 9
+    },
+    "half_defender_aggr": {
+     "folds": 2,
+     "opportunities": 3
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 10
+    },
+    "warning_free": {
+     "folds": 57,
+     "opportunities": 66
+    }
+   },
+   "responses": {
+    "fold": 57,
+    "call": 20,
+    "raise": 3
+   },
+   "n": 80
+  },
+  "29": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 90,
+     "opportunities": 142
+    },
+    "half_checked_through": {
+     "folds": 54,
+     "opportunities": 77
+    },
+    "half_bettor_aggr": {
+     "folds": 9,
+     "opportunities": 21
+    },
+    "half_defender_aggr": {
+     "folds": 6,
+     "opportunities": 9
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 25
+    },
+    "warning_free": {
+     "folds": 90,
+     "opportunities": 117
+    }
+   },
+   "responses": {
+    "call": 47,
+    "fold": 90,
+    "raise": 5
+   },
+   "n": 142
+  },
+  "30": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 86,
+     "opportunities": 135
+    },
+    "half_checked_through": {
+     "folds": 49,
+     "opportunities": 72
+    },
+    "half_bettor_aggr": {
+     "folds": 12,
+     "opportunities": 19
+    },
+    "half_defender_aggr": {
+     "folds": 6,
+     "opportunities": 10
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 21
+    },
+    "warning_free": {
+     "folds": 86,
+     "opportunities": 110
+    }
+   },
+   "responses": {
+    "fold": 86,
+    "call": 43,
+    "raise": 6
+   },
+   "n": 135
+  },
+  "31": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 92,
+     "opportunities": 151
+    },
+    "half_checked_through": {
+     "folds": 54,
+     "opportunities": 72
+    },
+    "half_bettor_aggr": {
+     "folds": 10,
+     "opportunities": 27
+    },
+    "half_defender_aggr": {
+     "folds": 7,
+     "opportunities": 10
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 27
+    },
+    "warning_free": {
+     "folds": 92,
+     "opportunities": 119
+    }
+   },
+   "responses": {
+    "fold": 92,
+    "call": 50,
+    "raise": 9
+   },
+   "n": 151
+  },
+  "32": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 109,
+     "opportunities": 161
+    },
+    "half_checked_through": {
+     "folds": 63,
+     "opportunities": 77
+    },
+    "half_bettor_aggr": {
+     "folds": 11,
+     "opportunities": 23
+    },
+    "half_defender_aggr": {
+     "folds": 10,
+     "opportunities": 12
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 23
+    },
+    "warning_free": {
+     "folds": 109,
+     "opportunities": 133
+    }
+   },
+   "responses": {
+    "call": 49,
+    "fold": 109,
+    "raise": 3
+   },
+   "n": 161
+  },
+  "33": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 108,
+     "opportunities": 173
+    },
+    "half_checked_through": {
+     "folds": 60,
+     "opportunities": 92
+    },
+    "half_bettor_aggr": {
+     "folds": 16,
+     "opportunities": 28
+    },
+    "half_defender_aggr": {
+     "folds": 3,
+     "opportunities": 6
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 29
+    },
+    "warning_free": {
+     "folds": 108,
+     "opportunities": 133
+    }
+   },
+   "responses": {
+    "call": 60,
+    "fold": 108,
+    "raise": 5
+   },
+   "n": 173
+  },
+  "34": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 178,
+     "opportunities": 287
+    },
+    "half_checked_through": {
+     "folds": 95,
+     "opportunities": 136
+    },
+    "half_bettor_aggr": {
+     "folds": 26,
+     "opportunities": 48
+    },
+    "half_defender_aggr": {
+     "folds": 17,
+     "opportunities": 25
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 52
+    },
+    "warning_free": {
+     "folds": 178,
+     "opportunities": 230
+    }
+   },
+   "responses": {
+    "fold": 178,
+    "raise": 12,
+    "call": 97
+   },
+   "n": 287
+  },
+  "35": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 688,
+     "opportunities": 1220
+    },
+    "half_checked_through": {
+     "folds": 299,
+     "opportunities": 455
+    },
+    "half_bettor_aggr": {
+     "folds": 71,
+     "opportunities": 141
+    },
+    "half_defender_aggr": {
+     "folds": 44,
+     "opportunities": 75
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 225
+    },
+    "warning_free": {
+     "folds": 688,
+     "opportunities": 925
+    }
+   },
+   "responses": {
+    "fold": 688,
+    "raise": 58,
+    "call": 474
+   },
+   "n": 1220
+  },
+  "36": {
+   "cohorts": {
+    "all_eligible": {
+     "folds": 592,
+     "opportunities": 1057
+    },
+    "half_checked_through": {
+     "folds": 266,
+     "opportunities": 394
+    },
+    "half_bettor_aggr": {
+     "folds": 52,
+     "opportunities": 100
+    },
+    "half_defender_aggr": {
+     "folds": 39,
+     "opportunities": 85
+    },
+    "defender_cards_known": {
+     "folds": 0,
+     "opportunities": 205
+    },
+    "warning_free": {
+     "folds": 592,
+     "opportunities": 815
+    }
+   },
+   "responses": {
+    "fold": 592,
+    "call": 421,
+    "raise": 44
+   },
+   "n": 1057
+  }
+ },
+ "two_shard": {
+  "cohorts": {
+   "all_eligible": {
+    "folds": 1280,
+    "opportunities": 2277
+   },
+   "half_checked_through": {
+    "folds": 565,
+    "opportunities": 849
+   },
+   "half_bettor_aggr": {
+    "folds": 123,
+    "opportunities": 241
+   },
+   "half_defender_aggr": {
+    "folds": 83,
+    "opportunities": 160
+   },
+   "defender_cards_known": {
+    "folds": 0,
+    "opportunities": 430
+   },
+   "warning_free": {
+    "folds": 1280,
+    "opportunities": 1740
+   }
+  },
+  "responses": {
+   "fold": 1280,
+   "raise": 102,
+   "call": 895
+  },
+  "n": 2277
+ },
+ "full_corpus": {
+  "cohorts": {
+   "all_eligible": {
+    "folds": 12570,
+    "opportunities": 22320
+   },
+   "half_checked_through": {
+    "folds": 5940,
+    "opportunities": 8880
+   },
+   "half_bettor_aggr": {
+    "folds": 1189,
+    "opportunities": 2363
+   },
+   "half_defender_aggr": {
+    "folds": 676,
+    "opportunities": 1246
+   },
+   "defender_cards_known": {
+    "folds": 0,
+    "opportunities": 4156
+   },
+   "warning_free": {
+    "folds": 12570,
+    "opportunities": 16879
+   }
+  },
+  "responses": {
+   "call": 8698,
+   "fold": 12570,
+   "raise": 1052
+  },
+  "n": 22320
+ },
+ "reference": {
+  "36": {
+   "all_eligible": [
+    592,
+    1057
+   ],
+   "half_checked_through": [
+    266,
+    394
+   ],
+   "half_bettor_aggr": [
+    52,
+    100
+   ],
+   "defender_cards_known": [
+    0,
+    205
+   ],
+   "warning_free": [
+    592,
+    815
+   ]
+  },
+  "35": {
+   "all_eligible": [
+    688,
+    1220
+   ],
+   "half_checked_through": [
+    299,
+    455
+   ],
+   "half_bettor_aggr": [
+    71,
+    141
+   ],
+   "defender_cards_known": [
+    0,
+    225
+   ],
+   "warning_free": [
+    688,
+    925
+   ]
+  }
+ }
+}

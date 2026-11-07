@@ -167,8 +167,61 @@ def main(argv: List[str] | None = None) -> int:
     a = sub.add_parser("agents", help="list built-in agents")
     a.set_defaults(fn=cmd_agents)
 
+    # Poker Mirror commands (see PLAN.md / CHECKLIST.md); each module owns its own argument parsing.
+    for name, help_text in MIRROR_COMMANDS.items():
+        sub.add_parser(name, help=help_text, add_help=False)
+
     args = ap.parse_args(argv)
     return args.fn(args)
+
+
+MIRROR_COMMANDS = {
+    "mirror-prepare": "scan the Takara shards: river spots, exhibit, manifests (pokersim.mirror_data)",
+    "mirror-cluster": "fit player types and run the type-prior gate (pokersim.mirror_styles)",
+    "mirror-train": "train a Q-learning bettor against a frozen twin (pokersim.mirror_rl)",
+    "mirror-evaluate": "matched comparison of two bettor policies (pokersim.mirror_rl)",
+    "mirror-check-ranges": "range readout and EV advisor checks (pokersim.mirror_advisor)",
+    "mirror-eval": "score the forecasters on the frozen test manifest (pokersim.mirror_eval)",
+    "mirror-benchmark": "personalised vs population bettor on matched deals (pokersim.mirror_rl)",
+    "mirror-sufficiency": "train the population bettor with three seeds and compare (pokersim.mirror_rl)",
+}
+
+
+def _dispatch_mirror(argv: List[str]) -> int | None:
+    """Route ``mirror-*`` commands straight to their module so flags pass through untouched."""
+    if not argv or argv[0] not in MIRROR_COMMANDS:
+        return None
+    name, rest = argv[0], argv[1:]
+    if name == "mirror-prepare":
+        from .mirror_data import main as m
+        return m(rest)
+    if name == "mirror-cluster":
+        from .mirror_styles import main as m
+        return m(rest)
+    if name == "mirror-check-ranges":
+        from .mirror_advisor import main as m
+        return m(rest)
+    if name == "mirror-eval":
+        from .mirror_eval import main as m
+        return m(rest)
+    from .mirror_rl import main as m
+    return m([name.replace("mirror-", "")] + rest)  # train | evaluate | benchmark
+
+
+_original_main = main
+
+
+def main(argv: List[str] | None = None) -> int:  # noqa: F811 - wraps the argparse main
+    argv = list(sys.argv[1:] if argv is None else argv)
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+    rc = _dispatch_mirror(argv)
+    if rc is not None:
+        return rc
+    return _original_main(argv)
 
 
 if __name__ == "__main__":

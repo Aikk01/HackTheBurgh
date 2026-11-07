@@ -1,0 +1,30 @@
+{
+ "by_context": {
+  "checked_through": {
+   "fold": 4782,
+   "call": 2115,
+   "raise": 215
+  },
+  "bettor_aggr": {
+   "fold": 914,
+   "call": 756,
+   "raise": 173
+  },
+  "defender_aggr": {
+   "fold": 518,
+   "call": 408,
+   "raise": 44
+  }
+ },
+ "pooled": {
+  "fold": 6214,
+  "call": 3279,
+  "raise": 432
+ },
+ "revision": "6acb5afb6f43082e6a468fde578890d9188be393",
+ "split": "train",
+ "n_train": 9925,
+ "n_test": 2482,
+ "generated": "2026-11-07T18:12:19",
+ "prior_pseudo_count": 1
+}

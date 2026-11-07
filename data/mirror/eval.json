@@ -1,0 +1,512 @@
+{
+ "generated": "2026-11-07T18:37:13",
+ "train": 9925,
+ "test": 2482,
+ "prior_strength_selection": {
+  "candidates": {
+   "2": 0.79255,
+   "8": 0.78086,
+   "24": 0.7797
+  },
+  "chosen": 24,
+  "windows": 4
+ },
+ "frozen": {
+  "ladder": [
+   {
+    "bin": "0",
+    "n": 1283,
+    "log_loss": {
+     "pooled": 0.7754511726300521,
+     "population": 0.7772252007833854,
+     "personal": 0.7772252007833854
+    },
+    "brier": {
+     "pooled": 0.2335657574792544,
+     "population": 0.2358481151343684,
+     "personal": 0.2358481151343684
+    }
+   },
+   {
+    "bin": "1-3",
+    "n": 578,
+    "log_loss": {
+     "pooled": 0.8504848230087562,
+     "population": 0.8301960779365006,
+     "personal": 0.8301379032213435
+    },
+    "brier": {
+     "pooled": 0.24494928745057987,
+     "population": 0.23718715518724362,
+     "personal": 0.23725426320193405
+    }
+   },
+   {
+    "bin": "4-15",
+    "n": 480,
+    "log_loss": {
+     "pooled": 0.7673465774290642,
+     "population": 0.7593921844997846,
+     "personal": 0.7550738298181242
+    },
+    "brier": {
+     "pooled": 0.2328009239043271,
+     "population": 0.2282858942760608,
+     "personal": 0.22733009862270873
+    }
+   },
+   {
+    "bin": "16-63",
+    "n": 109,
+    "log_loss": {
+     "pooled": 0.7664996115333038,
+     "population": 0.738492510692533,
+     "personal": 0.6951515714749728
+    },
+    "brier": {
+     "pooled": 0.22079266397411398,
+     "population": 0.20456800823520677,
+     "personal": 0.1936604898050117
+    }
+   },
+   {
+    "bin": "64+",
+    "n": 32,
+    "log_loss": {
+     "pooled": 0.7080641864021149,
+     "population": 0.6793025930111044,
+     "personal": 0.6739532164745174
+    },
+    "brier": {
+     "pooled": 0.23437601455702656,
+     "population": 0.22193331921829598,
+     "personal": 0.2241708699252502
+    }
+   }
+  ],
+  "overall": {
+   "n": 2482,
+   "players": 1157,
+   "log_loss": {
+    "pooled": 0.7900954677563927,
+    "population": 0.7831486224230938,
+    "personal": 0.7803275999990638
+   },
+   "brier": {
+    "pooled": 0.2355183043132147,
+    "population": 0.2331443657456703,
+    "personal": 0.23252498163310514
+   }
+  },
+  "paired_lift_log_loss": {
+   "pooled": {
+    "lift_vs_population": -0.00695,
+    "ci95": [
+     -0.01455,
+     -0.00019
+    ],
+    "better": false
+   },
+   "personal": {
+    "lift_vs_population": 0.00282,
+    "ci95": [
+     0.00015,
+     0.00596
+    ],
+    "better": true
+   }
+  },
+  "online": false,
+  "known_players": {
+   "n": 1199,
+   "log_loss": {
+    "pooled": 0.8057657185045952,
+    "population": 0.7894870293986952,
+    "personal": 0.783647348284064
+   }
+  },
+  "new_players": {
+   "n": 1283,
+   "log_loss": {
+    "pooled": 0.7754511726300521,
+    "population": 0.7772252007833854,
+    "personal": 0.7772252007833854
+   }
+  },
+  "style_known_decisions": 0,
+  "prior_strength": 24.0
+ },
+ "online_adaptation": {
+  "ladder": [
+   {
+    "bin": "0",
+    "n": 719,
+    "log_loss": {
+     "pooled": 0.7678371202487128,
+     "population": 0.764553323234435,
+     "personal": 0.764553323234435
+    },
+    "brier": {
+     "pooled": 0.23240441290552516,
+     "population": 0.23246069689471818,
+     "personal": 0.23246069689471818
+    }
+   },
+   {
+    "bin": "1-3",
+    "n": 836,
+    "log_loss": {
+     "pooled": 0.8003569903182441,
+     "population": 0.7972206939260086,
+     "personal": 0.7945484547342688
+    },
+    "brier": {
+     "pooled": 0.2354310992047678,
+     "population": 0.23620358098802202,
+     "personal": 0.23485358005101964
+    }
+   },
+   {
+    "bin": "4-15",
+    "n": 721,
+    "log_loss": {
+     "pooled": 0.8070534200795644,
+     "population": 0.7958916632731187,
+     "personal": 0.7862474281544495
+    },
+    "brier": {
+     "pooled": 0.24018702861552932,
+     "population": 0.2340831114686533,
+     "personal": 0.2306473967305185
+    }
+   },
+   {
+    "bin": "16-63",
+    "n": 174,
+    "log_loss": {
+     "pooled": 0.7775864814037722,
+     "population": 0.7586722363801334,
+     "personal": 0.7139331638301587
+    },
+    "brier": {
+     "pooled": 0.22966884708918917,
+     "population": 0.2194430541585081,
+     "personal": 0.20457601486116478
+    }
+   },
+   {
+    "bin": "64+",
+    "n": 32,
+    "log_loss": {
+     "pooled": 0.7080641864021149,
+     "population": 0.6793025930111044,
+     "personal": 0.6774244429210242
+    },
+    "brier": {
+     "pooled": 0.23437601455702656,
+     "population": 0.22193331921829598,
+     "personal": 0.22606426132188515
+    }
+   }
+  ],
+  "overall": {
+   "n": 2482,
+   "players": 1157,
+   "log_loss": {
+    "pooled": 0.7900954677563927,
+    "population": 0.7831486224230938,
+    "personal": 0.7762863400252562
+   },
+   "brier": {
+    "pooled": 0.2355183043132147,
+    "population": 0.2331443657456703,
+    "personal": 0.23070261481901755
+   }
+  },
+  "paired_lift_log_loss": {
+   "pooled": {
+    "lift_vs_population": -0.00695,
+    "ci95": [
+     -0.01455,
+     -0.00019
+    ],
+    "better": false
+   },
+   "personal": {
+    "lift_vs_population": 0.00686,
+    "ci95": [
+     0.00289,
+     0.01182
+    ],
+    "better": true
+   }
+  },
+  "online": true,
+  "known_players": {
+   "n": 1763,
+   "log_loss": {
+    "pooled": 0.79917303545805,
+    "population": 0.7907322980422917,
+    "personal": 0.7810713877124942
+   }
+  },
+  "new_players": {
+   "n": 719,
+   "log_loss": {
+    "pooled": 0.7678371202487128,
+    "population": 0.764553323234435,
+    "personal": 0.764553323234435
+   }
+  },
+  "style_known_decisions": 0,
+  "prior_strength": 24.0
+ },
+ "outside_shards_35_36": {
+  "ladder": [
+   {
+    "bin": "0",
+    "n": 1283,
+    "log_loss": {
+     "pooled": 0.7754511726300521,
+     "population": 0.7772252007833854,
+     "personal": 0.7772252007833854
+    },
+    "brier": {
+     "pooled": 0.2335657574792544,
+     "population": 0.2358481151343684,
+     "personal": 0.2358481151343684
+    }
+   },
+   {
+    "bin": "1-3",
+    "n": 578,
+    "log_loss": {
+     "pooled": 0.8504848230087562,
+     "population": 0.8301960779365006,
+     "personal": 0.8301379032213435
+    },
+    "brier": {
+     "pooled": 0.24494928745057987,
+     "population": 0.23718715518724362,
+     "personal": 0.23725426320193405
+    }
+   },
+   {
+    "bin": "4-15",
+    "n": 480,
+    "log_loss": {
+     "pooled": 0.7673465774290642,
+     "population": 0.7593921844997846,
+     "personal": 0.7550738298181242
+    },
+    "brier": {
+     "pooled": 0.2328009239043271,
+     "population": 0.2282858942760608,
+     "personal": 0.22733009862270873
+    }
+   },
+   {
+    "bin": "16-63",
+    "n": 109,
+    "log_loss": {
+     "pooled": 0.7664996115333038,
+     "population": 0.738492510692533,
+     "personal": 0.6951515714749728
+    },
+    "brier": {
+     "pooled": 0.22079266397411398,
+     "population": 0.20456800823520677,
+     "personal": 0.1936604898050117
+    }
+   },
+   {
+    "bin": "64+",
+    "n": 32,
+    "log_loss": {
+     "pooled": 0.7080641864021149,
+     "population": 0.6793025930111044,
+     "personal": 0.6739532164745174
+    },
+    "brier": {
+     "pooled": 0.23437601455702656,
+     "population": 0.22193331921829598,
+     "personal": 0.2241708699252502
+    }
+   }
+  ],
+  "overall": {
+   "n": 2482,
+   "players": 1157,
+   "log_loss": {
+    "pooled": 0.7900954677563927,
+    "population": 0.7831486224230938,
+    "personal": 0.7803275999990638
+   },
+   "brier": {
+    "pooled": 0.2355183043132147,
+    "population": 0.2331443657456703,
+    "personal": 0.23252498163310514
+   }
+  },
+  "paired_lift_log_loss": {
+   "pooled": {
+    "lift_vs_population": -0.00695,
+    "ci95": [
+     -0.01455,
+     -0.00019
+    ],
+    "better": false
+   },
+   "personal": {
+    "lift_vs_population": 0.00282,
+    "ci95": [
+     0.00015,
+     0.00596
+    ],
+    "better": true
+   }
+  },
+  "online": false,
+  "known_players": {
+   "n": 1199,
+   "log_loss": {
+    "pooled": 0.8057657185045952,
+    "population": 0.7894870293986952,
+    "personal": 0.783647348284064
+   }
+  },
+  "new_players": {
+   "n": 1283,
+   "log_loss": {
+    "pooled": 0.7754511726300521,
+    "population": 0.7772252007833854,
+    "personal": 0.7772252007833854
+   }
+  },
+  "style_known_decisions": 0,
+  "prior_strength": 24.0
+ },
+ "ladder": [
+  {
+   "bin": "0",
+   "n": 1283,
+   "log_loss": {
+    "pooled": 0.7754511726300521,
+    "population": 0.7772252007833854,
+    "personal": 0.7772252007833854
+   },
+   "brier": {
+    "pooled": 0.2335657574792544,
+    "population": 0.2358481151343684,
+    "personal": 0.2358481151343684
+   }
+  },
+  {
+   "bin": "1-3",
+   "n": 578,
+   "log_loss": {
+    "pooled": 0.8504848230087562,
+    "population": 0.8301960779365006,
+    "personal": 0.8301379032213435
+   },
+   "brier": {
+    "pooled": 0.24494928745057987,
+    "population": 0.23718715518724362,
+    "personal": 0.23725426320193405
+   }
+  },
+  {
+   "bin": "4-15",
+   "n": 480,
+   "log_loss": {
+    "pooled": 0.7673465774290642,
+    "population": 0.7593921844997846,
+    "personal": 0.7550738298181242
+   },
+   "brier": {
+    "pooled": 0.2328009239043271,
+    "population": 0.2282858942760608,
+    "personal": 0.22733009862270873
+   }
+  },
+  {
+   "bin": "16-63",
+   "n": 109,
+   "log_loss": {
+    "pooled": 0.7664996115333038,
+    "population": 0.738492510692533,
+    "personal": 0.6951515714749728
+   },
+   "brier": {
+    "pooled": 0.22079266397411398,
+    "population": 0.20456800823520677,
+    "personal": 0.1936604898050117
+   }
+  },
+  {
+   "bin": "64+",
+   "n": 32,
+   "log_loss": {
+    "pooled": 0.7080641864021149,
+    "population": 0.6793025930111044,
+    "personal": 0.6739532164745174
+   },
+   "brier": {
+    "pooled": 0.23437601455702656,
+    "population": 0.22193331921829598,
+    "personal": 0.2241708699252502
+   }
+  }
+ ],
+ "type_prior_used": false,
+ "label": "historical, frozen 20% test; personal counts fitted only on earlier training hands",
+ "pluribus": {
+  "spots": 701,
+  "by_response": {
+   "fold": {
+    "n": 417,
+    "mean_equity": 0.5091,
+    "ci95": [
+     0.4875,
+     0.5282
+    ],
+    "buckets": {
+     "medium": 216,
+     "strong": 108,
+     "weak": 93
+    }
+   },
+   "call": {
+    "n": 219,
+    "mean_equity": 0.7358,
+    "ci95": [
+     0.7136,
+     0.7585
+    ],
+    "buckets": {
+     "weak": 3,
+     "strong": 145,
+     "medium": 71
+    }
+   },
+   "raise": {
+    "n": 65,
+    "mean_equity": 0.839,
+    "ci95": [
+     0.7819,
+     0.8907
+    ],
+    "buckets": {
+     "strong": 52,
+     "medium": 10,
+     "weak": 3
+    }
+   }
+  },
+  "fold_below_call": true,
+  "call_below_raise": true,
+  "monotone": true,
+  "half_pot_band": 211,
+  "label": "directional check: every card known, no showdown selection; intervals are wide"
+ }
+}

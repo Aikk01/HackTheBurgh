@@ -97,6 +97,9 @@
     } else if (name === "replay") {
       $("#actionBar").hidden = true;
       if (S.replay.data) renderReplayStep(); else showOverlay(true, "Load a hand history to start replaying.");
+    } else if (name === "mirror" || name === "evidence") {
+      $("#actionBar").hidden = true;
+      if (window.Mirror) window.Mirror.onShow(name);
     } else {
       $("#actionBar").hidden = true;
       if (name === "evaluate") $("#evalStatus").textContent = S.replay.list ? `${S.replay.list.count} hands loaded (${S.replay.list.label})` : "Load a hand history in Replay first.";
@@ -1129,6 +1132,8 @@
       await api("/api/simulate/start", { agents, hands: Number(params.get("hands") || 100), seed: 1 });
       await pollJob("simulate");
     }
+    if (params.has("mirror")) setTab("mirror");   // #mirror=<step>&deal=1 | &spot=1 | &reveal=1 (handled in mirror.js)
+    if (params.has("evidence")) setTab("evidence");
   }
 
   // Poll a background job (fallback when live updates are unavailable).
@@ -1145,6 +1150,9 @@
       return;
     }
   }
+
+  // Shared helpers for the Mirror module (web/mirror.js).
+  window.PokerSim = { api, el, cardEl, cardsInline, renderTable, toast, fmt, pct, setTab, showOverlay, tile, seqColor, state: S };
 
   boot();
 })();

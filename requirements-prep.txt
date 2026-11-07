@@ -1,0 +1,4 @@
+# Offline data preparation only (never needed at demo time).
+pyarrow>=15
+numpy>=1.26
+scikit-learn>=1.4

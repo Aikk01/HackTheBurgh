@@ -803,6 +803,15 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"error": f"{type(exc).__name__}: {exc}"}, 500)
 
     def _get_api(self, path: str, qs: Dict[str, str]) -> Any:
+        if path.startswith("/api/mirror/"):
+            from . import mirror_api
+            try:
+                out = mirror_api.get(path, qs)
+            except (ValueError, KeyError) as exc:
+                raise ApiError(str(exc))
+            if out is None:
+                raise ApiError("not found", 404)
+            return out
         if path == "/api/agents":
             try:
                 import anthropic  # type: ignore # noqa: F401
@@ -862,6 +871,15 @@ class Handler(BaseHTTPRequestHandler):
         raise ApiError("not found", 404)
 
     def _post_api(self, path: str, body: Dict[str, Any]) -> Any:
+        if path.startswith("/api/mirror/"):
+            from . import mirror_api
+            try:
+                out = mirror_api.post(path, body)
+            except (ValueError, KeyError) as exc:
+                raise ApiError(str(exc))
+            if out is None:
+                raise ApiError("not found", 404)
+            return out
         if path == "/api/game/new":
             return APP.game.new_game(body)
         if path == "/api/game/next":
@@ -887,9 +905,19 @@ class Handler(BaseHTTPRequestHandler):
         raise ApiError("not found", 404)
 
 
+class _Server(ThreadingHTTPServer):
+    # On Windows SO_REUSEADDR lets a second server bind a port that is already taken, and requests keep
+    # reaching the stale process.  Refuse instead, so an old server cannot silently shadow new code.
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
+
+
 def serve(host: str = "127.0.0.1", port: int = 8000, open_browser: bool = False) -> None:
-    httpd = ThreadingHTTPServer((host, port), Handler)
-    httpd.daemon_threads = True
+    try:
+        httpd = _Server((host, port), Handler)
+    except OSError as exc:
+        print(f"cannot listen on {host}:{port} ({exc}). Another pokersim server is probably running: stop it or pass --port.")
+        raise SystemExit(1)
     url = f"http://{host}:{port}/"
     print(f"pokersim serving on {url}  (Ctrl+C to stop)")
     if open_browser:

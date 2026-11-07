@@ -1,0 +1,81 @@
+[1]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [82.9, 56]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'p2 cbr 2.00',
+  'p1 cc',
+  'd db 6dAc2h',
+  'p1 cc',
+  'p2 cbr 2',
+  'p1 cbr 8',
+  'p2 cc',
+  'd db 2c',
+  'p1 cc',
+  'p2 cc',
+  'd db 4c',
+  'p1 cc',
+  'p2 cbr 10',
+  'p1 f',
+]
+venue = 'Absolute Poker'
+table = 'MERCED'
+time = 12:42:33
+time_zone_abbreviation = 'ET'
+currency_symbol = '$'
+source_file = 'handhq/ABS-2009-07-01_2009-07-23_100NLH_OBFU/1/abs NLH handhq_119-OBFUSCATED.phhs'
+source_type = 'phhs'
+hand = '3039372300'
+day = 7
+month = 7
+year = 2009
+hand_number_in_file = 523
+seats = [6, 4]
+players = ['IiftSxvncZUfpSXujcT+cA', 'YFI2SeQk0yG8XhG8k1LkOw']
+winnings = [0, 19.5]
+
+[2]
+variant = 'NT'
+ante_trimming_status = false
+antes = [0, 0]
+blinds_or_straddles = [0.5, 1]
+min_bet = 1
+starting_stacks = [107.8, 77.6]
+actions = [
+  'd dh p1 ????',
+  'd dh p2 ????',
+  'p2 cbr 3.00',
+  'p1 cc',
+  'd db 8h2h4s',
+  'p1 cc',
+  'p2 cc',
+  'd db Ac',
+  'p1 cc',
+  'p2 cbr 3',
+  'p1 cc',
+  'd db 3d',
+  'p1 cc',
+  'p2 cbr 6',
+  'p1 cc',
+  'p2 sm Jc6c',
+  'p1 sm 8sQs',
+]
+venue = 'Absolute Poker'
+table = 'MERCED'
+time = 12:56:48
+time_zone_abbreviation = 'ET'
+currency_symbol = '$'
+source_file = 'handhq/ABS-2009-07-01_2009-07-23_100NLH_OBFU/1/abs NLH handhq_119-OBFUSCATED.phhs'
+source_type = 'phhs'
+hand = '3039405280'
+day = 7
+month = 7
+year = 2009
+hand_number_in_file = 823
+seats = [6, 4]
+players = ['IiftSxvncZUfpSXujcT+cA', 'YFI2SeQk0yG8XhG8k1LkOw']
