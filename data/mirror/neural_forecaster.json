@@ -1,0 +1,228 @@
+{
+ "generated": "2026-11-07T23:02:54",
+ "device": "NVIDIA GeForce RTX 5090",
+ "torch": "2.11.0+cu128",
+ "quick": false,
+ "rows": {
+  "fit": 389182,
+  "validation": 12536,
+  "test": 31586
+ },
+ "inputs": {
+  "public_features": 43,
+  "history_inputs": 8,
+  "players_with_embedding": 94962
+ },
+ "runs": [
+  {
+   "config": 0,
+   "emb": 0,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 1,
+   "validation_log_loss": 0.79522,
+   "best_epoch": 2,
+   "seconds": 1.3
+  },
+  {
+   "config": 0,
+   "emb": 0,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 2,
+   "validation_log_loss": 0.7895,
+   "best_epoch": 7,
+   "seconds": 1.1
+  },
+  {
+   "config": 0,
+   "emb": 0,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 3,
+   "validation_log_loss": 0.78966,
+   "best_epoch": 8,
+   "seconds": 1.2
+  },
+  {
+   "config": 1,
+   "emb": 16,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 1,
+   "validation_log_loss": 0.79672,
+   "best_epoch": 2,
+   "seconds": 0.7
+  },
+  {
+   "config": 1,
+   "emb": 16,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 2,
+   "validation_log_loss": 0.79469,
+   "best_epoch": 5,
+   "seconds": 1.2
+  },
+  {
+   "config": 1,
+   "emb": 16,
+   "hidden": 128,
+   "dropout": 0.1,
+   "seed": 3,
+   "validation_log_loss": 0.79531,
+   "best_epoch": 4,
+   "seconds": 1.0
+  },
+  {
+   "config": 2,
+   "emb": 32,
+   "hidden": 256,
+   "dropout": 0.15,
+   "seed": 1,
+   "validation_log_loss": 0.79754,
+   "best_epoch": 2,
+   "seconds": 0.7
+  },
+  {
+   "config": 2,
+   "emb": 32,
+   "hidden": 256,
+   "dropout": 0.15,
+   "seed": 2,
+   "validation_log_loss": 0.79774,
+   "best_epoch": 3,
+   "seconds": 0.8
+  },
+  {
+   "config": 2,
+   "emb": 32,
+   "hidden": 256,
+   "dropout": 0.15,
+   "seed": 3,
+   "validation_log_loss": 0.79794,
+   "best_epoch": 3,
+   "seconds": 0.8
+  },
+  {
+   "config": 3,
+   "emb": 64,
+   "hidden": 256,
+   "dropout": 0.25,
+   "seed": 1,
+   "validation_log_loss": 0.79879,
+   "best_epoch": 2,
+   "seconds": 0.7
+  },
+  {
+   "config": 3,
+   "emb": 64,
+   "hidden": 256,
+   "dropout": 0.25,
+   "seed": 2,
+   "validation_log_loss": 0.80006,
+   "best_epoch": 2,
+   "seconds": 0.7
+  },
+  {
+   "config": 3,
+   "emb": 64,
+   "hidden": 256,
+   "dropout": 0.25,
+   "seed": 3,
+   "validation_log_loss": 0.79988,
+   "best_epoch": 3,
+   "seconds": 0.8
+  }
+ ],
+ "chosen": {
+  "config": 0,
+  "emb": 0,
+  "hidden": 128,
+  "dropout": 0.1,
+  "seeds_averaged": 3,
+  "validation_log_loss": 0.79146
+ },
+ "test_log_loss": {
+  "neural": 0.79024,
+  "population": 0.81824,
+  "situation": 0.79292,
+  "personal_online": 0.81463,
+  "situation_personal_online": 0.78986
+ },
+ "neural_lift_vs": {
+  "population": {
+   "mean": 0.028,
+   "ci95": [
+    0.02558,
+    0.03067
+   ],
+   "better": true,
+   "worse": false,
+   "n": 31586,
+   "players": 15138
+  },
+  "situation": {
+   "mean": 0.00268,
+   "ci95": [
+    0.00099,
+    0.00439
+   ],
+   "better": true,
+   "worse": false,
+   "n": 31586,
+   "players": 15138
+  },
+  "personal_online": {
+   "mean": 0.02439,
+   "ci95": [
+    0.02227,
+    0.02685
+   ],
+   "better": true,
+   "worse": false,
+   "n": 31586,
+   "players": 15138
+  },
+  "situation_personal_online": {
+   "mean": -0.00038,
+   "ci95": [
+    -0.00195,
+    0.00132
+   ],
+   "better": false,
+   "worse": false,
+   "n": 31586,
+   "players": 15138
+  }
+ },
+ "bluff_chips_per_decision": {
+  "neural": 36.231,
+  "population": 36.139,
+  "situation_personal_online": 36.255
+ },
+ "bluff_vs_population": {
+  "mean": 0.09188,
+  "ci95": [
+   0.02665,
+   0.15594
+  ],
+  "better": true,
+  "worse": false,
+  "n": 31586,
+  "players": 15138
+ },
+ "bluff_vs_situation_personal": {
+  "mean": -0.02348,
+  "ci95": [
+   -0.122,
+   0.06919
+  ],
+  "better": false,
+  "worse": false,
+  "n": 31586,
+  "players": 15138
+ },
+ "seconds": 12.0,
+ "label": "frozen test half of the main cohort; lifts are the reduction in log loss against each CPU forecaster on the same decisions (positive means the network is better), 95% intervals from resampling players"
+}
