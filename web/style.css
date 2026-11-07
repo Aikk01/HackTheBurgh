@@ -245,6 +245,29 @@ table.mini td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-var
 .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--surface-3); border: 1px solid var(--line-2); padding: 8px 14px; border-radius: 8px; z-index: 60; box-shadow: var(--shadow); }
 .toast.err { border-color: var(--critical); }
 
+/* AI advisor (Play tab) */
+.advisor { border: 1px solid var(--accent); border-radius: 8px; padding: 8px 10px; background: var(--surface-2); }
+.advisor.off { border-color: var(--line); }
+.advisor.off .advisor-body { display: none; }
+.advisor-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.advisor-title { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+.advisor-rec { display: flex; align-items: baseline; gap: 8px; font-size: 18px; font-weight: 700; }
+.advisor-rec .conf { font-size: 12px; font-weight: 400; }
+.advisor-toggle { margin-left: auto; }
+.rec-action.rec-fold { color: #ff9a8f; }
+.rec-action.rec-check, .rec-action.rec-call { color: #9fd0ff; }
+.rec-action.rec-raise { color: #ffc46b; }
+.advisor-stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; margin-top: 6px; }
+.advisor-stats b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.advisor-stats .pos { color: #7fdc7f; } .advisor-stats .neg { color: #ff9a8f; }
+.eq-meter { position: relative; height: 8px; background: var(--surface-3); border-radius: 4px; margin: 6px 0; overflow: visible; }
+.eq-fill { height: 100%; background: var(--seq-400); border-radius: 4px; }
+.eq-need { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--warning); }
+.advisor-reason { font-size: 13px; line-height: 1.5; }
+.advisor-opps { font-size: 12px; margin-top: 4px; }
+.btn.recommended { box-shadow: 0 0 0 2px var(--warning); position: relative; }
+.btn.recommended::after { content: "AI"; position: absolute; top: -8px; right: -6px; font-size: 9px; font-weight: 700; background: var(--warning); color: #111; border-radius: 4px; padding: 0 3px; }
+
 /* Poker Mirror */
 .mstep { display: none; } .mstep.active { display: block; }
 .demo-hand { border-top: 1px solid var(--line); padding: 8px 0; }

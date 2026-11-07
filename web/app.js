@@ -379,6 +379,67 @@
       input.dataset.handId = hand.hand_id;
       $("#btnRaise").firstChild.textContent = (legal.raise_kind === "bet" ? "Bet " : "Raise to ");
     }
+    requestAdvice(st);
+  }
+
+  // ------------------------------------------------------------ AI advisor for the human seat
+  function adviceKey(st) { const h = st.hand; return `${h.hand_id}|${h.actor}|${(st.log || []).length}`; }
+  async function requestAdvice(st) {
+    const box = $("#advisor");
+    let on = true;
+    try { on = localStorage.getItem("advisorOn") !== "0"; } catch (e) { /* ignore */ }
+    $("#advisorOn").checked = on;
+    box.classList.toggle("off", !on);
+    clearRecommended();
+    if (!on) { $("#advisorRec").textContent = "非表示"; $("#advisorBody").innerHTML = ""; $("#advisorFollow").hidden = true; return; }
+    const key = adviceKey(st);
+    if (S.advice && S.advice.key === key) { if (S.advice.data) renderAdvice(S.advice.data); return; }
+    S.advice = { key, data: null };
+    $("#advisorRec").textContent = "計算中…";
+    $("#advisorBody").innerHTML = "";
+    $("#advisorFollow").hidden = true;
+    try {
+      const a = await api("/api/game/advice");
+      if (!S.advice || S.advice.key !== key) return;  // the hand moved on while we were computing
+      S.advice.data = a;
+      renderAdvice(a);
+    } catch (e) { $("#advisorRec").textContent = "取得できませんでした"; $("#advisorBody").textContent = e.message; }
+  }
+  function clearRecommended() { ["#btnFold", "#btnCheckCall", "#btnRaise"].forEach((s) => $(s).classList.remove("recommended")); }
+  function renderAdvice(a) {
+    clearRecommended();
+    const body = $("#advisorBody");
+    body.innerHTML = "";
+    if (!a.available) { $("#advisorRec").textContent = "—"; body.textContent = a.reason_ja || ""; $("#advisorFollow").hidden = true; return; }
+    const r = a.recommend;
+    const conf = { high: "自信: 高", medium: "自信: 中", close: "微妙な場面" }[a.confidence] || "";
+    $("#advisorRec").innerHTML = "";
+    $("#advisorRec").appendChild(el("span", { class: "rec-action rec-" + (r.action === "all_in" ? "raise" : r.action === "bet" ? "raise" : r.action) },
+      a.recommend_ja + (r.amount && (r.action === "raise" || r.action === "bet" || r.action === "all_in") ? ` ${fmt(r.amount)}` : "")));
+    $("#advisorRec").appendChild(el("span", { class: "muted conf", text: conf }));
+    const btn = r.action === "fold" ? "#btnFold" : (r.action === "check" || r.action === "call") ? "#btnCheckCall" : "#btnRaise";
+    $(btn).classList.add("recommended");
+    if (btn === "#btnRaise" && r.amount) setRaise(r.amount);
+    $("#advisorFollow").hidden = false;
+    // equity vs the price of calling, as one bar
+    const meter = el("div", { class: "eq-meter" },
+      el("div", { class: "eq-fill", style: `width:${(100 * a.equity).toFixed(1)}%` }),
+      a.to_call > 0 ? el("div", { class: "eq-need", style: `left:${(100 * a.pot_odds).toFixed(1)}%`, title: "コールに必要な勝率" }) : null);
+    body.appendChild(el("div", { class: "advisor-stats" },
+      el("div", {}, el("b", { text: pct(a.equity, 0) }), el("span", { class: "muted", text: ` 勝率（相手${a.opponents_in_hand}人）` })),
+      a.to_call > 0 ? el("div", {}, el("b", { text: pct(a.pot_odds, 0) }), el("span", { class: "muted", text: " コールに必要な勝率" })) : el("div", {}, el("span", { class: "muted", text: "コール不要" })),
+      a.to_call > 0 ? el("div", {}, el("b", { class: a.call_ev >= 0 ? "pos" : "neg", text: (a.call_ev >= 0 ? "+" : "") + fmt(a.call_ev) }), el("span", { class: "muted", text: " コールの期待値（チップ）" })) : null));
+    body.appendChild(meter);
+    body.appendChild(el("div", { class: "advisor-reason", text: a.reason_ja }));
+    if (a.opponents && a.opponents.length) body.appendChild(el("div", { class: "muted advisor-opps", text: "残っている相手: " + a.opponents.map((o) => `${o.name}（${o.kind}・${o.position}）`).join("、") }));
+  }
+  function followAdvice() {
+    const a = S.advice && S.advice.data;
+    if (!a || !a.available || $("#actionBar").hidden) return;
+    const r = a.recommend;
+    if (r.action === "fold") humanAct("fold");
+    else if (r.action === "check" || r.action === "call") humanAct("call");
+    else humanAct("raise", r.action === "all_in" ? S.game.hand.legal.max_raise_to : Number(r.amount));
   }
 
   function setRaise(v) {
@@ -437,6 +498,12 @@
     $("#nextHand").addEventListener("click", async () => { try { onGameState(await api("/api/game/next", {})); } catch (e) { toast(e.message, true); } });
     $("#revealToggle").addEventListener("change", async (e) => { try { onGameState(await api("/api/game/reveal", { reveal: e.target.checked })); } catch (err) { toast(err.message, true); } });
     $("#btnFold").addEventListener("click", () => humanAct("fold"));
+    $("#advisorFollow").addEventListener("click", followAdvice);
+    $("#advisorOn").addEventListener("change", (e) => {
+      try { localStorage.setItem("advisorOn", e.target.checked ? "1" : "0"); } catch (err) { /* ignore */ }
+      S.advice = null;
+      if (S.game && S.game.active) requestAdvice(S.game);
+    });
     $("#btnCheckCall").addEventListener("click", () => humanAct("call"));
     $("#btnRaise").addEventListener("click", () => humanAct("raise", Number($("#raiseInput").value)));
     $("#raiseSlider").addEventListener("input", (e) => setRaise(Number(e.target.value)));
@@ -452,7 +519,8 @@
     document.addEventListener("keydown", (e) => {
       if (e.target.matches("input, select, textarea")) return;
       if (S.tab === "play" && !$("#actionBar").hidden) {
-        if (e.key === "f" || e.key === "F") humanAct("fold");
+        if (e.key === "a" || e.key === "A") followAdvice();
+        else if (e.key === "f" || e.key === "F") humanAct("fold");
         else if (e.key === "c" || e.key === "C") humanAct("call");
         else if (e.key === "r" || e.key === "R" || e.key === "Enter") { if (!$(".raise-group").hidden) humanAct("raise", Number($("#raiseInput").value)); }
       } else if (S.tab === "play" && S.game && S.game.active && (S.game.hand.status === "finished" || S.game.hand.status === "incomplete") && (e.key === "Enter" || e.key === " ")) {

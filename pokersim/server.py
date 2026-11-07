@@ -340,6 +340,30 @@ class GameSession:
         else:
             self.bus.publish({"type": "game", "state": self.state()})
 
+    # -- live advice for a human seat ----------------------------------------
+    def advice(self) -> Dict[str, Any]:
+        from .advisor import advise
+
+        with self.lock:
+            hand = self.hand
+            if hand is None or hand.status != "betting" or hand.actor is None:
+                return {"available": False, "reason_ja": "今は判断する場面ではありません。"}
+            actor = hand.actor
+            if self.agents.get(self._seat_of(actor)) is not None:
+                return {"available": False, "reason_ja": "ボットの手番です。"}
+            obs = hand.observation(actor)
+            opponents = []
+            for p in obs["players"]:
+                if p["is_hero"] or p["folded"]:
+                    continue
+                agent = self.agents.get(self._seat_of(p["index"]))
+                opponents.append({"name": p["name"], "position": p["position"], "stack": p["stack"], "bet": p["bet"],
+                                  "kind": agent.describe().get("label", agent.kind) if agent else "Human"})
+            key = (hand.hand_id, actor, len(obs.get("history") or []))
+        out = advise(obs, opponents)  # Monte-Carlo runs outside the lock
+        out["key"] = "|".join(str(k) for k in key)
+        return out
+
     # -- reporting ------------------------------------------------------------
     def set_reveal(self, reveal: bool) -> Dict[str, Any]:
         with self.lock:
@@ -822,6 +846,8 @@ class Handler(BaseHTTPRequestHandler):
                     "anthropic_key": bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))}
         if path == "/api/game/state":
             return APP.game.state()
+        if path == "/api/game/advice":
+            return APP.game.advice()
         if path == "/api/game/export":
             recs = APP.game.records
             if not recs:

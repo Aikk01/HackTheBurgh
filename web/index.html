@@ -46,6 +46,15 @@
     </div>
 
     <div class="action-bar" id="actionBar" hidden>
+      <div class="advisor" id="advisor">
+        <div class="advisor-head">
+          <span class="advisor-title">AI アドバイス</span>
+          <span class="advisor-rec" id="advisorRec">計算中…</span>
+          <button class="btn small primary" id="advisorFollow" hidden>おすすめ通りにする <kbd>A</kbd></button>
+          <label class="toggle small advisor-toggle"><input type="checkbox" id="advisorOn" checked> 表示</label>
+        </div>
+        <div class="advisor-body" id="advisorBody"></div>
+      </div>
       <div class="action-info" id="actionInfo"></div>
       <div class="action-buttons">
         <button class="btn danger" id="btnFold">Fold <kbd>F</kbd></button>
