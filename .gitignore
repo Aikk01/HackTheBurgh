@@ -10,3 +10,6 @@ venv/
 data/rl/runs/**/*.pt
 data/rl/runs/smoke/
 data/rl/runs/cpu-check/
+
+# local experiment tracking
+wandb/

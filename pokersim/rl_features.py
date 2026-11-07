@@ -16,6 +16,7 @@ from . import cards as C
 from . import evaluator as E
 from .equity import estimate_equity
 from .mirror_data import STYLE_FEATURES
+from . import hand_range as HR
 from .opponent_model import TYPES, estimate_style, preflop_percentile
 
 ACTIONS = ["fold", "call", "raise_min", "raise_half", "raise_pot", "raise_2pot", "all_in"]
@@ -26,9 +27,87 @@ EQ_ITERS = 48
 STREETS = ["preflop", "flop", "turn", "river"]
 N_TYPES = len(TYPES["names"])
 
-HERO_DIM = 4 + 4 + 6 + 9 + 2 + 3 + 4 + 6 + 9 + 4  # cards, street, position, made hand, draws, equity, money, betting, helpers, behind
-OPP_DIM = 9 + len(STYLE_FEATURES) + 1 + N_TYPES
+RANGE_ITERS = 48
+# + equity against the predicted hands of the opponents, and that equity minus the price
+HERO_DIM = 4 + 4 + 6 + 9 + 2 + 3 + 4 + 6 + 9 + 4 + 2  # cards, street, position, made hand, draws, equity, money, betting, helpers, behind, range equity
+# + summary of the opponent's predicted 169-class range (pokersim.hand_range)
+RANGE_DIM = 9
+OPP_DIM = 9 + len(STYLE_FEATURES) + 1 + N_TYPES + RANGE_DIM
 OBS_DIM = HERO_DIM + MAX_OPP * OPP_DIM
+
+
+def _class_tables() -> Dict[str, np.ndarray]:
+    pct = preflop_percentile()
+    s = np.zeros(HR.N_CLASSES)
+    n = np.zeros(HR.N_CLASSES)
+    for (a, b), v in pct.items():
+        k = HR.class_of(a, b)
+        s[k] += 1.0 - v
+        n[k] += 1
+    strength = s / np.maximum(n, 1)
+    top10 = strength >= np.quantile(np.repeat(strength, n.astype(int)), 0.90)
+    return {"strength": strength, "top10": top10.astype(float), "pair": HR._CLS_PAIR.astype(float),
+            "suited": HR._CLS_SUITED.astype(float)}
+
+
+_TABLES: Optional[Dict[str, np.ndarray]] = None
+
+
+def range_features(obs: Dict[str, Any], hole: Sequence[int], board: Sequence[int], active_opp: Sequence[Dict[str, Any]],
+                   rng: random.Random, iters: int = RANGE_ITERS) -> Tuple[float, Dict[int, List[float]]]:
+    """Equity against hands drawn from each opponent's predicted range, and a summary of every range.
+
+    Without a trained range model (data/rl/hand_range.npz) everything is zero."""
+    global _TABLES
+    idx = [p["index"] for p in active_opp]
+    ranges = HR.predict_ranges(obs, idx) if len(hole) == 2 else {}
+    if not ranges:
+        return 0.0, {}
+    if _TABLES is None:
+        _TABLES = _class_tables()
+    t = _TABLES
+    g = HR.class_board_features(board)
+    made = ((g[:, 4] + g[:, 6] + g[:, 11] + _TABLES["pair"]) > 0).astype(float) if board else t["pair"]
+    strong = (g[:, 12:16].sum(axis=1) + g[:, 18] > 0).astype(float)
+    draw = ((g[:, 17] + g[:, 19]) > 0).astype(float)
+    # simulate: each opponent's hand from its range, then the rest of the board
+    cum = {j: np.cumsum(ranges[j]).tolist() for j in idx}
+    classes = list(range(HR.N_CLASSES))
+    total, pair_win = 0.0, {j: 0.0 for j in idx}
+    hole_l = list(hole)
+    for _ in range(iters):
+        used = set(hole_l) | set(board)
+        opp = {}
+        for j in idx:
+            got = None
+            for _try in range(10):
+                k = rng.choices(classes, cum_weights=cum[j])[0]
+                opts = [c for c in HR.CLASS_COMBOS[k] if c[0] not in used and c[1] not in used]
+                if opts:
+                    got = rng.choice(opts)
+                    break
+            if got is None:
+                got = tuple(rng.sample([c for c in range(52) if c not in used], 2))
+            used.update(got)
+            opp[j] = got
+        rest = [c for c in range(52) if c not in used]
+        full = list(board) + rng.sample(rest, 5 - len(board))
+        hs = E.evaluate(hole_l + full)
+        os_ = {j: E.evaluate(list(opp[j]) + full) for j in idx}
+        best = max(os_.values())
+        if hs > best:
+            total += 1.0
+        elif hs == best:
+            total += 1.0 / (1 + sum(1 for v in os_.values() if v == best))
+        for j in idx:
+            pair_win[j] += 1.0 if hs > os_[j] else 0.5 if hs == os_[j] else 0.0
+    out = {}
+    for j in idx:
+        p = ranges[j]
+        ent = float(-(p * np.log(np.maximum(p, 1e-12))).sum() / np.log(HR.N_CLASSES))
+        out[j] = [float(p @ t["pair"]), float(p @ t["suited"]), float(p @ t["strength"]), float(p @ t["top10"]),
+                  float(p @ made), float(p @ strong), float(p @ draw), ent, pair_win[j] / iters]
+    return total / iters, out
 
 
 def _draws(hole: Sequence[int], board: Sequence[int]) -> Tuple[float, float]:
@@ -47,7 +126,7 @@ def _bb(x: Any, bb: float) -> float:
 
 
 def encode(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], rng: Optional[random.Random] = None,
-           eq_iters: int = EQ_ITERS) -> np.ndarray:
+           eq_iters: int = EQ_ITERS, use_ranges: bool = True) -> np.ndarray:
     """Feature vector for the player whose observation ``obs`` is.  ``styles`` maps player index -> style estimate."""
     rng = rng or random.Random()
     bb = float(obs.get("min_bet") or 1.0) or 1.0
@@ -105,6 +184,9 @@ def encode(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], rng: Optional
     f += [len(behind) / 5.0, float(any(p["all_in"] for p in active_opp)),
           max((_bb(p["bet"], bb) for p in active_opp), default=0.0) / 100.0,
           sum(_bb(p["contributed"], bb) for p in active_opp) / 100.0]
+    # equity against the hands the range model predicts for the live opponents
+    eq_range, ranges = range_features(obs, hole, board, active_opp, rng) if active_opp and use_ranges else (0.0, {})
+    f += [eq_range, eq_range - price if ranges else 0.0]
     assert len(f) == HERO_DIM, (len(f), HERO_DIM)
 
     # opponents, in seat order after the hero (5 x OPP_DIM)
@@ -125,6 +207,7 @@ def encode(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], rng: Optional
         f += [st["rates"][x] for x in STYLE_FEATURES]
         f += [min(st["hands"], 300) / 300.0]
         f += [st["type_posterior"].get(t, 0.0) for t in TYPES["names"]]
+        f += ranges.get(p["index"], [0.0] * RANGE_DIM)
     v = np.asarray(f, dtype=np.float32)
     assert v.shape[0] == OBS_DIM
     return v

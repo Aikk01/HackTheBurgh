@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from . import hand_range as HR
 from .rl_features import ACTIONS, ACTIONS_JA, OBS_DIM, action_targets, encode
 
 RL_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "rl")
@@ -89,7 +90,13 @@ def recommend(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], policy: Op
     order = [int(i) for i in np.argsort(-pr) if mask[i]]
     best = order[0]
     bb = float(obs.get("min_bet") or 1.0)
+    live = [p for p in obs["players"] if not p["folded"] and not p["is_hero"]]
+    ranges = HR.predict_ranges(obs, [p["index"] for p in live])
     return {
+        "ranges": [{"index": p["index"], "name": p["name"], "grid": HR.grid(ranges[p["index"]]),
+                    "top": [{"hand": HR.CLASS_NAMES[k], "p": round(float(ranges[p["index"]][k]), 4)}
+                            for k in np.argsort(-ranges[p["index"]])[:8]]}
+                   for p in live if p["index"] in ranges],
         "available": True,
         "action_index": best, "action": ACTIONS[best], "action_ja": ACTIONS_JA[best], "engine_action": targets[best],
         "probs": [{"action": ACTIONS[i], "action_ja": ACTIONS_JA[i], "p": round(float(pr[i]), 4),

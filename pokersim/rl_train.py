@@ -148,11 +148,12 @@ def play_hand(sess: Session, hero_fn, snapshot_policies: Dict[int, NumpyPolicy],
     return net_bb, steps
 
 
-def _sampling_hero(policy: NumpyPolicy, rng: random.Random, blank_styles: bool = False, greedy: bool = False):
+def _sampling_hero(policy: NumpyPolicy, rng: random.Random, blank_styles: bool = False, greedy: bool = False,
+                   blank_ranges: bool = False):
     def fn(obs, styles):
         if blank_styles:
             styles = {}
-        x = encode(obs, styles, rng=rng)
+        x = encode(obs, styles, rng=rng, use_ranges=not blank_ranges)
         mask, targets = action_targets(obs)
         logits, value = policy.forward(x[None, :])
         logits = np.where(mask, logits[0], -1e9)
@@ -221,6 +222,8 @@ def worker_main(wid: int, seed: int, cmd_q, out_q) -> None:
                     hero = _sampling_hero(policy, erng, greedy=True)
                 elif msg["hero"] == "rl_nostyle":
                     hero = _sampling_hero(policy, erng, greedy=True, blank_styles=True)
+                elif msg["hero"] == "rl_norange":
+                    hero = _sampling_hero(policy, erng, greedy=True, blank_ranges=True)
                 else:
                     hero = _bot_hero(msg["hero"], erng)
                 s = Session(random.Random(msg["seed"]), 0.0, [], lineup=EVAL_LINEUPS[msg["lineup"]], hands=msg["hands"])
@@ -474,7 +477,7 @@ class Trainer:
     def _evaluate(self, cmd_qs, out_q, final: bool = False) -> Dict[str, Any]:
         a = self.args
         params = export_params(self.net)
-        heroes = ["rl", "rl_nostyle", "equity:iterations=40"]
+        heroes = ["rl", "rl_nostyle", "rl_norange", "equity:iterations=40"]
         jobs = []
         chunk = max(50, a.eval_hands // max(1, a.eval_chunks))
         for li, lineup in enumerate(EVAL_LINEUPS):
@@ -502,6 +505,7 @@ class Trainer:
                 row["baseline_equity_bot" if h.startswith("equity") else h] = {"bb100": round(m, 2), "ci95": round(ci, 2)}
             row["rl_minus_baseline"] = round(row["rl"]["bb100"] - row["baseline_equity_bot"]["bb100"], 2)
             row["style_inputs_gain"] = round(row["rl"]["bb100"] - row["rl_nostyle"]["bb100"], 2)
+            row["range_inputs_gain"] = round(row["rl"]["bb100"] - row["rl_norange"]["bb100"], 2)
             res["lineups"][lineup] = row
             score.append(row["rl"]["bb100"])
         res["mean_rl_bb100"] = round(sum(score) / len(score), 2)
@@ -509,7 +513,7 @@ class Trainer:
         self.history.append(res)
         with open(os.path.join(self.run_dir, "eval.json"), "w", encoding="utf-8") as f:
             json.dump(self.history, f, indent=1)
-        line = " · ".join(f"{k} {v['rl']['bb100']:+.1f} (base {v['baseline_equity_bot']['bb100']:+.1f}, no-style {v['rl_nostyle']['bb100']:+.1f})"
+        line = " · ".join(f"{k} {v['rl']['bb100']:+.1f} (base {v['baseline_equity_bot']['bb100']:+.1f}, no-style {v['rl_nostyle']['bb100']:+.1f}, no-range {v['rl_norange']['bb100']:+.1f})"
                           for k, v in res["lineups"].items())
         print(f"EVAL upd {self.update}: mean {res['mean_rl_bb100']:+.1f} bb/100 · {line}", flush=True)
         if res["mean_rl_bb100"] > self.best_score or final and self.best_score == -1e9:
