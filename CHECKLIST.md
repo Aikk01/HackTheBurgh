@@ -136,13 +136,38 @@ REPORT at each gate: Done / Evidence (command and result) / Failing or cut / Dec
 
 ## Phase 4 · Evidence and integration (H15 to H20)
 
-- [ ] **4.1 [All] Volunteer sessions.** Run development sessions first to calibrate the strength tables. Then run new held-out sessions with people who have not seen the model. Keep labels local to each session. Verify: the Evidence page shows the number of independent sessions.
+- [ ] **4.1 [All] Volunteer sessions (optional since Phase 6).** Run development sessions first to calibrate the strength tables. Then run new held-out sessions with people who have not seen the model. Keep labels local to each session. Verify: the Evidence page shows the number of independent sessions.
 - [ ] **4.2 [B] Held-out evaluation.** The forecast ladder on the frozen 20% and on volunteer sessions, and the range readout on held-out sessions.
 - [x] **4.3 [A] Pluribus check (extras).** Only if everything above is done. Use spots from rows whose `source_file` starts with `pluribus/`, report the defender's mean true equity by response, and call it directional.
 - [ ] **4.4 [D] Evidence page complete.** Five panels, each with source, denominator and date. Failed or null results are shown plainly.
 - [ ] **4.5 [All] Full 90-second run offline** with the real artifacts. Fix what breaks.
 
 **GATE H20.** Feature freeze. Tag `freeze`. Defects only from here.
+
+## Phase 6 · Use all the data and real opponents (started 2026-11-07 evening, before the H20 freeze; status in PROGRESS.md)
+
+Why: the river cohort used only two-player tables and bets of exactly half the pot, 12,407 decisions. Samples of
+800,000 rows show about 10 times more usable decisions (PROGRESS.md, "Data left out"). Volunteers are hard to get,
+so the evidence comes from held-out players in the dataset, and 4.1 becomes optional.
+
+Must:
+- [x] **6.1 [A] Widen the extractor.** Any table size where exactly two players are left when the river is dealt. The defender is the player who checks first on the river, the bettor is the other survivor. Record table size, bet-to-pot ratio, stack-to-pot ratio, position and board-texture flags. Verify: a six-handed fixture that ends heads-up gives the right roles, context and ratio, and the two-player reference counts still reproduce exactly.
+- [x] **6.2 [A] Full scan and frozen split.** All 37 shards, deduplicated, chronological 80/20 per venue, written to a new manifest once, before any model sees the test half. Main cohort: bets of 40–60% of the pot with all three responses legal; exact half pot stays a flag. The original manifest and artifacts stay as the two-player-table cohort. Verify: counts by table size and bet band in the scan summary.
+- [x] **6.3 [B] Forecast models.** Population (context × table-size class), personal (prior weight re-selected on forward windows) and a new situation model on public features (bet ratio, context, table size, board texture, position, stack-to-pot) with gradient-boosted trees on CPU. Verify: forecast ladder on the new frozen test with player-level bootstrap intervals, reported for two-player tables and bigger tables separately.
+- [x] **6.4 [B] Bluff test on real decisions.** For each held-out decision, a pure bluffer bets when a forecaster predicts a fold above one third. The player's recorded response scores it: fold +100 chips, call or raise −50, check 0. Compare population, personal, situation and combined forecasters with always-bluff, never-bluff and perfect foresight, by history length, with player-level bootstrap. Verify: unit test on a toy set with hand-computed payoffs.
+- [ ] **6.5 [D] Evidence panels** for 6.3 and 6.4 with source, denominator and date. The human-session panel is labelled optional.
+
+Should:
+- [ ] **6.6 [C] RL benchmark on real opponents.** Opponents are real players with at least 40 recorded decisions. Their full history defines the true profile; the probes are their own earlier decisions in time order. Exact best response for every player, Q-learning on a sample to show it makes the same choices. Report the average gain, the share of players helped and intervals; keep the synthetic opponents as a sanity panel. Verify: zero probes give identical bots.
+- [ ] **6.7 [B] Strength table from Pluribus.** Fit how often each hand-strength bucket folds, calls or raises on half of the 701 Pluribus spots, check the readout on the other half. Replaces the calibration sessions; the synthetic default stays as fallback. Verify: the held-out half scores better than the default.
+- [ ] **6.8 [B] Type gate on the new cohort.** Re-run the style scan with the new cutoffs, then the types and the gate. Verify: player counts and intervals recorded.
+
+Nice:
+- [ ] **6.9 [D] Real-player twins in the app.** Steps 4 and 5 can load a twin built from a real player in the dataset, shown by anonymous ID, venue and number of decisions, so the demo needs no drills. Verify: browser pass.
+- [ ] **6.10 [B] GPU track, optional.** Neural forecaster with learned player embeddings, trained on all river decisions of any bet size, compared on the same frozen test. Drop it if it does not beat the situation model by 08:00.
+
+Close:
+- [ ] **6.11 [All] Docs and checks.** PLAN.md scope note, PROGRESS decisions, README commands, demo-script numbers; all tests and both smoke tests green; push.
 
 ## Phase 5 · Rehearse and ship (H20 to H24)
 

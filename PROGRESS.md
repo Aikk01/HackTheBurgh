@@ -31,7 +31,13 @@ that weaker hands fold more. In the RL benchmark, a bot tuned to one opponent wi
 opponent plays very differently from the crowd, such as a frequent caller or a frequent folder. Against an
 average opponent it loses a little, because a few dozen hands give a noisy profile.
 
-**Waiting on.** Volunteer sessions with real people, merging `poker-mirror` into `main`, and the team rehearsal.
+**Phase 6, every table size (157,926 decisions).** The situation, meaning bet size, board and earlier betting,
+predicts a defender's answer about ten times better than their personal history does. The person still adds a
+real, smaller amount on top. A bluffer using both wins slightly more against real players' recorded answers,
+because almost everyone folds often enough that a half-pot bluff is nearly always right.
+
+**Waiting on.** The GPU run (see "Handoff: GPU run"), the rest of Phase 6, merging `poker-mirror` into `main`,
+and the team rehearsal. Volunteer sessions are now optional.
 
 ## Status board
 
@@ -89,6 +95,20 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 ### Phase 5 · Rehearse and ship
 - [ ] 5.1–5.5 — human.
 
+### Phase 6 · Use all the data and real opponents (CHECKLIST.md Phase 6) — paused mid-way
+Phase 6 last update: 2026-11-07 ~22:00, stopped on request and pushed; 6.1-6.4 done, 6.5-6.11 partly done.
+- [x] 6.1 Wider extractor — any table size where exactly two players reach the river (`mirror_data.extract_spot(wide=True)`, `prefilter_wide`). Two-player hands extract exactly as before (tested on 30,000 rows of shard 36); six-handed fixture and split rule tested.
+- [x] 6.2 Full scan and frozen split — `python -m pokersim mirror-prepare --wide --workers 8`, 805 s: 539,052 unique spots at any bet size; main cohort (40-60% bets, all three answers legal) 157,926 decisions by 60,918 players, train 126,340 / test 31,586. Two-player rows reproduce the original exactly (22,320 band, 12,407 exact half). `data/mirror/scan_counts_wide.json`, `population_wide.json`.
+- [x] 6.3 Forecast models — `python -m pokersim mirror-wide` (`pokersim/mirror_wide.py`): situation model = gradient-boosted trees on public features (bet size, board texture, seats, earlier streets, stakes). Results in Key results below and `data/mirror/eval_wide.json`. Prior weight re-selected: 24.
+- [x] 6.4 Bluff test on real decisions — `data/mirror/bluff_test.json`. Small but real gain for situation + player (see Key results).
+- [~] 6.5 Evidence panels — API (`mirror_api.wide_panels`) and renderers (`phase6Panels` in `web/mirror.js`) written; headless Edge renders the new section (text check). A visual pass is still to do. Panels without an artifact say "missing".
+- [~] 6.6 RL benchmark on real players — code written (`pokersim/mirror_real.py`, `python -m pokersim mirror-real --qlearning-sample 8`); the vectorised exact best response equals `mirror_rl.q_star` (difference 0.0, ~200x faster). NOT run yet. Only 90 players have 40+ decisions, so use `--probes 0,4,8,16` (needs 16 + 24 decisions per player).
+- [~] 6.7 Strength table from Pluribus — code written (`python -m pokersim mirror-eval --pluribus-strength`, writes `strength_pluribus.json`, used only if the held-out half improves with a 95% interval above zero). NOT run yet.
+- [ ] 6.8 Type gate on the new cohort — not started. Run `python -m pokersim mirror-prepare --styles-wide` (new cutoffs, ~10 min), then add a wide mode to `mirror_styles.build` / `compute_gate` and write `data/mirror/styles_wide.json`.
+- [~] 6.9 Real-player twins in the app — code written: `MirrorSession.load_real_player`, `GET /api/mirror/real_players`, `POST /api/mirror/real/load`, a picker in step 4, deep link `#mirror=play&real=<id>`; `data/mirror/real_players.json` (90 players, anonymous IDs). Headless Edge loads a real player's twin and shows the picker (text check); a visual pass is still to do.
+- [~] 6.10 GPU track — `scripts/train_neural_forecaster.py` and `data/mirror/neural/neural_dataset.npz` (539,052 rows, 43 public features + player history, 15 MB, committed). Quick CPU check passed on a small sample. Waiting for the 5090 run (see "Handoff: GPU run").
+- [~] 6.11 Docs, tests, push — pushed with all 71 unit tests green (4 new for 6.1); PLAN.md scope note, README commands and unit tests for `mirror_wide` / `mirror_real` are still to do.
+
 ## Key results so far
 
 | Result | Value | Source |
@@ -103,6 +123,28 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 | Pluribus check: mean defender equity by response, 701 heads-up river spots | fold 0.51 < call 0.74 < raise 0.84 | `data/mirror/eval.json` → `pluribus` |
 | RL benchmark at 64 probes: bot tuned to the twin minus average-trained bot, chips per spot (pot 100) | caller +4.55 [+2.00, +7.15] · folder +8.00 [+6.10, +10.05] · population −2.75 [−4.40, −1.10] · strength +0.70 [−0.70, +2.05] | `data/mirror/benchmark.json` |
 | RL training sufficiency, three seeds | every oracle check passes; 7 of 9 first-decision cells agree, the other 2 are near ties | `data/mirror/training_sufficiency.json` |
+| Phase 6 main cohort (all tables, 40-60% bets) | 157,926 decisions by 60,918 players; test 31,586 by 15,138 players | `data/mirror/scan_counts_wide.json` |
+| Phase 6 log loss, history up to cutoff: pooled / population / situation / personal / situation + personal | 0.8274 / 0.8182 / 0.7929 / 0.8161 / 0.7912 | `data/mirror/eval_wide.json` |
+| Situation model vs average player | +0.0253 nats, 95% CI [+0.0229, +0.0280]; the same at every table size | same |
+| Player history vs average player (all tables) | +0.0021, CI [+0.0013, +0.0029]; two-player tables +0.0022 — replicates the original +0.0028 | same |
+| Player history on top of the situation | +0.0017, CI [+0.0010, +0.0025]; learning as you go +0.0031, CI [+0.0021, +0.0040] | same |
+| Bluff test, chips per decision (pot 100): never / always = average-player forecast / situation + player / perfect foresight | 0 / 36.14 / 36.26 / 57.25 | `data/mirror/bluff_test.json` |
+| Bluff test, situation + player vs average-player forecast | +0.12 chips per decision, CI [+0.02, +0.22], 1.4% of decisions change — almost everyone folds more than a third of the time, so bluffing half pot is nearly always right | same |
+
+### Data left out (sampled 2026-11-07 evening)
+
+Two samples of 400,000 rows each, the first rows of shards 35 and 36, then of shards 5, 14, 23 and 31, replayed with a
+throwaway extractor generalised to any table where exactly two players reach the river (6.1 makes it permanent):
+
+| Cohort | Sample 1 | Sample 2 | vs today | Full-corpus projection |
+|---|---|---|---|---|
+| Today: two-player tables, exact half pot, all responses legal | 310 | 543 | 1× | 12,407 (measured) |
+| All tables, exact half pot, all responses legal | 1,067 | 837 | about 2× | about 28,000 |
+| All tables, 40–60% of the pot | 4,506 | 3,833 | about 10× | about 120,000 |
+| All tables, any bet size | 16,420 | 12,721 | about 34× | about 420,000 |
+
+Shards differ a lot, so treat the projections as ±50%. The band rows do not yet require all three responses legal.
+The style scan already reads every table size; only the river cohort was narrow, by design of the original plan.
 
 ## Gate reports
 
@@ -151,7 +193,39 @@ What to check in the output: `benchmark.json` → `zero_probe_identical: true`; 
 `control` row shows how much two trainings of the same bot differ. `training_sufficiency.json` →
 `all_oracle_pass` and whether disagreements between seeds sit on near-tie cells.
 
+## Handoff: GPU run (Phase 6, item 6.10)
+
+Everything is in git, including the dataset (`data/mirror/neural/neural_dataset.npz`, 15 MB). No shards needed.
+
+```bash
+git pull                                              # branch poker-mirror
+python -m pip install numpy torch                     # a CUDA build of torch for the 5090 (CUDA 12.8 or newer)
+python scripts/train_neural_forecaster.py --quick     # 1-2 minutes, checks the setup (CPU is fine)
+python scripts/train_neural_forecaster.py             # full sweep: 4 configurations x 3 seeds, GPU if present
+git add data/mirror/neural_forecaster.json && git commit -m "Add neural forecaster results" && git push
+```
+
+It writes `data/mirror/neural_forecaster.json`: test log loss of the network next to the CPU forecasters on the
+same 31,586 test decisions, lifts with 95% intervals over players, and the bluff test. The Evidence tab shows it
+as panel F. To beat: the situation + player model, log loss 0.7912 (history up to the cutoff) on these decisions.
+
+## Handoff: finishing Phase 6 (agent or human)
+
+```bash
+python -m pokersim mirror-eval --pluribus-strength                  # 6.7, about 2 minutes (shard 0)
+python -m pokersim mirror-real --probes 0,4,8,16 --qlearning-sample 8   # 6.6, a few minutes
+python -m pokersim mirror-prepare --styles-wide                     # 6.8 step 1, about 10 minutes
+python -m pokersim serve                                            # 6.5 and 6.9: check the Evidence tab and step 4
+```
+
+Still to write: a wide mode for the type gate (6.8), unit tests for `mirror_wide` and `mirror_real`, the PLAN.md
+scope note and README commands (6.11). Memory note: this laptop had under 2 GB free RAM, so the wide scan used
+8 workers and streams spots to disk; `mirror-wide` needs about 1.5 GB.
+
 ## Next steps
+
+Phase 6 in [CHECKLIST.md](CHECKLIST.md) is half done: first run the GPU handoff above, then finish 6.5-6.11 with the
+commands in "Handoff: finishing Phase 6". Volunteers are hard to get, so volunteer sessions (item 1 below) are optional.
 
 For the team:
 1. Volunteer sessions: two calibration sessions first, then at least three held-out sessions with people who have not

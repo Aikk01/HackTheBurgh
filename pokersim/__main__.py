@@ -184,6 +184,8 @@ MIRROR_COMMANDS = {
     "mirror-eval": "score the forecasters on the frozen test manifest (pokersim.mirror_eval)",
     "mirror-benchmark": "personalised vs population bettor on matched deals (pokersim.mirror_rl)",
     "mirror-sufficiency": "train the population bettor with three seeds and compare (pokersim.mirror_rl)",
+    "mirror-wide": "Phase 6: forecasts, bluff test and GPU dataset on every table size (pokersim.mirror_wide)",
+    "mirror-real": "Phase 6: bettors tuned to real players vs the population bettor (pokersim.mirror_real)",
 }
 
 
@@ -203,6 +205,12 @@ def _dispatch_mirror(argv: List[str]) -> int | None:
         return m(rest)
     if name == "mirror-eval":
         from .mirror_eval import main as m
+        return m(rest)
+    if name == "mirror-wide":
+        from .mirror_wide import main as m
+        return m(rest)
+    if name == "mirror-real":
+        from .mirror_real import main as m
         return m(rest)
     from .mirror_rl import main as m
     return m([name.replace("mirror-", "")] + rest)  # train | evaluate | benchmark

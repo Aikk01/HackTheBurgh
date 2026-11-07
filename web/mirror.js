@@ -239,15 +239,17 @@
     root.innerHTML = "";
     const st = M.state || await refresh();
     const v = st.play;
-    const box = el("div", { class: "card-box" }, el("h4", { text: "You bet against your frozen twin" }));
-    if (!st.frozen) box.appendChild(el("p", { class: "hint", text: "Freeze your profile first (step 3). With no responses, the twin is the population player." }));
+    const real = st.opponent && st.opponent.kind === "real";
+    const box = el("div", { class: "card-box" }, el("h4", { text: real ? "You bet against a real player's twin" : "You bet against your frozen twin" }));
+    box.appendChild(await opponentPicker(st));
+    if (!st.frozen) box.appendChild(el("p", { class: "hint", text: "Freeze your profile first (step 3), or pick a real player from the dataset above. With no responses, your twin is the population player." }));
     box.appendChild(el("div", { class: "row" }, el("button", { class: "btn primary", onclick: newSpot }, "New spot"), el("span", { class: "muted", text: v.frozen ? "twin " + v.frozen : "" })));
     if (v.spot) {
       const s = v.spot;
       box.appendChild(el("p", {}, el("b", { text: "Turn history: " }), s.context_label, el("br"), el("span", { class: "muted", text: s.story.join(" · ") })));
       if (v.advice && s.stage === 1) box.appendChild(adviceBox(v.advice));
       if (s.stage === 1) box.appendChild(el("div", { class: "row" }, el("button", { class: "btn", onclick: () => act("check") }, "Check back"), el("button", { class: "btn primary", onclick: () => act("bet") }, `Bet ${s.bet}`)));
-      if (s.stage === 2) box.appendChild(el("div", { class: "row" }, el("span", { text: `Your twin raised to ${s.raise_to}. ` }), el("button", { class: "btn danger", onclick: () => act("fold") }, "Fold"), el("button", { class: "btn primary", onclick: () => act("call") }, "Call 50")));
+      if (s.stage === 2) box.appendChild(el("div", { class: "row" }, el("span", { text: `${real ? "The player's twin" : "Your twin"} raised to ${s.raise_to}. ` }), el("button", { class: "btn danger", onclick: () => act("fold") }, "Fold"), el("button", { class: "btn primary", onclick: () => act("call") }, "Call 50")));
       if (v.readout) box.appendChild(readoutBox(v.readout, v.response));
       if (v.result) box.appendChild(el("div", { class: "result" }, el("b", { text: `Result: ${v.result.reward_chips >= 0 ? "+" : ""}${fmt(v.result.reward_chips)} chips` }), ` · twin had ${v.result.defender_cards.join(" ")} (${v.result.defender_bucket}).`));
       const bettorBet = s.stage === 1 ? 0 : 50, defBet = s.stage === 2 ? 100 : (v.response === "call" ? 50 : 0);
@@ -287,6 +289,28 @@
     }));
     box.appendChild(grid);
     return box;
+  }
+  async function realPlayers() {
+    if (!M.realPlayers) { try { M.realPlayers = await api("/api/mirror/real_players"); } catch (e) { M.realPlayers = { present: false, players: [] }; } }
+    return M.realPlayers;
+  }
+  async function opponentPicker(st) {
+    const o = st.opponent || { kind: "judge" };
+    const row = el("div", { class: "row" }, el("span", { class: "muted", text: o.kind === "real"
+      ? `Opponent: real player ${o.id} · ${o.venue} · ${o.decisions} recorded decisions · folds ${pct(o.fold_rate, 0)}` : "Opponent: your frozen twin" }));
+    const rp = await realPlayers();
+    if (rp.present && rp.players.length) {
+      const sel = el("select", { class: "small", title: "Players from the dataset with enough recorded river answers" });
+      rp.players.forEach((pl) => sel.appendChild(el("option", { value: pl.id, text: `${pl.id} · ${pl.venue} · ${pl.decisions} hands · folds ${pct(pl.fold_rate, 0)}` })));
+      if (o.kind === "real") sel.value = o.id;
+      row.appendChild(sel);
+      row.appendChild(el("button", { class: "btn small", onclick: () => loadReal(sel.value) }, "Play this real player"));
+    }
+    if (o.kind === "real") row.appendChild(el("button", { class: "btn small", onclick: async () => { await freeze(); await newSpot(); } }, "Back to my twin"));
+    return row;
+  }
+  async function loadReal(id) {
+    try { const r = await api("/api/mirror/real/load", body({ player_id: id })); remember(r.token); toast(`Twin of ${id} loaded`); await refresh(); await newSpot(); } catch (e) { toast(e.message, true); }
   }
   async function newSpot() { try { const r = await api("/api/mirror/play/new", body()); remember(r.token); await refresh(); renderPlay(); } catch (e) { toast(e.message, true); } }
   async function act(a) { try { await api("/api/mirror/play/act", body({ action: a })); await refresh(); renderPlay(); } catch (e) { toast(e.message, true); } }
@@ -335,6 +359,101 @@
   }
   async function startTraining() { try { await api("/api/mirror/train", body({ episodes: 20000 })); renderCompare(); } catch (e) { toast(e.message, true); } }
 
+  // ------------------------------------------------------------ evidence: Phase 6 (every table size, real players)
+  const sg = (x, d = 2) => (x === null || x === undefined ? "-" : (x > 0 ? "+" : x < 0 ? "\u2212" : "") + Math.abs(x).toFixed(d));
+  const ci = (v, d = 2) => (v ? `${sg(v[0], d)} to ${sg(v[1], d)}` : "-");
+  const fmtN = (n) => (n === null || n === undefined ? "-" : Number(n).toLocaleString("en-GB"));
+  const ARM_LABEL = { pooled: "one rate for everyone", population: "average player, by context", situation: "situation model",
+    personal: "this player's history", situation_personal: "situation + this player", personal_online: "this player's history",
+    situation_personal_online: "situation + this player", neural: "neural network" };
+  const verdict = (b) => (b.better ? "real gain" : b.worse ? "real loss" : "no clear effect");
+  function miniTable(head, rows) {
+    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, ...head.map((h) => el("th", { text: h })))));
+    const tb = el("tbody");
+    rows.forEach((r) => tb.appendChild(el("tr", {}, ...r.map((c) => el("td", { text: c === null || c === undefined ? "-" : String(c) })))));
+    t.appendChild(tb);
+    return t;
+  }
+  function wideScanBox(d) {
+    const rows = Object.entries(d.by_table_size || {}).map(([k, v]) => [k === "2" ? "two players" : `${k} players`, fmtN(v.any), fmtN(v.band), fmtN(v.main)]);
+    const m = d.main_cohort || {};
+    return el("div", {}, miniTable(["table size", "any bet", "bet 40-60% of pot", "main cohort"], rows),
+      el("p", { text: `Main cohort: ${fmtN(m.decisions)} decisions by ${fmtN(m.players)} players, ${fmtN(m.train)} to train and ${fmtN(m.test)} to test. The original cohort had 12,407 decisions from two-player tables.` }),
+      el("div", { class: "muted", text: `${fmtN(d.rows)} rows scanned, ${fmtN(d.kept)} unique river spots, ${d.seconds} s.` }));
+  }
+  function forecastWideBox(d) {
+    const out = el("div", {});
+    [["frozen", "History up to the cutoff (as before)"], ["online", "Learning as you go"]].forEach(([proto, title]) => {
+      const pr = (d.protocols || {})[proto];
+      if (!pr) return;
+      out.appendChild(el("h5", { text: title }));
+      out.appendChild(miniTable(["forecaster", "log loss"], ["pooled", "population", "situation", "personal", "situation_personal"].map((a) => [ARM_LABEL[a], pr.overall[a].toFixed(4)])));
+      const L = pr.lift_log_loss || {};
+      [["situation_vs_population", "Situation over the average player"], ["personal_vs_population", "Player history over the average player"],
+        ["situation_personal_vs_situation", "Player history on top of the situation"]].forEach(([k, label]) => {
+        const b = L[k];
+        if (b) out.appendChild(el("div", { text: `${label}: ${sg(b.mean, 4)} (95% ${ci(b.ci95, 4)}), ${verdict(b)}.` }));
+      });
+    });
+    out.appendChild(el("div", { class: "muted", text: `${fmtN((d.cohort || {}).test)} test decisions by ${fmtN((d.cohort || {}).test_players)} players. ${d.label}.` }));
+    return out;
+  }
+  function bluffBox(d) {
+    const pr = (d.protocols || {}).online || (d.protocols || {}).frozen;
+    const c = pr.chips_per_decision, br = pr.bluff_rate || {};
+    const rows = [["never", "never bluff"], ["always", "always bluff"], ["population", "average-player forecast"], ["situation", "situation model"],
+      ["personal", "player history"], ["situation_personal", "situation + player"], ["perfect", "perfect foresight (ceiling)"]]
+      .filter(([k]) => c[k] !== undefined).map(([k, label]) => [label, c[k].toFixed(2), k === "always" ? "100%" : k === "never" ? "0%" : br[k] !== undefined ? pct(br[k], 0) : "-"]);
+    const out = el("div", {}, miniTable(["the bluffer uses", "chips per decision", "bluffs"], rows));
+    [["situation", "Situation model"], ["personal", "Player history"], ["situation_personal", "Situation + player"]].forEach(([k, label]) => {
+      const b = (pr.vs_population || {})[k];
+      if (b) out.appendChild(el("div", { text: `${label} vs the average-player forecast: ${sg(b.mean)} chips per decision (95% ${ci(b.ci95)}), ${pct(b.decisions_changed, 0)} of decisions changed, ${verdict(b)}.` }));
+    });
+    out.appendChild(el("div", { class: "muted", text: `${fmtN(d.decisions)} held-out decisions by ${fmtN(d.players)} players, learning as you go. Rule: ${d.rule}. Pot = 100 chips.` }));
+    return out;
+  }
+  function realBenchBox(d) {
+    const rows = (d.rows || []).map((r) => [r.probes, sg(r.mean_gain_chips), ci(r.ci95), pct(r.share_helped, 0), pct(r.share_hurt, 0), pct(r.decisions_changed, 0)]);
+    const out = el("div", {}, miniTable(["answers seen", "gain, chips per decision", "95% interval", "players helped", "players hurt", "decisions changed"], rows));
+    const g = d.by_true_fold_rate || {};
+    out.appendChild(el("div", { text: "By how often the player really folds: " + Object.entries(g).map(([k, v]) => `${k} ${sg(v.mean_gain_chips)} (${v.players} players)`).join(" · ") }));
+    out.appendChild(el("div", { class: "muted", text: `Sanity: with 0 answers seen the two bettors are ${d.zero_probe_identical ? "identical, as they must be" : "NOT identical, check the setup"}.` }));
+    const q = d.qlearning_check;
+    if (q) out.appendChild(el("div", { class: "muted", text: `Q-learning re-check on ${q.players.length} players: ${q.cells_agree} of ${q.cells} first-decision cells match the exact best response; value gap ${sg(q.mean_value_gap_chips)} chips.` }));
+    out.appendChild(el("div", { class: "muted", text: `${d.players} real players. ${d.label}.` }));
+    return out;
+  }
+  function strengthBox(d) {
+    const c = d.check || {};
+    return el("div", {}, el("p", { text: `Fitted on ${d.fit_spots} Pluribus spots and checked on the other ${d.check_spots}. Readout log score ${c.log_score_default} with the default table and ${c.log_score_calibrated} calibrated: ${sg(c.improvement, 3)} (95% ${ci(c.ci95, 3)}). The top bucket is right ${pct(c.top_bucket_right_default, 0)} of the time with the default and ${pct(c.top_bucket_right_calibrated, 0)} calibrated.` }),
+      el("div", { text: d.use ? "Used by the twins." : "Not used: the improvement is not clear, so the twins keep the labelled default." }), el("div", { class: "muted", text: d.rule }));
+  }
+  function neuralBox(d) {
+    const out = el("div", {}, miniTable(["forecaster", "test log loss"], Object.entries(d.test_log_loss || {}).map(([k, v]) => [ARM_LABEL[k] || k.replace(/_/g, " "), v.toFixed(4)])));
+    Object.entries(d.neural_lift_vs || {}).forEach(([k, b]) => out.appendChild(el("div", { text: `Network vs ${ARM_LABEL[k] || k.replace(/_/g, " ")}: ${sg(b.mean, 4)} (95% ${ci(b.ci95, 4)}), ${verdict(b)}.` })));
+    if (d.bluff_vs_population) out.appendChild(el("div", { text: `Bluff test: ${sg(d.bluff_vs_population.mean)} chips per decision against the average-player forecast (95% ${ci(d.bluff_vs_population.ci95)}).` }));
+    out.appendChild(el("div", { class: "muted", text: `${d.device}${d.quick ? ", quick check only" : ""}. ${d.label}.` }));
+    return out;
+  }
+  function typeGateWideBox(d) {
+    const g = d.gate || {}, a = g.type_vs_population_zero_history || {}, b = g.type_vs_personal || {};
+    return el("div", {}, el("p", {}, el("b", { text: g.pass ? "Gate passed. " : "Gate failed. " }),
+      `Players with no river history, type prior vs average player: ${sg(a.lift, 4)} (95% ${ci(a.ci95, 4)}, ${fmtN(a.players)} players). Types plus history vs history alone: ${sg(b.lift, 4)} (95% ${ci(b.ci95, 4)}).`),
+      el("div", { class: "muted", text: g.rule || "" }));
+  }
+  function phase6Panels(root, p, panel) {
+    root.appendChild(el("div", { class: "card-box" }, el("h4", { text: "Every table size and real players" }),
+      el("p", { class: "hint", text: "Two-player river pots from every table size, scored against real players' recorded answers. The original two-player-table panels follow." })));
+    const W = (key, title, fn) => { const x = p[key]; if (x) root.appendChild(panel(title, x.present, x.source, x.generated, x.present ? fn(x.data) : null)); };
+    W("wide_scan", "A · Data from every table size", wideScanBox);
+    W("forecast_wide", "B · Forecasts: situation, person, both", forecastWideBox);
+    W("bluff_test", "C · Bluff test on real decisions", bluffBox);
+    W("benchmark_real", "D · RL bettors against real players", realBenchBox);
+    W("strength_pluribus", "E · Strength table from Pluribus hands", strengthBox);
+    W("neural_forecaster", "F · Neural forecaster (GPU)", neuralBox);
+    W("type_gate_wide", "G · Player types on every table size", typeGateWideBox);
+  }
+
   // ------------------------------------------------------------ evidence
   async function renderEvidence() {
     const root = $("#evidencePanels");
@@ -344,6 +463,7 @@
     const p = ev.panels;
     const panel = (title, present, source, generated, content) => el("div", { class: "card-box" }, el("div", { class: "row between" }, el("h4", { text: title }), el("span", { class: "tag " + (present ? "good" : "warn"), text: present ? "generated" : "missing" })),
       present ? content : el("p", { class: "hint", text: "Not generated yet." }), el("div", { class: "muted", text: `source: ${source}${generated ? " · " + generated : ""}` }));
+    phase6Panels(root, p, panel);
     // 1 filter exhibit
     const fe = p.filter_exhibit;
     root.appendChild(panel("1 · Filter exhibit", fe.present, fe.source, fe.generated, fe.present ? (() => {
@@ -536,8 +656,9 @@
       if (params.has("deal")) await newDrill();
       else if (params.has("respond")) { await newDrill(); const d = M.state.drill.pending; if (d) await respond(d.decision_id, params.get("respond")); }
       else if (params.has("spot")) { await freeze(); await newSpot(); if (params.has("act")) await act(params.get("act")); }
+      else if (params.has("real")) { const rp = await realPlayers(); const id = params.get("real") || (rp.players[0] || {}).id; if (id) await loadReal(id); if (params.has("act")) await act(params.get("act")); }
       if (params.has("deal") || params.has("respond")) return;  // the drill renderers already drew the table
-      if (params.has("spot") && M.step === "play") return;
+      if ((params.has("spot") || params.has("real")) && M.step === "play") return;
     }
     await renderCurrent();
     if (M.step === "reveal" && M.revealed && M.demo) showDemoHand(0);

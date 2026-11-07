@@ -1,0 +1,687 @@
+{
+ "revision": "6acb5afb6f43082e6a468fde578890d9188be393",
+ "generated": "2026-11-07T21:44:40",
+ "shards_scanned": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36
+ ],
+ "shards_missing": [],
+ "rows": 21616175,
+ "prefiltered": 3408214,
+ "eligible_before_dedupe": 539052,
+ "dedupe": {
+  "quarantined_conflicts": 0,
+  "kept": 539052
+ },
+ "kept": 539052,
+ "no_timestamp": 0,
+ "with_timestamp": 539052,
+ "by_table_size": {
+  "2": {
+   "any": 79884,
+   "band": 22320,
+   "exact_half": 12407,
+   "main": 21825,
+   "main_call": 8518,
+   "main_train": 13561,
+   "main_fold": 12283,
+   "main_test": 8264,
+   "main_raise": 1024
+  },
+  "3-6": {
+   "any": 308440,
+   "band": 95138,
+   "exact_half": 11449,
+   "main": 90630,
+   "main_call": 33685,
+   "main_train": 72609,
+   "main_fold": 52649,
+   "main_raise": 4296,
+   "main_test": 18021
+  },
+  "7-10": {
+   "any": 150728,
+   "band": 48143,
+   "exact_half": 5228,
+   "main": 45471,
+   "main_raise": 1994,
+   "main_train": 40170,
+   "main_fold": 26886,
+   "main_call": 16591,
+   "main_test": 5301
+  }
+ },
+ "main_cohort": {
+  "definition": "bet 40-60% of the pot, all three responses legal, any table size",
+  "decisions": 157926,
+  "train": 126340,
+  "test": 31586,
+  "players": 60918
+ },
+ "any_size": {
+  "train": 432425,
+  "test": 106627
+ },
+ "exact_half_all_tables": 29084,
+ "cutoffs": {
+  "Absolute Poker": "2009-07-16T22:30:16",
+  "Full Tilt Poker": "2009-07-19T01:50:19",
+  "PartyPoker": "2009-07-17T18:54:42",
+  "PokerStars": "2009-07-11T01:10:34"
+ },
+ "venues": {
+  "Absolute Poker": 54210,
+  "Full Tilt Poker": 44182,
+  "PokerStars": 339230,
+  "PartyPoker": 101430
+ },
+ "workers": 8,
+ "per_shard": [
+  {
+   "shard": 0,
+   "rows": 450337,
+   "prefiltered": 92276,
+   "eligible": 16431,
+   "duplicates": 0,
+   "rejections": {
+    "variant": 76,
+    "venue_or_hand": 10107,
+    "no_river": 338676,
+    "no_river_response": 71310,
+    "sequence": 3805,
+    "not_two_at_river": 9202,
+    "defender_short": 729,
+    "warnings": 1
+   },
+   "seconds": 137.2
+  },
+  {
+   "shard": 1,
+   "rows": 450337,
+   "prefiltered": 85165,
+   "eligible": 14885,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 359115,
+    "no_river_response": 66755,
+    "sequence": 2908,
+    "not_two_at_river": 6045,
+    "defender_short": 614,
+    "venue_or_hand": 12,
+    "warnings": 3
+   },
+   "seconds": 118.0
+  },
+  {
+   "shard": 2,
+   "rows": 450337,
+   "prefiltered": 82555,
+   "eligible": 3793,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 363494,
+    "no_river_response": 64669,
+    "sequence": 2613,
+    "not_two_at_river": 4282,
+    "defender_short": 1009,
+    "venue_or_hand": 6,
+    "warnings": 10471
+   },
+   "seconds": 175.6
+  },
+  {
+   "shard": 3,
+   "rows": 450337,
+   "prefiltered": 52506,
+   "eligible": 8339,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 227342,
+    "no_river_response": 41722,
+    "sequence": 1805,
+    "not_two_at_river": 3096,
+    "defender_short": 518,
+    "warnings": 122,
+    "players": 167393
+   },
+   "seconds": 74.8
+  },
+  {
+   "shard": 4,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 4.3
+  },
+  {
+   "shard": 5,
+   "rows": 450337,
+   "prefiltered": 3898,
+   "eligible": 727,
+   "duplicates": 0,
+   "rejections": {
+    "players": 430568,
+    "no_river_response": 2981,
+    "no_river": 15614,
+    "sequence": 144,
+    "not_two_at_river": 257,
+    "defender_short": 37,
+    "warnings": 9
+   },
+   "seconds": 9.3
+  },
+  {
+   "shard": 6,
+   "rows": 450337,
+   "prefiltered": 87268,
+   "eligible": 14944,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 68086,
+    "no_river": 357566,
+    "sequence": 3202,
+    "not_two_at_river": 5503,
+    "defender_short": 786,
+    "warnings": 250
+   },
+   "seconds": 120.4
+  },
+  {
+   "shard": 7,
+   "rows": 450337,
+   "prefiltered": 87819,
+   "eligible": 15280,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 356829,
+    "no_river_response": 68332,
+    "sequence": 3195,
+    "not_two_at_river": 5689,
+    "defender_short": 785,
+    "warnings": 227
+   },
+   "seconds": 121.7
+  },
+  {
+   "shard": 8,
+   "rows": 450337,
+   "prefiltered": 53240,
+   "eligible": 9086,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 220415,
+    "no_river_response": 41643,
+    "sequence": 1908,
+    "not_two_at_river": 3361,
+    "warnings": 143,
+    "defender_short": 460,
+    "players": 173321
+   },
+   "seconds": 74.7
+  },
+  {
+   "shard": 9,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 4.3
+  },
+  {
+   "shard": 10,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 4.4
+  },
+  {
+   "shard": 11,
+   "rows": 450337,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 450337
+   },
+   "seconds": 4.2
+  },
+  {
+   "shard": 12,
+   "rows": 450337,
+   "prefiltered": 45220,
+   "eligible": 9242,
+   "duplicates": 0,
+   "rejections": {
+    "players": 261496,
+    "no_river": 140615,
+    "no_river_response": 33424,
+    "not_two_at_river": 3006,
+    "warnings": 162,
+    "sequence": 2111,
+    "defender_short": 281
+   },
+   "seconds": 58.7
+  },
+  {
+   "shard": 13,
+   "rows": 450337,
+   "prefiltered": 107449,
+   "eligible": 21665,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 79475,
+    "no_river": 335561,
+    "sequence": 5244,
+    "not_two_at_river": 7327,
+    "defender_short": 746,
+    "warnings": 319
+   },
+   "seconds": 137.5
+  },
+  {
+   "shard": 14,
+   "rows": 450337,
+   "prefiltered": 106258,
+   "eligible": 21645,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 336985,
+    "defender_short": 717,
+    "no_river_response": 78575,
+    "not_two_at_river": 7094,
+    "sequence": 4995,
+    "warnings": 326
+   },
+   "seconds": 137.4
+  },
+  {
+   "shard": 15,
+   "rows": 675506,
+   "prefiltered": 129838,
+   "eligible": 16609,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 538065,
+    "no_river_response": 99619,
+    "not_two_at_river": 7603,
+    "sequence": 4863,
+    "defender_short": 1326,
+    "warnings": 7421
+   },
+   "seconds": 221.1
+  },
+  {
+   "shard": 16,
+   "rows": 675505,
+   "prefiltered": 118189,
+   "eligible": 14410,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 550046,
+    "no_river_response": 93164,
+    "warnings": 5567,
+    "not_two_at_river": 7270,
+    "defender_short": 1241,
+    "sequence": 3807
+   },
+   "seconds": 202.3
+  },
+  {
+   "shard": 17,
+   "rows": 675506,
+   "prefiltered": 109297,
+   "eligible": 19371,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 560127,
+    "no_river_response": 84913,
+    "sequence": 3493,
+    "not_two_at_river": 6082,
+    "defender_short": 1161,
+    "warnings": 359
+   },
+   "seconds": 156.7
+  },
+  {
+   "shard": 18,
+   "rows": 675505,
+   "prefiltered": 123305,
+   "eligible": 19550,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 545172,
+    "no_river_response": 98203,
+    "not_two_at_river": 7028,
+    "defender_short": 1137,
+    "sequence": 4073,
+    "warnings": 342
+   },
+   "seconds": 171.8
+  },
+  {
+   "shard": 19,
+   "rows": 675506,
+   "prefiltered": 123184,
+   "eligible": 21463,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 476759,
+    "no_river_response": 96020,
+    "not_two_at_river": 10370,
+    "sequence": 4542,
+    "defender_short": 1014,
+    "warnings": 145,
+    "players": 65193
+   },
+   "seconds": 181.9
+  },
+  {
+   "shard": 20,
+   "rows": 675505,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675505
+   },
+   "seconds": 7.2
+  },
+  {
+   "shard": 21,
+   "rows": 675506,
+   "prefiltered": 59052,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 389266,
+    "sequence": 2029,
+    "no_river": 222538,
+    "no_river_response": 45713,
+    "warnings": 10656,
+    "not_two_at_river": 4650,
+    "defender_short": 654
+   },
+   "seconds": 156.8
+  },
+  {
+   "shard": 22,
+   "rows": 675505,
+   "prefiltered": 138647,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 525786,
+    "no_river_response": 107328,
+    "sequence": 4912,
+    "warnings": 24919,
+    "defender_short": 1488,
+    "not_two_at_river": 11072
+   },
+   "seconds": 387.9
+  },
+  {
+   "shard": 23,
+   "rows": 675506,
+   "prefiltered": 149218,
+   "eligible": 24716,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 114602,
+    "no_river": 506036,
+    "not_two_at_river": 20252,
+    "defender_short": 1137,
+    "warnings": 1983,
+    "sequence": 6780
+   },
+   "seconds": 237.9
+  },
+  {
+   "shard": 24,
+   "rows": 675505,
+   "prefiltered": 149269,
+   "eligible": 25668,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 506028,
+    "no_river_response": 114432,
+    "sequence": 6793,
+    "not_two_at_river": 20208,
+    "defender_short": 1129,
+    "warnings": 1247
+   },
+   "seconds": 239.1
+  },
+  {
+   "shard": 25,
+   "rows": 675506,
+   "prefiltered": 61142,
+   "eligible": 10496,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 46915,
+    "no_river": 205463,
+    "not_two_at_river": 8411,
+    "warnings": 504,
+    "sequence": 2778,
+    "defender_short": 449,
+    "players": 400490
+   },
+   "seconds": 101.0
+  },
+  {
+   "shard": 26,
+   "rows": 675505,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675505
+   },
+   "seconds": 6.8
+  },
+  {
+   "shard": 27,
+   "rows": 675506,
+   "prefiltered": 0,
+   "eligible": 0,
+   "duplicates": 0,
+   "rejections": {
+    "players": 675506
+   },
+   "seconds": 7.0
+  },
+  {
+   "shard": 28,
+   "rows": 675505,
+   "prefiltered": 102566,
+   "eligible": 17469,
+   "duplicates": 0,
+   "rejections": {
+    "players": 281154,
+    "no_river": 275040,
+    "sequence": 5362,
+    "no_river_response": 77944,
+    "not_two_at_river": 16745,
+    "warnings": 1064,
+    "defender_short": 727
+   },
+   "seconds": 185.0
+  },
+  {
+   "shard": 29,
+   "rows": 675506,
+   "prefiltered": 176259,
+   "eligible": 30418,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 469795,
+    "no_river_response": 133565,
+    "defender_short": 1357,
+    "not_two_at_river": 29452,
+    "sequence": 9199,
+    "warnings": 1720
+   },
+   "seconds": 316.1
+  },
+  {
+   "shard": 30,
+   "rows": 675505,
+   "prefiltered": 175809,
+   "eligible": 30445,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 133187,
+    "no_river": 470980,
+    "not_two_at_river": 28716,
+    "sequence": 9087,
+    "warnings": 1806,
+    "defender_short": 1284
+   },
+   "seconds": 315.5
+  },
+  {
+   "shard": 31,
+   "rows": 675506,
+   "prefiltered": 176591,
+   "eligible": 30746,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 469917,
+    "no_river_response": 133648,
+    "not_two_at_river": 28998,
+    "warnings": 1739,
+    "sequence": 9135,
+    "defender_short": 1323
+   },
+   "seconds": 315.4
+  },
+  {
+   "shard": 32,
+   "rows": 675505,
+   "prefiltered": 176732,
+   "eligible": 30610,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 469499,
+    "no_river_response": 133878,
+    "warnings": 1754,
+    "not_two_at_river": 29274,
+    "sequence": 9174,
+    "defender_short": 1316
+   },
+   "seconds": 302.9
+  },
+  {
+   "shard": 33,
+   "rows": 675506,
+   "prefiltered": 175576,
+   "eligible": 30381,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 470782,
+    "warnings": 1752,
+    "no_river_response": 133095,
+    "sequence": 9015,
+    "not_two_at_river": 29148,
+    "defender_short": 1333
+   },
+   "seconds": 284.9
+  },
+  {
+   "shard": 34,
+   "rows": 675505,
+   "prefiltered": 175424,
+   "eligible": 30486,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 470931,
+    "no_river_response": 133146,
+    "not_two_at_river": 29150,
+    "sequence": 8996,
+    "warnings": 1462,
+    "defender_short": 1334
+   },
+   "seconds": 265.8
+  },
+  {
+   "shard": 35,
+   "rows": 675505,
+   "prefiltered": 142822,
+   "eligible": 24476,
+   "duplicates": 0,
+   "rejections": {
+    "no_river_response": 111498,
+    "not_two_at_river": 17458,
+    "no_river": 515225,
+    "sequence": 5608,
+    "defender_short": 1166,
+    "warnings": 74
+   },
+   "seconds": 207.3
+  },
+  {
+   "shard": 36,
+   "rows": 675505,
+   "prefiltered": 141640,
+   "eligible": 25701,
+   "duplicates": 0,
+   "rejections": {
+    "no_river": 519693,
+    "no_river_response": 109493,
+    "sequence": 5275,
+    "not_two_at_river": 14152,
+    "defender_short": 1170,
+    "warnings": 1,
+    "venue_or_hand": 20
+   },
+   "seconds": 173.1
+  }
+ ],
+ "seconds": 805.2
+}

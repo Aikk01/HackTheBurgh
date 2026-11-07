@@ -19,9 +19,9 @@ import os
 import random
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .mirror_data import LARGE_OUT, SMALL_OUT, RiverSpot, load_spots
-from .mirror_model import PersonalModel, PopulationModel, TypePrior
-from .mirror_types import CONTEXTS, RESPONSES
+from .mirror_data import LARGE_OUT, SMALL_OUT, RiverSpot, _last_aggressor, _role, load_spots
+from .mirror_model import PersonalModel, PopulationModel, StrengthTable, TypePrior
+from .mirror_types import BUCKETS, CONTEXTS, RESPONSES
 
 BINS: Sequence[Tuple[int, Optional[int]]] = ((0, 0), (1, 3), (4, 15), (16, 63), (64, None))
 RESPONSIBILITIES_PATH = os.path.join(LARGE_OUT, "style_responsibilities.json")
@@ -249,9 +249,66 @@ def pluribus_spots(shard_path: str) -> List[Dict[str, Any]]:
             continue
         r = ranker_for(board)
         eq = r.equity(cards)  # type: ignore[arg-type]
-        out.append({"hand": sf, "response": d2.actual["action"], "ratio": bet / pot_before, "defender_equity": eq,
-                    "bucket": r.bucket(cards), "defender": defender.name})  # type: ignore[arg-type]
+        avoid = {c for c in res.hand.players[d1.player].final_cards() if c is not None}
+        shares = collections.Counter(b for h, b in r.all_buckets().items() if not (set(h) & avoid))
+        total = sum(shares.values()) or 1
+        context = _role(_last_aggressor(d2.observation["history"], "turn"), d2.player, d1.player)
+        out.append({"hand": sf, "hand_index": rec.index, "response": d2.actual["action"], "ratio": bet / pot_before,
+                    "defender_equity": eq, "bucket": r.bucket(cards), "defender": defender.name,  # type: ignore[arg-type]
+                    "context": context, "bucket_shares": {b: shares[b] / total for b in BUCKETS}})
     return out
+
+
+STRENGTH_PLURIBUS = os.path.join(SMALL_OUT, "strength_pluribus.json")
+
+
+def _readout_log_score(table: Dict[str, Dict[str, Dict[str, float]]], spot: Dict[str, Any]) -> Tuple[float, bool]:
+    """log P(true bucket | answer) under the bucket-level readout, and whether the top bucket is the true one."""
+    shares, c, a = spot["bucket_shares"], spot["context"], spot["response"]
+    w = {b: shares[b] * table[c][b][a] for b in BUCKETS}
+    z = sum(w.values()) or 1.0
+    return math.log(max(w[spot["bucket"]] / z, 1e-9)), max(w, key=w.get) == spot["bucket"]
+
+
+def strength_from_pluribus(spots: Sequence[Dict[str, Any]], population: PopulationModel, prior_weight: float = 8.0,
+                           bootstrap: int = 2000, seed: int = 1, out: Optional[str] = STRENGTH_PLURIBUS) -> Dict[str, Any]:
+    """Fit how each hand-strength bucket answers on half of the Pluribus spots (every card known) and check the
+    range readout on the other half.  Replaces the volunteer calibration sessions; used only if it beats the default."""
+    import hashlib
+
+    usable = [sp for sp in spots if sp.get("context") in CONTEXTS and sp.get("bucket_shares")]
+    half = lambda sp: int(hashlib.sha1(f"{sp['hand']}|{sp.get('hand_index')}".encode()).hexdigest(), 16) % 2  # noqa: E731
+    fit = [sp for sp in usable if half(sp) == 0]
+    check = [sp for sp in usable if half(sp) == 1]
+    counts = {c: {b: {a: 0 for a in RESPONSES} for b in BUCKETS} for c in CONTEXTS}
+    for sp in fit:
+        counts[sp["context"]][sp["bucket"]][sp["response"]] += 1
+    default = StrengthTable.default(population).prior
+    calibrated = StrengthTable.from_calibration(population, counts, sessions=0, prior_weight=prior_weight).prior
+    d_scores = [_readout_log_score(default, sp) for sp in check]
+    c_scores = [_readout_log_score(calibrated, sp) for sp in check]
+    diffs = [c[0] - d[0] for c, d in zip(c_scores, d_scores)]
+    rng = random.Random(seed)
+    means = sorted(sum(diffs[rng.randrange(len(diffs))] for _ in diffs) / len(diffs) for _ in range(bootstrap)) if diffs else [0.0]
+    lo, hi = means[int(0.025 * len(means))], means[int(0.975 * len(means)) - 1]
+    mean_diff = sum(diffs) / len(diffs) if diffs else 0.0
+    result = {
+        "generated": _dt.datetime.now().isoformat(timespec="seconds"), "spots": len(usable), "fit_spots": len(fit),
+        "check_spots": len(check), "fit_counts": counts, "prior_weight": prior_weight,
+        "check": {"log_score_default": round(sum(d[0] for d in d_scores) / max(len(d_scores), 1), 4),
+                  "log_score_calibrated": round(sum(c[0] for c in c_scores) / max(len(c_scores), 1), 4),
+                  "improvement": round(mean_diff, 4), "ci95": [round(lo, 4), round(hi, 4)],
+                  "top_bucket_right_default": round(sum(d[1] for d in d_scores) / max(len(d_scores), 1), 3),
+                  "top_bucket_right_calibrated": round(sum(c[1] for c in c_scores) / max(len(c_scores), 1), 3)},
+        "use": bool(diffs) and lo > 0,
+        "rule": "used by the twins only if the held-out half's readout log score improves with a 95% interval above zero",
+        "label": "Pluribus hands (the bot and the pros), every card known; any bet size; split by a hash of the hand",
+    }
+    if out:
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=1)
+    return result
 
 
 def pluribus_check(spots: Sequence[Dict[str, Any]], bootstrap: int = 2000, seed: int = 1) -> Dict[str, Any]:
@@ -475,7 +532,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--out", default=os.path.join(SMALL_OUT, "eval.json"))
     ap.add_argument("--pluribus-shard", default=None, help="parquet shard holding the Pluribus rows (shard 0)")
     ap.add_argument("--bootstrap", type=int, default=1000)
+    ap.add_argument("--pluribus-strength", action="store_true",
+                    help="calibrate the strength table on half the Pluribus spots (needs --pluribus-shard)")
     args = ap.parse_args(argv)
+    if args.pluribus_strength:
+        spots = pluribus_spots(args.pluribus_shard or os.path.join(os.path.dirname(LARGE_OUT), "takara", "train-00000-of-00037.parquet"))
+        pop_path = os.path.join(SMALL_OUT, "population_wide.json")
+        res = strength_from_pluribus(spots, PopulationModel.load(pop_path if os.path.exists(pop_path) else os.path.join(SMALL_OUT, "population.json")))
+        print(json.dumps({k: res[k] for k in ("spots", "fit_spots", "check_spots", "check", "use")}, indent=1))
+        return 0
     if args.sessions:
         res = evaluate_sessions()
         write_range_checks(os.path.join(SMALL_OUT, "range_checks.json"))

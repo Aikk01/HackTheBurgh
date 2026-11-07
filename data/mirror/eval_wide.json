@@ -1,0 +1,798 @@
+{
+ "generated": "2026-11-07T21:45:45",
+ "cohort": {
+  "definition": "heads-up river after a check, bet 40-60% of the pot, all three answers legal, any table size",
+  "train": 126340,
+  "test": 31586,
+  "test_players": 15138,
+  "test_by_table_size": {
+   "2": 8264,
+   "3-6": 18021,
+   "7-10": 5301
+  }
+ },
+ "prior_strength_selection": {
+  "candidates": {
+   "2": 0.8306,
+   "8": 0.81567,
+   "24": 0.81464,
+   "64": 0.81521
+  },
+  "chosen": 24,
+  "windows": 4
+ },
+ "prior_strength": 24.0,
+ "population": {
+  "checked_through": {
+   "fold": 0.656,
+   "call": 0.3126,
+   "raise": 0.0315
+  },
+  "bettor_aggr": {
+   "fold": 0.5094,
+   "call": 0.4218,
+   "raise": 0.0687
+  },
+  "defender_aggr": {
+   "fold": 0.5661,
+   "call": 0.3967,
+   "raise": 0.0372
+  }
+ },
+ "situation_model": {
+  "kind": "HistGradientBoostingClassifier (CPU)",
+  "features": [
+   "ctx_checked_through",
+   "ctx_bettor_aggr",
+   "ctx_defender_aggr",
+   "table_2",
+   "table_3-6",
+   "table_7-10",
+   "table_size",
+   "ratio",
+   "log_ratio",
+   "log_spr",
+   "log_pot_bb",
+   "log_bb",
+   "def_seat",
+   "bet_seat",
+   "bettor_last",
+   "flop_players",
+   "multiway_flop",
+   "preflop_raiser_none",
+   "preflop_raiser_bettor",
+   "preflop_raiser_defender",
+   "preflop_raiser_other",
+   "flop_bet_checked",
+   "flop_bet_bettor",
+   "flop_bet_defender",
+   "flop_bet_other",
+   "board_paired",
+   "board_trips",
+   "board_two_pair_board",
+   "board_flush3",
+   "board_flush4",
+   "board_straight3",
+   "board_straight4",
+   "board_river_pairs",
+   "board_river_suit_n",
+   "board_river_over",
+   "board_river_rank",
+   "board_high_rank",
+   "board_broadway",
+   "venue_0",
+   "venue_1",
+   "venue_2",
+   "venue_3",
+   "raise_legal"
+  ],
+  "iterations": 257,
+  "train_rows_any_bet_size": 432425
+ },
+ "protocols": {
+  "frozen": {
+   "online": false,
+   "overall": {
+    "pooled": 0.82744,
+    "population": 0.81824,
+    "situation": 0.79292,
+    "personal": 0.81614,
+    "situation_personal": 0.79121
+   },
+   "ladder": [
+    {
+     "bin": "0",
+     "n": 15235,
+     "log_loss": {
+      "pooled": 0.84148,
+      "population": 0.83363,
+      "situation": 0.80954,
+      "personal": 0.83363,
+      "situation_personal": 0.80954
+     }
+    },
+    {
+     "bin": "1-3",
+     "n": 7520,
+     "log_loss": {
+      "pooled": 0.82008,
+      "population": 0.81051,
+      "situation": 0.7858,
+      "personal": 0.80912,
+      "situation_personal": 0.78449
+     }
+    },
+    {
+     "bin": "4-15",
+     "n": 6840,
+     "log_loss": {
+      "pooled": 0.80845,
+      "population": 0.79862,
+      "situation": 0.77208,
+      "personal": 0.79328,
+      "situation_personal": 0.76745
+     }
+    },
+    {
+     "bin": "16-63",
+     "n": 1721,
+     "log_loss": {
+      "pooled": 0.81629,
+      "population": 0.80134,
+      "situation": 0.77069,
+      "personal": 0.79323,
+      "situation_personal": 0.76498
+     }
+    },
+    {
+     "bin": "64+",
+     "n": 270,
+     "log_loss": {
+      "pooled": 0.79254,
+      "population": 0.76929,
+      "situation": 0.72313,
+      "personal": 0.74978,
+      "situation_personal": 0.71266
+     }
+    }
+   ],
+   "lift_log_loss": {
+    "situation_vs_population": {
+     "mean": 0.02531,
+     "ci95": [
+      0.02285,
+      0.02799
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.02527,
+       "ci95": [
+        0.0197,
+        0.03031
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.02519,
+       "ci95": [
+        0.02219,
+        0.02796
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.02581,
+       "ci95": [
+        0.02006,
+        0.03151
+       ],
+       "better": true,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "personal_vs_population": {
+     "mean": 0.0021,
+     "ci95": [
+      0.0013,
+      0.0029
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.00216,
+       "ci95": [
+        0.00061,
+        0.00384
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.00223,
+       "ci95": [
+        0.00123,
+        0.00337
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.00154,
+       "ci95": [
+        -3e-05,
+        0.00323
+       ],
+       "better": false,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "situation_personal_vs_situation": {
+     "mean": 0.00172,
+     "ci95": [
+      0.00096,
+      0.00246
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.0016,
+       "ci95": [
+        0.00017,
+        0.0031
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.00192,
+       "ci95": [
+        0.00095,
+        0.00298
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.00122,
+       "ci95": [
+        -0.00028,
+        0.00289
+       ],
+       "better": false,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "situation_personal_vs_population": {
+     "mean": 0.02703,
+     "ci95": [
+      0.02431,
+      0.02986
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.02687,
+       "ci95": [
+        0.02089,
+        0.03236
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.02711,
+       "ci95": [
+        0.02379,
+        0.03009
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.02703,
+       "ci95": [
+        0.02111,
+        0.03317
+       ],
+       "better": true,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "pooled_vs_population": {
+     "mean": -0.00921,
+     "ci95": [
+      -0.01073,
+      -0.00753
+     ],
+     "better": false,
+     "worse": true,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": -0.01118,
+       "ci95": [
+        -0.01446,
+        -0.00772
+       ],
+       "better": false,
+       "worse": true,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": -0.00831,
+       "ci95": [
+        -0.01051,
+        -0.0061
+       ],
+       "better": false,
+       "worse": true,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": -0.00919,
+       "ci95": [
+        -0.01283,
+        -0.00557
+       ],
+       "better": false,
+       "worse": true,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    }
+   },
+   "known_players": {
+    "n": 16351,
+    "log_loss": {
+     "pooled": 0.81436,
+     "population": 0.80389,
+     "situation": 0.77743,
+     "personal": 0.79984,
+     "situation_personal": 0.77412
+    }
+   },
+   "new_players": {
+    "n": 15235,
+    "log_loss": {
+     "pooled": 0.84148,
+     "population": 0.83363,
+     "situation": 0.80954,
+     "personal": 0.83363,
+     "situation_personal": 0.80954
+    }
+   },
+   "by_table_size": {
+    "2": {
+     "n": 8264,
+     "log_loss": {
+      "pooled": 0.8396,
+      "population": 0.82842,
+      "situation": 0.80315,
+      "personal": 0.82626,
+      "situation_personal": 0.80155
+     }
+    },
+    "3-6": {
+     "n": 18021,
+     "log_loss": {
+      "pooled": 0.82795,
+      "population": 0.81964,
+      "situation": 0.79445,
+      "personal": 0.81741,
+      "situation_personal": 0.79254
+     }
+    },
+    "7-10": {
+     "n": 5301,
+     "log_loss": {
+      "pooled": 0.80679,
+      "population": 0.79759,
+      "situation": 0.77178,
+      "personal": 0.79605,
+      "situation_personal": 0.77056
+     }
+    }
+   }
+  },
+  "online": {
+   "online": true,
+   "overall": {
+    "pooled": 0.82744,
+    "population": 0.81824,
+    "situation": 0.79292,
+    "personal": 0.81463,
+    "situation_personal": 0.78986
+   },
+   "ladder": [
+    {
+     "bin": "0",
+     "n": 9449,
+     "log_loss": {
+      "pooled": 0.843,
+      "population": 0.83525,
+      "situation": 0.809,
+      "personal": 0.83525,
+      "situation_personal": 0.809
+     }
+    },
+    {
+     "bin": "1-3",
+     "n": 9902,
+     "log_loss": {
+      "pooled": 0.82906,
+      "population": 0.82033,
+      "situation": 0.7981,
+      "personal": 0.8181,
+      "situation_personal": 0.79618
+     }
+    },
+    {
+     "bin": "4-15",
+     "n": 8805,
+     "log_loss": {
+      "pooled": 0.81423,
+      "population": 0.80471,
+      "situation": 0.77872,
+      "personal": 0.79817,
+      "situation_personal": 0.77281
+     }
+    },
+    {
+     "bin": "16-63",
+     "n": 3118,
+     "log_loss": {
+      "pooled": 0.81645,
+      "population": 0.80362,
+      "situation": 0.77583,
+      "personal": 0.79447,
+      "situation_personal": 0.76849
+     }
+    },
+    {
+     "bin": "64+",
+     "n": 312,
+     "log_loss": {
+      "pooled": 0.78771,
+      "population": 0.76406,
+      "situation": 0.71328,
+      "personal": 0.74595,
+      "situation_personal": 0.70423
+     }
+    }
+   ],
+   "lift_log_loss": {
+    "situation_vs_population": {
+     "mean": 0.02531,
+     "ci95": [
+      0.02285,
+      0.02799
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.02527,
+       "ci95": [
+        0.0197,
+        0.03031
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.02519,
+       "ci95": [
+        0.02219,
+        0.02796
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.02581,
+       "ci95": [
+        0.02006,
+        0.03151
+       ],
+       "better": true,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "personal_vs_population": {
+     "mean": 0.0036,
+     "ci95": [
+      0.0026,
+      0.00458
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.00501,
+       "ci95": [
+        0.00306,
+        0.00705
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.00345,
+       "ci95": [
+        0.00225,
+        0.00487
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.00193,
+       "ci95": [
+        0.00028,
+        0.00383
+       ],
+       "better": true,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "situation_personal_vs_situation": {
+     "mean": 0.00306,
+     "ci95": [
+      0.00214,
+      0.004
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.00432,
+       "ci95": [
+        0.00248,
+        0.00624
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.00294,
+       "ci95": [
+        0.00178,
+        0.00429
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.00154,
+       "ci95": [
+        -8e-05,
+        0.00344
+       ],
+       "better": false,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "situation_personal_vs_population": {
+     "mean": 0.02838,
+     "ci95": [
+      0.02567,
+      0.03118
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": 0.02959,
+       "ci95": [
+        0.02367,
+        0.03512
+       ],
+       "better": true,
+       "worse": false,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": 0.02813,
+       "ci95": [
+        0.02481,
+        0.03132
+       ],
+       "better": true,
+       "worse": false,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": 0.02735,
+       "ci95": [
+        0.02156,
+        0.03344
+       ],
+       "better": true,
+       "worse": false,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    },
+    "pooled_vs_population": {
+     "mean": -0.00921,
+     "ci95": [
+      -0.01073,
+      -0.00753
+     ],
+     "better": false,
+     "worse": true,
+     "n": 31586,
+     "players": 15138,
+     "by_table_size": {
+      "2": {
+       "mean": -0.01118,
+       "ci95": [
+        -0.01446,
+        -0.00772
+       ],
+       "better": false,
+       "worse": true,
+       "n": 8264,
+       "players": 2872
+      },
+      "3-6": {
+       "mean": -0.00831,
+       "ci95": [
+        -0.01051,
+        -0.0061
+       ],
+       "better": false,
+       "worse": true,
+       "n": 18021,
+       "players": 9344
+      },
+      "7-10": {
+       "mean": -0.00919,
+       "ci95": [
+        -0.01283,
+        -0.00557
+       ],
+       "better": false,
+       "worse": true,
+       "n": 5301,
+       "players": 3532
+      }
+     }
+    }
+   },
+   "known_players": {
+    "n": 22137,
+    "log_loss": {
+     "pooled": 0.8208,
+     "population": 0.81097,
+     "situation": 0.78606,
+     "personal": 0.80583,
+     "situation_personal": 0.78169
+    }
+   },
+   "new_players": {
+    "n": 9449,
+    "log_loss": {
+     "pooled": 0.843,
+     "population": 0.83525,
+     "situation": 0.809,
+     "personal": 0.83525,
+     "situation_personal": 0.809
+    }
+   },
+   "by_table_size": {
+    "2": {
+     "n": 8264,
+     "log_loss": {
+      "pooled": 0.8396,
+      "population": 0.82842,
+      "situation": 0.80315,
+      "personal": 0.82341,
+      "situation_personal": 0.79883
+     }
+    },
+    "3-6": {
+     "n": 18021,
+     "log_loss": {
+      "pooled": 0.82795,
+      "population": 0.81964,
+      "situation": 0.79445,
+      "personal": 0.81619,
+      "situation_personal": 0.79152
+     }
+    },
+    "7-10": {
+     "n": 5301,
+     "log_loss": {
+      "pooled": 0.80679,
+      "population": 0.79759,
+      "situation": 0.77178,
+      "personal": 0.79566,
+      "situation_personal": 0.77024
+     }
+    }
+   }
+  }
+ },
+ "seconds": 27.5,
+ "label": "log loss per decision on the frozen test half (lower is better); lifts are the reduction in log loss, 95% intervals from resampling players"
+}

@@ -1,0 +1,84 @@
+{
+ "by_context": {
+  "checked_through": {
+   "fold": 35809,
+   "call": 17062,
+   "raise": 1716
+  },
+  "bettor_aggr": {
+   "fold": 24220,
+   "call": 20055,
+   "raise": 3267
+  },
+  "defender_aggr": {
+   "fold": 13707,
+   "call": 9604,
+   "raise": 900
+  }
+ },
+ "pooled": {
+  "fold": 73736,
+  "call": 46721,
+  "raise": 5883
+ },
+ "by_context_size": {
+  "checked_through": {
+   "2": {
+    "fold": 4748,
+    "call": 2445,
+    "raise": 238
+   },
+   "3-6": {
+    "fold": 20398,
+    "call": 9821,
+    "raise": 1023
+   },
+   "7-10": {
+    "fold": 10663,
+    "call": 4796,
+    "raise": 455
+   }
+  },
+  "bettor_aggr": {
+   "2": {
+    "fold": 1894,
+    "call": 1889,
+    "raise": 309
+   },
+   "3-6": {
+    "fold": 13728,
+    "call": 11547,
+    "raise": 1885
+   },
+   "7-10": {
+    "fold": 8598,
+    "call": 6619,
+    "raise": 1073
+   }
+  },
+  "defender_aggr": {
+   "2": {
+    "fold": 1064,
+    "call": 886,
+    "raise": 88
+   },
+   "3-6": {
+    "fold": 8133,
+    "call": 5523,
+    "raise": 551
+   },
+   "7-10": {
+    "fold": 4510,
+    "call": 3195,
+    "raise": 261
+   }
+  }
+ },
+ "revision": "6acb5afb6f43082e6a468fde578890d9188be393",
+ "split": "train",
+ "cohort": "bet 40-60% of the pot, all three responses legal, any table size",
+ "n_train": 126340,
+ "n_test": 31586,
+ "generated": "2026-11-07T21:44:40",
+ "prior_pseudo_count": 1
+}

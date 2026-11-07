@@ -1,0 +1,356 @@
+{
+ "generated": "2026-11-07T21:45:47",
+ "decisions": 31586,
+ "players": 15138,
+ "protocols": {
+  "frozen": {
+   "chips_per_decision": {
+    "never": 0.0,
+    "always": 36.138,
+    "perfect": 57.247,
+    "population": 36.138,
+    "situation": 36.184,
+    "personal": 36.142,
+    "situation_personal": 36.214
+   },
+   "bluff_rate": {
+    "population": 1.0,
+    "situation": 0.9915,
+    "personal": 0.9999,
+    "situation_personal": 0.9881
+   },
+   "fold_rate_when_bluffing": {
+    "population": 0.5725,
+    "situation": 0.5748,
+    "personal": 0.5725,
+    "situation_personal": 0.5759
+   },
+   "vs_population": {
+    "situation": {
+     "mean": 0.04563,
+     "ci95": [
+      -0.01913,
+      0.11865
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0085
+    },
+    "personal": {
+     "mean": 0.00378,
+     "ci95": [
+      0.0,
+      0.01137
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0001
+    },
+    "situation_personal": {
+     "mean": 0.07615,
+     "ci95": [
+      -0.00879,
+      0.166
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0119
+    },
+    "always": {
+     "mean": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0
+    }
+   },
+   "by_history": [
+    {
+     "bin": "0",
+     "n": 15235,
+     "never": 0.0,
+     "always": 34.995,
+     "perfect": 56.488,
+     "population": 34.995,
+     "situation": 35.013,
+     "personal": 34.995,
+     "situation_personal": 35.013
+    },
+    {
+     "bin": "1-3",
+     "n": 7520,
+     "never": 0.0,
+     "always": 36.96,
+     "perfect": 57.793,
+     "population": 36.96,
+     "situation": 37.056,
+     "personal": 36.96,
+     "situation_personal": 36.991
+    },
+    {
+     "bin": "4-15",
+     "n": 6840,
+     "never": 0.0,
+     "always": 37.769,
+     "perfect": 58.363,
+     "population": 37.769,
+     "situation": 37.803,
+     "personal": 37.769,
+     "situation_personal": 37.935
+    },
+    {
+     "bin": "16-63",
+     "n": 1721,
+     "never": 0.0,
+     "always": 36.019,
+     "perfect": 57.06,
+     "population": 36.019,
+     "situation": 36.108,
+     "personal": 36.019,
+     "situation_personal": 36.231
+    },
+    {
+     "bin": "64+",
+     "n": 270,
+     "never": 0.0,
+     "always": 37.249,
+     "perfect": 57.778,
+     "population": 37.249,
+     "situation": 37.434,
+     "personal": 37.691,
+     "situation_personal": 38.658
+    }
+   ],
+   "by_table_size": {
+    "2": {
+     "n": 8264,
+     "never": 0.0,
+     "always": 33.04,
+     "perfect": 55.385,
+     "population": 33.04,
+     "situation": 33.03,
+     "personal": 33.054,
+     "situation_personal": 33.172
+    },
+    "3-6": {
+     "n": 18021,
+     "never": 0.0,
+     "always": 36.821,
+     "perfect": 57.655,
+     "population": 36.821,
+     "situation": 36.864,
+     "personal": 36.821,
+     "situation_personal": 36.841
+    },
+    "7-10": {
+     "n": 5301,
+     "never": 0.0,
+     "always": 38.649,
+     "perfect": 58.762,
+     "population": 38.649,
+     "situation": 38.79,
+     "personal": 38.649,
+     "situation_personal": 38.826
+    }
+   },
+   "personal_on_top_of_situation": {
+    "mean": 0.03052,
+    "ci95": [
+     -0.02884,
+     0.09039
+    ],
+    "better": false,
+    "worse": false,
+    "n": 31586,
+    "players": 15138
+   }
+  },
+  "online": {
+   "chips_per_decision": {
+    "never": 0.0,
+    "always": 36.138,
+    "perfect": 57.247,
+    "population": 36.138,
+    "situation": 36.184,
+    "personal": 36.142,
+    "situation_personal": 36.255
+   },
+   "bluff_rate": {
+    "population": 1.0,
+    "situation": 0.9915,
+    "personal": 0.9999,
+    "situation_personal": 0.9863
+   },
+   "fold_rate_when_bluffing": {
+    "population": 0.5725,
+    "situation": 0.5748,
+    "personal": 0.5725,
+    "situation_personal": 0.5766
+   },
+   "vs_population": {
+    "situation": {
+     "mean": 0.04563,
+     "ci95": [
+      -0.01913,
+      0.11865
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0085
+    },
+    "personal": {
+     "mean": 0.00346,
+     "ci95": [
+      0.0,
+      0.01042
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0001
+    },
+    "situation_personal": {
+     "mean": 0.11695,
+     "ci95": [
+      0.02483,
+      0.21717
+     ],
+     "better": true,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0137
+    },
+    "always": {
+     "mean": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "better": false,
+     "worse": false,
+     "n": 31586,
+     "players": 15138,
+     "decisions_changed": 0.0
+    }
+   },
+   "by_history": [
+    {
+     "bin": "0",
+     "n": 9449,
+     "never": 0.0,
+     "always": 35.098,
+     "perfect": 56.524,
+     "population": 35.098,
+     "situation": 35.096,
+     "personal": 35.098,
+     "situation_personal": 35.096
+    },
+    {
+     "bin": "1-3",
+     "n": 9902,
+     "never": 0.0,
+     "always": 35.97,
+     "perfect": 57.14,
+     "population": 35.97,
+     "situation": 36.029,
+     "personal": 35.97,
+     "situation_personal": 36.077
+    },
+    {
+     "bin": "4-15",
+     "n": 8805,
+     "never": 0.0,
+     "always": 37.689,
+     "perfect": 58.342,
+     "population": 37.689,
+     "situation": 37.747,
+     "personal": 37.689,
+     "situation_personal": 37.818
+    },
+    {
+     "bin": "16-63",
+     "n": 3118,
+     "never": 0.0,
+     "always": 35.017,
+     "perfect": 56.414,
+     "population": 35.017,
+     "situation": 35.117,
+     "personal": 35.017,
+     "situation_personal": 35.377
+    },
+    {
+     "bin": "64+",
+     "n": 312,
+     "never": 0.0,
+     "always": 40.438,
+     "perfect": 59.936,
+     "population": 40.438,
+     "situation": 40.598,
+     "personal": 40.788,
+     "situation_personal": 41.72
+    }
+   ],
+   "by_table_size": {
+    "2": {
+     "n": 8264,
+     "never": 0.0,
+     "always": 33.04,
+     "perfect": 55.385,
+     "population": 33.04,
+     "situation": 33.03,
+     "personal": 33.053,
+     "situation_personal": 33.274
+    },
+    "3-6": {
+     "n": 18021,
+     "never": 0.0,
+     "always": 36.821,
+     "perfect": 57.655,
+     "population": 36.821,
+     "situation": 36.864,
+     "personal": 36.821,
+     "situation_personal": 36.856
+    },
+    "7-10": {
+     "n": 5301,
+     "never": 0.0,
+     "always": 38.649,
+     "perfect": 58.762,
+     "population": 38.649,
+     "situation": 38.79,
+     "personal": 38.649,
+     "situation_personal": 38.862
+    }
+   },
+   "personal_on_top_of_situation": {
+    "mean": 0.07133,
+    "ci95": [
+     -0.00132,
+     0.14094
+    ],
+    "better": false,
+    "worse": false,
+    "n": 31586,
+    "players": 15138
+   }
+  }
+ },
+ "units": "chips per decision, pot = 100 chips",
+ "rule": "bet when the forecast fold rate is above r / (1 + r), where r is the bet as a fraction of the pot",
+ "label": "real held-out decisions; each bluff is scored by the player's recorded answer"
+}

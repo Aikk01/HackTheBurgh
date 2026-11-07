@@ -13,6 +13,8 @@ POST /api/mirror/freeze  {session}
 POST /api/mirror/play/new {session, scenario_index?}
 POST /api/mirror/play/act {session, action}
 POST /api/mirror/train   {session, episodes?, seed?}
+GET  /api/mirror/real_players             players from the dataset with enough river answers for a twin
+POST /api/mirror/real/load {session, player_id}  bet against that player's twin (Phase 6)
 """
 from __future__ import annotations
 
@@ -92,7 +94,25 @@ def evidence() -> Dict[str, Any]:
         "population_bot": {"present": policy is not None, "data": {"meta": (policy or {}).get("meta"), "checkpoints": (policy or {}).get("checkpoints")} if policy else None,
                            "source": "Q-learning vs. the context-only twin", "generated": None},
     }
+    panels.update(wide_panels())
     return {"generated": _dt.datetime.now().isoformat(timespec="seconds"), "panels": panels}
+
+
+def wide_panels() -> Dict[str, Any]:
+    """Phase 6 panels: every table size, real players, Pluribus strength table, GPU forecaster."""
+    def panel(name: str, source: str, drop: tuple = ()) -> Dict[str, Any]:
+        d = _load_json(name)
+        return {"present": d is not None, "data": {k: v for k, v in d.items() if k not in drop} if d else None,
+                "source": source, "generated": (d or {}).get("generated")}
+    return {
+        "wide_scan": panel("scan_counts_wide.json", "every table size where two players reach the river", ("per_shard",)),
+        "forecast_wide": panel("eval_wide.json", "frozen test half, every table size"),
+        "bluff_test": panel("bluff_test.json", "real held-out decisions scored by the players' recorded answers"),
+        "benchmark_real": panel("benchmark_real.json", "real players' recorded answers; exact best responses", ("per_player",)),
+        "strength_pluribus": panel("strength_pluribus.json", "Pluribus hands, every card known", ("fit_counts",)),
+        "neural_forecaster": panel("neural_forecaster.json", "GPU forecaster on the same frozen test half", ("runs",)),
+        "type_gate_wide": panel("styles_wide.json", "player types on every table size"),
+    }
 
 
 def styles() -> Dict[str, Any]:
@@ -103,6 +123,16 @@ def styles() -> Dict[str, Any]:
     keep = ("generated", "k", "names", "shares", "centroids", "centroid_xy", "map_points", "features", "players_used",
             "players_total", "gate", "stable")
     return {"present": True, **{k: st.get(k) for k in keep}, "n_min": (st.get("reliability") or {}).get("n_min")}
+
+
+def real_players() -> Dict[str, Any]:
+    """Real players for the opponent picker: summaries only, the answer sequences stay on the server."""
+    d = _load_json("real_players.json")
+    if not d:
+        return {"present": False, "players": []}
+    keep = ("id", "venue", "decisions", "fold_rate", "table_mix", "counts", "first", "last")
+    return {"present": True, "min_decisions": d.get("min_decisions"), "eligible_players": d.get("eligible_players"),
+            "label": d.get("label"), "players": [{k: p.get(k) for k in keep} for p in d.get("players", [])]}
 
 
 def sessions_summary() -> Dict[str, Any]:
@@ -128,6 +158,8 @@ def get(path: str, qs: Dict[str, str]) -> Any:
         return demo_hands()
     if path == "/api/mirror/evidence":
         return evidence()
+    if path == "/api/mirror/real_players":
+        return real_players()
     return None
 
 
@@ -154,6 +186,8 @@ def post(path: str, body: Dict[str, Any]) -> Any:
         return {"token": s.token, **s.new_play_spot(int(idx) if idx is not None else None)}
     if path == "/api/mirror/play/act":
         return {"token": s.token, **s.play_act(str(body.get("action", "")))}
+    if path == "/api/mirror/real/load":
+        return {"token": s.token, "frozen": s.load_real_player(str(body.get("player_id", ""))), "state": s.state()}
     if path == "/api/mirror/train":
         return {"token": s.token, "training": s.start_training(int(body.get("episodes", 20000)), int(body.get("seed", 7)))}
     return None

@@ -67,6 +67,8 @@ class SharedModels:
         self._drill_pool: Optional[List[Scenario]] = None
         self._play_pool: Optional[List[Scenario]] = None
         self._population_policy: Optional[Any] = None
+        self._real_players: Optional[Dict[str, Dict[str, Any]]] = None
+        self._population_wide: Optional[PopulationModel] = None
         self.sessions_dir: Optional[str] = SESSIONS_DIR  # None disables session logging (tests)
 
     def make_strength(self) -> StrengthTable:
@@ -74,7 +76,33 @@ class SharedModels:
         cal = _load_json("strength_calibration.json")
         if cal and cal.get("sessions", 0) > 0:
             return StrengthTable.from_calibration(self.population, cal["counts"], int(cal["sessions"]))
-        return StrengthTable.default(self.population)
+        from .mirror_real import strength_table
+        return strength_table(self.population)  # Pluribus-calibrated when 6.7 passed, else the labelled default
+
+    @property
+    def real_players(self) -> Dict[str, Dict[str, Any]]:
+        """Players from the dataset with enough recorded river answers to build a twin (Phase 6)."""
+        with self.lock:
+            if self._real_players is None:
+                d = _load_json("real_players.json") or {}
+                self._real_players = {p["id"]: p for p in d.get("players", [])}
+            return self._real_players
+
+    @property
+    def population_wide(self) -> PopulationModel:
+        """Population over every table size (Phase 6); falls back to the two-player-table population."""
+        with self.lock:
+            if self._population_wide is None:
+                path = os.path.join(MIRROR_DIR, "population_wide.json")
+                if os.path.exists(path):
+                    self._population_wide = PopulationModel.load(path)
+            pop = self._population_wide
+        return pop if pop is not None else self.population
+
+    @property
+    def wide_prior_strength(self) -> float:
+        ev = _load_json("eval_wide.json")
+        return float(ev["prior_strength"]) if ev and ev.get("prior_strength") else float(DEFAULT_PRIOR_STRENGTH)
 
     @property
     def population(self) -> PopulationModel:
@@ -146,6 +174,7 @@ class MirrorSession:
         self.play_current: Optional[Dict[str, Any]] = None
         self.training: Dict[str, Any] = {"status": "idle"}
         self.personal_policy: Optional[Any] = None
+        self.opponent: Dict[str, Any] = {"kind": "judge"}
         self.version = 0
 
     # ------------------------------------------------------------ drills (judge defends)
@@ -264,10 +293,41 @@ class MirrorSession:
             self.frozen = self.personal.freeze(self.strength)
             self.frozen.label = f"judge twin ({self.personal.observations()} observations)"
             self.twin = Twin(self.frozen)
+            self._forget_other_bot()
+            self.opponent = {"kind": "judge", "observations": self.frozen.observations}
             self.play_env = RiverResponseEnv(self.twin, self.shared.play_pool, seed=self.rng.randrange(1 << 30))
             self.version += 1
             return {"hash": self.frozen.hash, "observations": self.frozen.observations, "arm": self.frozen.arm,
                     "public": self.frozen.public, "strength_sources": self.frozen.strength_sources}
+
+    def _forget_other_bot(self) -> None:
+        """A bettor trained against another twin no longer applies."""
+        if self.personal_policy is not None and self.personal_policy.meta.get("profile_hash") not in (None, self.frozen.hash):
+            self.personal_policy = None
+            self.training = {"status": "idle"}
+
+    def load_real_player(self, player_id: str) -> Dict[str, Any]:
+        """Bet against a twin built from a real player's recorded river answers, so no drills are needed."""
+        from .mirror_real import decode, strength_table
+        rec = self.shared.real_players.get(player_id)
+        if rec is None:
+            raise ValueError(f"unknown real player {player_id!r}")
+        population = self.shared.population_wide
+        pm = PersonalModel(population, self.shared.wide_prior_strength, player_id=player_id)
+        for c, a in decode(rec["sequence"]):
+            pm.observe(c, a)
+        frozen = pm.freeze(strength_table(population))
+        frozen.label = f"real player {player_id} ({rec['decisions']} recorded decisions, {rec['venue']})"
+        with self.lock:
+            self.frozen = frozen
+            self.twin = Twin(frozen)
+            self.play_env = RiverResponseEnv(self.twin, self.shared.play_pool, seed=self.rng.randrange(1 << 30))
+            self._forget_other_bot()
+            self.opponent = {"kind": "real", "id": player_id, "venue": rec["venue"], "decisions": rec["decisions"],
+                             "fold_rate": rec["fold_rate"], "table_mix": rec.get("table_mix")}
+            self.version += 1
+            return {"hash": frozen.hash, "observations": frozen.observations, "arm": frozen.arm, "public": frozen.public,
+                    "strength_sources": frozen.strength_sources, "opponent": dict(self.opponent)}
 
     def twin_for_training(self) -> Twin:
         with self.lock:
@@ -307,7 +367,8 @@ class MirrorSession:
             cur = self.play_current or {}
             view: Dict[str, Any] = {
                 "spot": {"board": list(sc.board), "own_cards": list(sc.bettor_cards), "context": sc.context,
-                         "context_label": CONTEXT_LABELS[sc.context].replace("you (the defender)", "your twin"),
+                         "context_label": CONTEXT_LABELS[sc.context].replace(
+                             "you (the defender)", "the player's twin" if self.opponent.get("kind") == "real" else "your twin"),
                          "story": PREFIX_STORY[sc.context], "pot": OPENING_POT, "bet": BET_SIZE, "raise_to": RAISE_TO,
                          "stage": self.play_stage, "bettor_bucket": sc.bettor_bucket, "bettor_equity": sc.bettor_equity},
                 "advice": self._advice(sc) if self.play_stage == 1 else None,
@@ -450,7 +511,7 @@ class MirrorSession:
         with self.lock:
             return {"token": self.token, "version": self.version, "tag": self.tag, "drill": self.drill_view(),
                     "profile": self.profile_summary(), "frozen": self.frozen.hash if self.frozen else None,
-                    "play": self.play_view(), "training": dict(self.training),
+                    "play": self.play_view(), "training": dict(self.training), "opponent": dict(self.opponent),
                     "has_population_policy": self.shared.population_policy is not None}
 
 
