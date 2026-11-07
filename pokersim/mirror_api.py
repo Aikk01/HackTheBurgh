@@ -84,13 +84,38 @@ def evidence() -> Dict[str, Any]:
                       "style_counts": style_counts, "source": "style table up to each venue cutoff", "generated": (styles or {}).get("generated")},
         "decision_benchmark": {"present": bench is not None, "data": bench, "source": "simulated matched deals", "generated": (bench or {}).get("generated")},
         "range_checks": {"present": ranges is not None, "data": ranges, "source": "held-out sessions / Pluribus / twin", "generated": (ranges or {}).get("generated")},
+        "sessions": {"present": True, "data": sessions_summary(), "source": "volunteer sessions logged on this machine (raw logs never leave it)",
+                     "generated": ((_load_json("sessions_eval.json") or {}).get("generated"))},
+        "training_sufficiency": {"present": _load_json("training_sufficiency.json") is not None,
+                                 "data": {k: v for k, v in (_load_json("training_sufficiency.json") or {}).items() if k != "runs"},
+                                 "source": "three training seeds of the population bot", "generated": (_load_json("training_sufficiency.json") or {}).get("generated")},
         "population_bot": {"present": policy is not None, "data": {"meta": (policy or {}).get("meta"), "checkpoints": (policy or {}).get("checkpoints")} if policy else None,
                            "source": "Q-learning vs. the context-only twin", "generated": None},
     }
     return {"generated": _dt.datetime.now().isoformat(timespec="seconds"), "panels": panels}
 
 
+def styles() -> Dict[str, Any]:
+    """Player-type map for the Evidence tab (descriptive when the type gate failed)."""
+    st = _load_json("styles.json")
+    if not st:
+        return {"present": False}
+    keep = ("generated", "k", "names", "shares", "centroids", "centroid_xy", "map_points", "features", "players_used",
+            "players_total", "gate", "stable")
+    return {"present": True, **{k: st.get(k) for k in keep}, "n_min": (st.get("reliability") or {}).get("n_min")}
+
+
+def sessions_summary() -> Dict[str, Any]:
+    from .mirror_eval import session_counts
+    return {"live_counts": session_counts(), "evaluation": _load_json("sessions_eval.json"),
+            "calibration": _load_json("strength_calibration.json")}
+
+
 def get(path: str, qs: Dict[str, str]) -> Any:
+    if path == "/api/mirror/styles":
+        return styles()
+    if path == "/api/mirror/sessions":
+        return sessions_summary()
     if path == "/api/mirror/state":
         return _session(qs).state()
     if path == "/api/mirror/profile":
@@ -110,7 +135,14 @@ def post(path: str, body: Dict[str, Any]) -> Any:
     if path == "/api/mirror/reset":
         token = body.get("session") or REGISTRY.get(None).token
         return REGISTRY.reset(token).state()
+    if path == "/api/mirror/sessions/recompute":
+        from .mirror_eval import evaluate_sessions, write_range_checks
+        res = evaluate_sessions()
+        write_range_checks(os.path.join(MIRROR_DIR, "range_checks.json"))
+        return res
     s = _session(body)
+    if path == "/api/mirror/tag":
+        return {"token": s.token, **s.set_tag(str(body.get("tag", ""))), "state": s.state()}
     if path == "/api/mirror/drill":
         return {"token": s.token, **s.new_drill(), "profile": s.profile_summary()}
     if path == "/api/mirror/respond":

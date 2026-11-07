@@ -98,7 +98,7 @@ REPORT at each gate: Done / Evidence (command and result) / Failing or cut / Dec
 - [x] **2.A1** First scan over all 37 shards, parallel by shard, with per-shard input, eligible, duplicate and rejection counts, cached by source checksum. Verify: the counts table is written and a rerun is a cache hit.
 - [x] **2.A2** Global deduplication on venue and hand ID plus a content fingerprint, then the chronological 80/20 manifests with largest-remainder allocation by venue. Verify: no hand or fingerprint appears on both sides, and the training count equals floor(0.8 × N).
 - [x] **2.A3** Export the full-corpus counts, the two-shard exhibit and the two opening-replay hands: `3039372300` at step 15 and `3039405280` at step 14. Verify: both replays stop just before the response with unknown cards face down.
-- [ ] **2.A4** Commit only small artifacts, plus the CC BY 4.0 attribution. Verify: `git status` shows no data files.
+- [x] **2.A4** Commit only small artifacts, plus the CC BY 4.0 attribution. Verify: `git status` shows no data files.
 
 **B · Model**
 
@@ -129,7 +129,7 @@ REPORT at each gate: Done / Evidence (command and result) / Failing or cut / Dec
 - [x] **3.3 [A] Handle gate.** Report, per venue, how many handles reach several hand-count thresholds. If handles do not repeat across shards, cluster within shards.
 - [x] **3.4 [B] Types.** Choose the minimum hand count by split-half reliability of at least 0.7. Fit a Gaussian mixture for K from 2 to 8 by bootstrap stability, capped at 6. Name the types, build the type response tables and export map points without handles.
 - [x] **3.5 [B] Mixture model and type-prior gate.** Run the lift test on the frozen 20%: four forecasters, bootstrap over players, keep the type prior only if its log-loss interval beats the population model. Repeat on hands outside shards 35 and 36. Record the result whichever way it falls.
-- [ ] **3.6 [C] Paired benchmark.** Four synthetic opponents (frequent caller, frequent folder, context-matched population control, strength-dependent raiser), probe budgets 0, 4, 16 and 64, 1,000 matched opportunities each, and a paired 95% bootstrap interval. Verify: it regenerates from the documented seeds.
+- [x] **3.6 [C] Paired benchmark.** Four synthetic opponents (frequent caller, frequent folder, context-matched population control, strength-dependent raiser), probe budgets 0, 4, 16 and 64, 1,000 matched opportunities each, and a paired 95% bootstrap interval. Verify: it regenerates from the documented seeds.
 - [ ] **3.7 [D] Visuals.** The style map with the judge's dot, the 13 by 13 range grid, the learning-curve chart and the policy chart.
 
 **GATE H15.** Pass means the H12 outcome is recorded, the type-prior gate is decided and recorded, and the benchmark regenerates from seeds.

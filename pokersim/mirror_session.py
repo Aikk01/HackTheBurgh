@@ -29,6 +29,9 @@ from .river_env import RiverResponseEnv, Scenario, scenario_pool
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MIRROR_DIR = os.path.join(ROOT, "data", "mirror")
 POLICY_DIR = os.path.join(ROOT, "data", "cache", "mirror", "policies")
+# Volunteer decisions stay on this machine (data/cache is git-ignored); only aggregates are committed.
+SESSIONS_DIR = os.path.join(ROOT, "data", "cache", "mirror", "sessions")
+SESSION_TAGS = ("practice", "calibration", "heldout")
 DRILL_POOL_SEED = 42
 DRILL_POOL_SIZE = 3000
 PLAY_POOL_SEED = 43
@@ -64,6 +67,14 @@ class SharedModels:
         self._drill_pool: Optional[List[Scenario]] = None
         self._play_pool: Optional[List[Scenario]] = None
         self._population_policy: Optional[Any] = None
+        self.sessions_dir: Optional[str] = SESSIONS_DIR  # None disables session logging (tests)
+
+    def make_strength(self) -> StrengthTable:
+        """Strength table for a new session: calibration sessions when they exist, else the labelled default."""
+        cal = _load_json("strength_calibration.json")
+        if cal and cal.get("sessions", 0) > 0:
+            return StrengthTable.from_calibration(self.population, cal["counts"], int(cal["sessions"]))
+        return StrengthTable.default(self.population)
 
     @property
     def population(self) -> PopulationModel:
@@ -119,7 +130,8 @@ class MirrorSession:
         self.rng = random.Random(seed if seed is not None else secrets.randbits(32))
         self.population = shared.population
         self.personal = PersonalModel(self.population, DEFAULT_PRIOR_STRENGTH, shared.type_prior, player_id=token)
-        self.strength = StrengthTable.default(self.population)
+        self.strength = shared.make_strength()
+        self.tag = "practice"  # practice | calibration | heldout (what this judge's decisions may be used for)
         self.decisions: Dict[str, DecisionRecord] = {}
         self.order: List[str] = []
         self.pending: Optional[DecisionRecord] = None
@@ -158,7 +170,8 @@ class MirrorSession:
                 session_id=self.token, decision_id=f"{self.token[:6]}-d{self.drill_count}", context=sc.context,
                 pot_before_bet=OPENING_POT, bet=BET_SIZE, legal=legal, board=list(sc.board), own_cards=list(sc.defender_cards),
                 defender_strength=sc.defender_bucket, prediction=pred, source="practice", player_id=self.token,
-                extra={"story": PREFIX_STORY[sc.context], "context_label": CONTEXT_LABELS[sc.context], "equity": sc.defender_equity},
+                extra={"story": PREFIX_STORY[sc.context], "context_label": CONTEXT_LABELS[sc.context], "equity": sc.defender_equity,
+                       "population_prediction": self.population.probs(sc.context), "tag": self.tag},
             )
             self.pending = rec
             self.pending_scenario = sc
@@ -197,11 +210,11 @@ class MirrorSession:
             if sc is not None:
                 from .mirror_rl import showdown_value
                 w = showdown_value(sc)  # bettor's showdown result
+                # defender's result relative to the river start, in opening pots (the bettor calls a raise)
                 if action == "fold":
-                    net = -0.0
+                    net = 0.0
                     result = "you folded"
                 elif action == "call":
-                    net = (1.0 - w) * 2 - 0.5 if w != 0.5 else 0.5
                     net = {1.0: -0.5, 0.0: 1.5, 0.5: 0.5}[w]
                     result = "you won at showdown" if w == 0.0 else "you lost at showdown" if w == 1.0 else "split pot"
                 else:
@@ -210,6 +223,8 @@ class MirrorSession:
                 outcome = {"bettor_cards": list(sc.bettor_cards), "result": result, "net_pots": net,
                            "your_bucket": sc.defender_bucket, "your_equity": sc.defender_equity}
                 rec.extra["outcome"] = outcome
+            rec.extra["tag"] = self.tag
+            self._log({"type": "drill", "tag": self.tag, "session": self.token, "time": time.time(), "decision": asdict(rec)})
             self.pending = None
             self.pending_scenario = None
             self.version += 1
@@ -410,11 +425,32 @@ class MirrorSession:
                 "advice": self._advice(sc) if (sc and self.frozen) else None,
             }
 
+    # ------------------------------------------------------------ session data
+    def set_tag(self, tag: str) -> Dict[str, Any]:
+        """Declare what this judge's decisions are for: practice, calibration (development) or heldout (evaluation)."""
+        if tag not in SESSION_TAGS:
+            raise ValueError(f"tag must be one of {', '.join(SESSION_TAGS)}")
+        with self.lock:
+            self.tag = tag
+            self.version += 1
+            return {"tag": self.tag}
+
+    def _log(self, entry: Dict[str, Any]) -> None:
+        if not self.shared.sessions_dir:
+            return
+        try:
+            os.makedirs(self.shared.sessions_dir, exist_ok=True)
+            with open(os.path.join(self.shared.sessions_dir, f"{self.token}.jsonl"), "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, sort_keys=True) + "\n")
+        except OSError:
+            pass  # logging must never break a live demo
+
     # ------------------------------------------------------------ state
     def state(self) -> Dict[str, Any]:
         with self.lock:
-            return {"token": self.token, "version": self.version, "drill": self.drill_view(), "profile": self.profile_summary(),
-                    "frozen": self.frozen.hash if self.frozen else None, "play": self.play_view(), "training": dict(self.training),
+            return {"token": self.token, "version": self.version, "tag": self.tag, "drill": self.drill_view(),
+                    "profile": self.profile_summary(), "frozen": self.frozen.hash if self.frozen else None,
+                    "play": self.play_view(), "training": dict(self.training),
                     "has_population_policy": self.shared.population_policy is not None}
 
 

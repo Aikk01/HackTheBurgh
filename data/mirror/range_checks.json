@@ -1,0 +1,69 @@
+{
+ "generated": "2026-11-07T19:21:34",
+ "held_out_sessions": {
+  "sessions": 0,
+  "note": "no held-out volunteer sessions recorded yet; nothing claimed about humans"
+ },
+ "pluribus": {
+  "spots": 701,
+  "by_response": {
+   "fold": {
+    "n": 417,
+    "mean_equity": 0.5091,
+    "ci95": [
+     0.4875,
+     0.5282
+    ],
+    "buckets": {
+     "medium": 216,
+     "strong": 108,
+     "weak": 93
+    }
+   },
+   "call": {
+    "n": 219,
+    "mean_equity": 0.7358,
+    "ci95": [
+     0.7136,
+     0.7585
+    ],
+    "buckets": {
+     "weak": 3,
+     "strong": 145,
+     "medium": 71
+    }
+   },
+   "raise": {
+    "n": 65,
+    "mean_equity": 0.839,
+    "ci95": [
+     0.7819,
+     0.8907
+    ],
+    "buckets": {
+     "strong": 52,
+     "medium": 10,
+     "weak": 3
+    }
+   }
+  },
+  "fold_below_call": true,
+  "call_below_raise": true,
+  "monotone": true,
+  "half_pot_band": 211,
+  "label": "directional check: every card known, no showdown selection; intervals are wide"
+ },
+ "twin_unit_check": {
+  "n": 1500,
+  "mean_log_score_readout": -0.8466,
+  "mean_log_score_blind": -1.0912,
+  "improvement": 0.2446,
+  "top_bucket_accuracy": 0.614,
+  "mean_posterior_strong_by_response": {
+   "call": 0.6191,
+   "fold": 0.0942,
+   "raise": 0.8515
+  },
+  "label": "twin's own responses: tests the Bayes code, not human behaviour"
+ }
+}

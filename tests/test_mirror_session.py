@@ -4,8 +4,12 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+import json  # noqa: E402
+import tempfile  # noqa: E402
+
+from pokersim import mirror_eval as EV  # noqa: E402
 from pokersim import mirror_session as MS  # noqa: E402
-from pokersim.mirror_model import PopulationModel  # noqa: E402
+from pokersim.mirror_model import PopulationModel, StrengthTable  # noqa: E402
 from pokersim.river_env import generate_scenarios  # noqa: E402
 
 COUNTS = {"checked_through": {"fold": 266, "call": 110, "raise": 18}, "bettor_aggr": {"fold": 52, "call": 42, "raise": 6},
@@ -22,6 +26,54 @@ class FakeShared(MS.SharedModels):
         self._type_prior_checked = True
         self._drill_pool = generate_scenarios(60, seed=1)
         self._play_pool = generate_scenarios(20, seed=2)
+        self.sessions_dir = None  # never write test decisions into the real session logs
+
+    def make_strength(self):
+        return StrengthTable.default(self.population)
+
+
+class SessionLogs(unittest.TestCase):
+    """Volunteer decisions are logged locally and scored only from aggregates."""
+
+    def play(self, session, n, action="call"):
+        for _ in range(n):
+            v = session.new_drill()
+            session.respond(v["pending"]["decision_id"], action)
+
+    def test_tags_logging_calibration_and_heldout_scores(self):
+        shared = FakeShared()
+        with tempfile.TemporaryDirectory() as logs, tempfile.TemporaryDirectory() as out:
+            shared.sessions_dir = logs
+            cal = MS.MirrorSession("cal1", shared, seed=1)
+            cal.set_tag("calibration")
+            self.play(cal, 4, "fold")
+            held = MS.MirrorSession("held1", shared, seed=2)
+            held.set_tag("heldout")
+            self.play(held, 3, "call")
+            practice = MS.MirrorSession("prac1", shared, seed=3)
+            self.play(practice, 2)
+            with self.assertRaises(ValueError):
+                practice.set_tag("everything")
+            with open(os.path.join(logs, "held1.jsonl"), encoding="utf-8") as f:
+                rows = [json.loads(line) for line in f]
+            self.assertEqual(len(rows), 3)
+            d = rows[0]["decision"]
+            self.assertEqual(rows[0]["tag"], "heldout")
+            self.assertIn(d["defender_strength"], ("weak", "medium", "strong"))
+            self.assertIn("population_prediction", d["extra"])
+            self.assertIn("bettor_cards", d["extra"]["outcome"])
+            counts = EV.session_counts(logs)
+            self.assertEqual(counts["calibration"], {"sessions": 1, "decisions": 4})
+            self.assertEqual(counts["heldout"], {"sessions": 1, "decisions": 3})
+            res = EV.evaluate_sessions(logs, out_dir=out, population=shared.population)
+            self.assertEqual(res["calibration"]["sessions"], 1)
+            self.assertEqual(res["calibration"]["decisions"], 4)
+            self.assertEqual(res["heldout_forecast"]["decisions"], 3)
+            self.assertEqual(res["heldout_readout"]["decisions"], 3)
+            self.assertEqual(res["heldout_readout"]["strength_table"], "calibration sessions")
+            with open(os.path.join(out, "strength_calibration.json"), encoding="utf-8") as f:
+                calib = json.load(f)
+            self.assertEqual(sum(v for c in calib["counts"].values() for b in c.values() for v in b.values()), 4)
 
 
 class Drills(unittest.TestCase):

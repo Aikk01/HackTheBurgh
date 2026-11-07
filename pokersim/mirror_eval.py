@@ -156,9 +156,39 @@ def forecast_ladder(train: Sequence[RiverSpot], test: Sequence[RiverSpot], popul
         mean = (overall["log_loss"]["population"] - overall["log_loss"][arm]) if rows else 0.0
         paired[arm] = {"lift_vs_population": round(mean, 5), "ci95": [round(diffs[int(0.025 * bootstrap)], 5), round(diffs[int(0.975 * bootstrap) - 1], 5)],
                        "better": mean > 0 and diffs[int(0.025 * bootstrap)] > 0}
+    def _paired(a: str, b: str, keep: Any = None) -> Dict[str, Any]:
+        """Lift of arm ``a`` over arm ``b`` (b's log loss minus a's), bootstrapped over players."""
+        per: Dict[Any, List[float]] = collections.defaultdict(lambda: [0.0, 0])
+        for r in rows:
+            if (keep is None or keep(r)) and a in r["ll"] and b in r["ll"]:
+                per[r["player"]][0] += r["ll"][b] - r["ll"][a]
+                per[r["player"]][1] += 1
+        players = list(per)
+        n = sum(v[1] for v in per.values())
+        if not n:
+            return {"n": 0, "players": 0, "lift": None, "ci95": None, "better": False}
+        draws = []
+        for _ in range(bootstrap):
+            tot = cnt = 0.0
+            for _ in range(len(players)):
+                v = per[players[rng.randrange(len(players))]]
+                tot += v[0]
+                cnt += v[1]
+            draws.append(tot / cnt if cnt else 0.0)
+        draws.sort()
+        lo, hi = draws[int(0.025 * bootstrap)], draws[int(0.975 * bootstrap) - 1]
+        return {"n": n, "players": len(players), "lift": round(sum(v[0] for v in per.values()) / n, 5),
+                "ci95": [round(lo, 5), round(hi, 5)], "better": lo > 0}
+
+    gate_comparisons = None
+    if type_prior is not None:
+        gate_comparisons = {
+            "type_vs_population_zero_history_style_known": _paired("type", "population", lambda r: r["style_known"] and r["n_before"] == 0),
+            "type_vs_personal_all": _paired("type", "personal"),
+        }
     known = [r for r in rows if r["n_before"] > 0]
     new = [r for r in rows if r["n_before"] == 0]
-    return {"ladder": ladder, "overall": overall, "paired_lift_log_loss": paired, "online": online,
+    return {"ladder": ladder, "overall": overall, "paired_lift_log_loss": paired, "online": online, "gate_comparisons": gate_comparisons,
             "known_players": {"n": len(known), "log_loss": {a: sum(r["ll"][a] for r in known) / len(known) for a in arms} if known else {}},
             "new_players": {"n": len(new), "log_loss": {a: sum(r["ll"][a] for r in new) / len(new) for a in arms} if new else {}},
             "style_known_decisions": sum(1 for r in rows if r["style_known"]), "prior_strength": prior_strength}
@@ -287,11 +317,146 @@ def write_range_checks(out: str, eval_path: Optional[str] = None) -> Dict[str, A
     if os.path.exists(eval_path):
         with open(eval_path, encoding="utf-8") as f:
             pl = json.load(f).get("pluribus")
+    held = {"sessions": 0, "note": "no held-out volunteer sessions recorded yet; nothing claimed about humans"}
+    sess_path = os.path.join(SMALL_OUT, "sessions_eval.json")
+    if os.path.exists(sess_path):
+        with open(sess_path, encoding="utf-8") as f:
+            se = json.load(f)
+        if se.get("heldout_readout", {}).get("decisions"):
+            held = {"sessions": se["heldout_readout"]["sessions"], **se["heldout_readout"]}
     result = {"generated": _dt.datetime.now().isoformat(timespec="seconds"),
-              "held_out_sessions": {"sessions": 0, "note": "no volunteer sessions recorded yet; nothing claimed about humans"},
-              "pluribus": pl, "twin_unit_check": synthetic_readout_check()}
+              "held_out_sessions": held, "pluribus": pl, "twin_unit_check": synthetic_readout_check()}
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=1)
+    return result
+
+
+# ----------------------------------------------------------------- volunteer sessions
+SESSIONS_DIR = os.path.join(LARGE_OUT, "sessions")
+
+
+def load_session_logs(sessions_dir: str = SESSIONS_DIR) -> Dict[str, List[Dict[str, Any]]]:
+    """Drill decisions per session token, in the order they were made."""
+    import glob
+
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for path in sorted(glob.glob(os.path.join(sessions_dir, "*.jsonl"))):
+        rows = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    if r.get("type") == "drill" and r.get("decision", {}).get("actual"):
+                        rows.append(r)
+        if rows:
+            out[os.path.splitext(os.path.basename(path))[0]] = rows
+    return out
+
+
+def session_counts(sessions_dir: str = SESSIONS_DIR) -> Dict[str, Dict[str, int]]:
+    """Independent sessions and decisions per tag (a session counts under the tag of each decision)."""
+    counts: Dict[str, Dict[str, Any]] = {}
+    for token, rows in load_session_logs(sessions_dir).items():
+        for r in rows:
+            c = counts.setdefault(r["tag"], {"sessions": set(), "decisions": 0})
+            c["sessions"].add(token)
+            c["decisions"] += 1
+    return {t: {"sessions": len(c["sessions"]), "decisions": c["decisions"]} for t, c in counts.items()}
+
+
+def _bootstrap_mean(values: Sequence[float], n: int = 2000, seed: int = 1) -> Optional[List[float]]:
+    if len(values) < 3:
+        return None
+    rng = random.Random(seed)
+    means = sorted(sum(values[rng.randrange(len(values))] for _ in values) / len(values) for _ in range(n))
+    return [round(means[int(0.025 * n)], 5), round(means[int(0.975 * n) - 1], 5)]
+
+
+def evaluate_sessions(sessions_dir: str = SESSIONS_DIR, out_dir: str = SMALL_OUT,
+                      population: Optional[PopulationModel] = None) -> Dict[str, Any]:
+    """Fit the strength calibration on calibration sessions and score held-out sessions (PLAN.md sections 3 and 6).
+
+    Only aggregates are written; raw decisions stay in ``sessions_dir``.
+    """
+    from .mirror_advisor import range_readout
+    from .mirror_model import StrengthTable
+    from .mirror_types import BUCKETS
+
+    logs = load_session_logs(sessions_dir)
+    population = population or PopulationModel.load()
+    counts = {c: {b: {a: 0 for a in RESPONSES} for b in BUCKETS} for c in CONTEXTS}
+    cal_sessions = set()
+    cal_decisions = 0
+    for token, rows in logs.items():
+        for r in rows:
+            d = r["decision"]
+            if r["tag"] == "calibration" and d.get("defender_strength") in BUCKETS:
+                counts[d["context"]][d["defender_strength"]][d["actual"]] += 1
+                cal_sessions.add(token)
+                cal_decisions += 1
+    calibration = {"generated": _dt.datetime.now().isoformat(timespec="seconds"), "sessions": len(cal_sessions),
+                   "decisions": cal_decisions, "counts": counts,
+                   "label": "development sessions only; fitted before any held-out session is scored"}
+    if cal_sessions:
+        table = StrengthTable.from_calibration(population, counts, len(cal_sessions)).table_for_profile(None)
+    else:
+        table = StrengthTable.default(population).table_for_profile(None)
+    # held-out sessions: committed personal forecast vs the population forecast logged at the same moment
+    per_session_diff: List[float] = []
+    ll = {"population": 0.0, "personal": 0.0}
+    brier = {"population": 0.0, "personal": 0.0}
+    n = 0
+    readout_post = readout_prior = 0.0
+    readout_n = 0
+    held_sessions = set()
+    for token, rows in logs.items():
+        s_ll = {"population": 0.0, "personal": 0.0}
+        s_n = 0
+        for r in rows:
+            if r["tag"] != "heldout":
+                continue
+            d = r["decision"]
+            actual = d["actual"]
+            p_pers = (d.get("prediction") or {}).get("probs")
+            p_pop = (d.get("extra") or {}).get("population_prediction")
+            if not p_pers or not p_pop:
+                continue
+            held_sessions.add(token)
+            for arm, p in (("population", p_pop), ("personal", p_pers)):
+                v = log_loss(p, actual)
+                ll[arm] += v
+                s_ll[arm] += v
+                brier[arm] += brier_fold(p, actual)
+            n += 1
+            s_n += 1
+            outcome = (d.get("extra") or {}).get("outcome") or {}
+            if outcome.get("bettor_cards") and d.get("defender_strength") in BUCKETS:
+                rd = range_readout(d["board"], outcome["bettor_cards"], d["context"], actual, table)
+                readout_post += math.log(max(rd["buckets"][d["defender_strength"]], 1e-9))
+                readout_prior += math.log(max(rd["prior_buckets"][d["defender_strength"]], 1e-9))
+                readout_n += 1
+        if s_n:
+            per_session_diff.append((s_ll["population"] - s_ll["personal"]) / s_n)
+    result = {
+        "generated": calibration["generated"], "counts_by_tag": session_counts(sessions_dir), "calibration": {k: v for k, v in calibration.items() if k != "counts"},
+        "heldout_forecast": {"sessions": len(held_sessions), "decisions": n,
+                             "log_loss": {k: round(v / n, 5) for k, v in ll.items()} if n else None,
+                             "brier_fold": {k: round(v / n, 5) for k, v in brier.items()} if n else None,
+                             "per_session_lift": [round(x, 5) for x in per_session_diff],
+                             "lift_ci95_over_sessions": _bootstrap_mean(per_session_diff),
+                             "label": "lift = population log loss minus personal log loss, per decision; positive means knowing the judge helped"},
+        "heldout_readout": {"sessions": len(held_sessions), "decisions": readout_n,
+                            "mean_log_score_readout": round(readout_post / readout_n, 4) if readout_n else None,
+                            "mean_log_score_blind": round(readout_prior / readout_n, 4) if readout_n else None,
+                            "improvement": round((readout_post - readout_prior) / readout_n, 4) if readout_n else None,
+                            "strength_table": "calibration sessions" if cal_sessions else "synthetic default (no calibration sessions)",
+                            "label": "true strength bucket of a held-out human under the readout vs the response-blind prior"},
+    }
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "strength_calibration.json"), "w", encoding="utf-8") as f:
+        json.dump(calibration, f, indent=1)
+    with open(os.path.join(out_dir, "sessions_eval.json"), "w", encoding="utf-8") as f:
         json.dump(result, f, indent=1)
     return result
 
@@ -302,6 +467,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     ap = argparse.ArgumentParser(prog="pokersim mirror-eval")
     ap.add_argument("--range-checks", action="store_true", help="only write data/mirror/range_checks.json")
+    ap.add_argument("--sessions", action="store_true",
+                    help="fit the strength calibration and score held-out volunteer sessions, then refresh range_checks.json")
     ap.add_argument("--spots", default=os.path.join(LARGE_OUT, "spots.jsonl"))
     ap.add_argument("--manifest", default=os.path.join(LARGE_OUT, "manifest.csv"))
     ap.add_argument("--styles", default=os.path.join(SMALL_OUT, "styles.json"))
@@ -309,6 +476,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--pluribus-shard", default=None, help="parquet shard holding the Pluribus rows (shard 0)")
     ap.add_argument("--bootstrap", type=int, default=1000)
     args = ap.parse_args(argv)
+    if args.sessions:
+        res = evaluate_sessions()
+        write_range_checks(os.path.join(SMALL_OUT, "range_checks.json"))
+        print(json.dumps({k: res[k] for k in ("counts_by_tag", "calibration", "heldout_forecast", "heldout_readout")}, indent=1))
+        return 0
     if args.range_checks:
         res = write_range_checks(os.path.join(SMALL_OUT, "range_checks.json"), args.out if args.out.endswith("eval.json") else None)
         print(json.dumps({k: res[k] for k in ("twin_unit_check", "pluribus")}, indent=1))

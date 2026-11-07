@@ -90,9 +90,9 @@
       const ct = two.half_checked_through, ba = two.half_bettor_aggr, da = two.half_defender_aggr;
       const ebox = el("div", { class: "card-box" }, el("h4", { text: "The turn history changes the answer" }),
         el("p", { class: "hint", text: "Exact half-pot offers in the two demo shards (Takara 35 + 36), folds over opportunities:" }),
-        bars([["turn checked through", ct.folds / ct.opportunities, `${ct.folds}/${ct.opportunities}`],
-              ["bettor bet/raised the turn", ba.folds / ba.opportunities, `${ba.folds}/${ba.opportunities}`],
-              ["defender bet/raised the turn", da.folds / da.opportunities, `${da.folds}/${da.opportunities}`]]),
+        bars([["turn checked through", ct.folds / ct.opportunities, fo(ct)],
+              ["bettor bet/raised the turn", ba.folds / ba.opportunities, fo(ba)],
+              ["defender bet/raised the turn", da.folds / da.opportunities, fo(da)]]),
         el("p", { class: "hint", text: `Across all 37 shards: ${fmt(M.exhibit.scan.eligible_unique)} unique eligible offers from ${fmt(M.exhibit.scan.rows)} hands; ${fmt(M.exhibit.scan.eligible_modelling)} exact half-pot offers with all three responses legal form the modelling cohort.` }));
       root.appendChild(ebox);
     }
@@ -112,9 +112,11 @@
 
   function bars(rows) {
     const root = el("div", { class: "bars" });
-    rows.forEach(([label, frac, val]) => root.appendChild(el("div", { class: "bar-row" }, el("span", { text: label }), el("div", { class: "track" }, el("div", { class: "fill", style: `width:${(100 * frac).toFixed(1)}%` })), el("span", { class: "val", text: `${pct(frac)} · ${val}` }))));
+    rows.forEach(([label, frac, val]) => root.appendChild(el("div", { class: "bar-row" }, el("span", { text: label }), el("div", { class: "track" }, el("div", { class: "fill", style: `width:${(100 * frac).toFixed(1)}%` })), el("span", { class: "val", text: val === undefined ? pct(frac) : val }))));
     return root;
   }
+  // "66.5% · 565/849" for a cohort of folds over opportunities
+  const fo = (c) => `${pct(c.folds / c.opportunities)} · ${c.folds.toLocaleString()}/${c.opportunities.toLocaleString()}`;
 
   // ------------------------------------------------------------ step 2: filters
   async function renderFilters() {
@@ -154,6 +156,7 @@
     const st = M.state || await refresh();
     const d = st.drill.pending;
     const box = el("div", { class: "card-box" }, el("h4", { text: "You defend: you checked the river and face a half-pot bet" }));
+    box.appendChild(tagRow(st));
     if (!d) {
       box.appendChild(el("p", { class: "hint", text: "Each spot commits a forecast of your response before you click. Deals alternate the turn history and your hand strength." }));
       box.appendChild(el("div", { class: "row" }, el("button", { class: "btn primary", onclick: newDrill }, "Deal a spot"), el("span", { class: "muted", text: `${st.drill.drills} spots played` })));
@@ -170,6 +173,19 @@
     root.appendChild(box);
     root.appendChild(profileBox(st.profile));
   }
+  const TAGS = [["practice", "practice"], ["calibration", "calibration (development)"], ["heldout", "held-out evaluation"]];
+  function tagRow(st) {
+    return el("div", { class: "tag-row" },
+      el("div", { class: "row" }, el("span", { class: "muted", text: "This judge's answers are for:" }),
+        ...TAGS.map(([t, label]) => el("button", { class: "chip-btn" + (st.tag === t ? " active" : ""), onclick: () => setTag(t) }, label))),
+      el("div", { class: "hint", text: st.tag === "heldout" ? "Held-out: someone who has not seen the model or its forecasts. Their answers are scored, never trained on."
+        : st.tag === "calibration" ? "Calibration: development sessions that teach the twin how hand strength changes responses."
+        : "Practice: nothing is used for evaluation. Raw answers never leave this laptop." }));
+  }
+  async function setTag(t) {
+    try { await api("/api/mirror/tag", body({ tag: t })); await refresh(); renderDrill(); } catch (e) { toast(e.message, true); }
+  }
+
   function lastDrillBox(r) {
     const dec = r.decision, pred = dec.prediction, out = r.outcome;
     return el("div", { class: "result" }, el("h4", { text: "Last spot" }),
@@ -283,7 +299,8 @@
       const tb = el("tbody");
       ["population", "personal"].forEach((k) => {
         const b = c.on_deal && c.on_deal[k];
-        tb.appendChild(el("tr", {}, el("td", { text: k }), el("td", { text: b ? b.action : "(not trained)" }), el("td", { text: b ? b.q_chips.join(" / ") : "" }), el("td", { text: b ? b.visits.join(" / ") : "" }), el("td", { text: b && b.oracle ? (b.oracle.pass ? "pass" : "fail") : "" })));
+        const nice = (a) => ({ bet_half: "bet 50", check_back: "check", fold: "fold", call: "call" }[a] || a);
+        tb.appendChild(el("tr", {}, el("td", { text: k }), el("td", { text: b ? nice(b.action) : "(not trained)" }), el("td", { text: b ? b.q_chips.join(" / ") : "" }), el("td", { text: b ? b.visits.join(" / ") : "" }), el("td", { text: b && b.oracle ? (b.oracle.pass ? "pass" : "fail") : "" })));
       });
       if (c.advice) tb.appendChild(el("tr", {}, el("td", { text: "EV advisor" }), el("td", { text: c.advice.recommend }), el("td", { text: `${fmt(Math.round(c.advice.ev_check * 100))} / ${fmt(Math.round(c.advice.ev_bet * 100))}` }), el("td", { text: "closed form" }), el("td", { text: "" })));
       table.appendChild(tb);
@@ -298,7 +315,7 @@
       const tbl = el("table", { class: "matrix" }, el("tr", {}, el("th", { text: "turn ↓ strength →" }), ...["weak", "medium", "strong"].map((b) => el("th", { text: b }))));
       Object.entries(chart["1"]).forEach(([ctx, row]) => {
         const tr = el("tr", {}, el("th", { text: CTX_LABEL[ctx] }));
-        ["weak", "medium", "strong"].forEach((b) => { const cell = row[b]; tr.appendChild(el("td", { class: cell.action === "bet_half" ? "bet" : "", html: `<b>${cell.action === "bet_half" ? "bet" : "check"}</b><br><span class="muted">${cell.q.map((x) => Math.round(x * 100)).join(" / ")}</span><br><span class="muted">${cell.visits.join("+")}</span>` })); });
+        ["weak", "medium", "strong"].forEach((b) => { const cell = row[b]; tr.appendChild(el("td", { class: cell.action === "bet_half" ? "pc-bet" : "", html: `<b>${cell.action === "bet_half" ? "bet" : "check"}</b><br><span class="muted">${cell.q.map((x) => Math.round(x * 100)).join(" / ")}</span><br><span class="muted">${cell.visits.join("+")}</span>` })); });
         tbl.appendChild(tr);
       });
       cb.appendChild(tbl);
@@ -323,29 +340,143 @@
     root.appendChild(panel("1 · Filter exhibit", fe.present, fe.source, fe.generated, fe.present ? (() => {
       const rows = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "cohort" }), el("th", { text: "shards 35+36" }), el("th", { text: "all 37 shards" }))));
       const tb = el("tbody");
-      Object.keys(fe.data.full_corpus.cohorts).forEach((k) => { const a = fe.data.two_shard.cohorts[k], b = fe.data.full_corpus.cohorts[k]; tb.appendChild(el("tr", {}, el("td", { text: k }), el("td", { text: `${a.folds}/${a.opportunities}` }), el("td", { text: `${b.folds}/${b.opportunities}` }))); });
+      const labels = { all_eligible: "all eligible offers", half_checked_through: "half pot, turn checked through", half_bettor_aggr: "half pot, bettor bet the turn",
+        half_defender_aggr: "half pot, defender bet the turn", defender_cards_known: "defender's cards became known", warning_free: "warning-free hands" };
+      const cnt = (c) => `${c.folds.toLocaleString()}/${c.opportunities.toLocaleString()}`;
+      Object.keys(fe.data.full_corpus.cohorts).forEach((k) => { const a = fe.data.two_shard.cohorts[k], b = fe.data.full_corpus.cohorts[k]; tb.appendChild(el("tr", {}, el("td", { text: labels[k] || k }), el("td", { text: cnt(a) }), el("td", { text: cnt(b) }))); });
       rows.appendChild(tb);
       return el("div", {}, rows, el("div", { class: "muted", text: `${fmt(fe.scan.rows)} rows scanned, ${fmt(fe.scan.eligible_unique)} unique eligible offers, ${fmt(fe.scan.eligible_modelling)} in the modelling cohort; train ${fmt(fe.scan.manifest.train)} / test ${fmt(fe.scan.manifest.test)}` }));
     })() : null));
     // 2 forecast ladder
     const fl = p.forecast_ladder;
     root.appendChild(panel("2 · Forecast ladder (held-out test)", fl.present, fl.source, fl.generated, fl.present ? ladderTable(fl.data) : null));
-    // 3 type gate
+    // 3 type gate + style map
     const tg = p.type_gate;
-    root.appendChild(panel("3 · Type-prior gate", tg.present, tg.source, tg.generated, tg.present ? el("div", {}, el("p", {}, el("b", { text: `K = ${tg.data.k} types · gate ${tg.data.gate && tg.data.gate.pass ? "PASSED" : "FAILED"}` })), el("pre", { class: "phh", text: JSON.stringify(tg.data.gate, null, 1) })) : null));
+    let st = null;
+    try { st = await api("/api/mirror/styles"); } catch (e) { st = null; }
+    root.appendChild(panel("3 · Player types and the type-prior gate", tg.present, tg.source, tg.generated, tg.present ? (() => {
+      const g = tg.data.gate || {};
+      return el("div", {},
+        el("p", {}, el("b", { text: `${tg.data.k} types from ${(st && st.players_used || 0).toLocaleString()} players with at least ${st && st.n_min} hands. Gate ${g.pass ? "passed" : "failed"}.` })),
+        el("p", { class: "hint", text: gateText(g) }),
+        st && st.present ? styleMap(st) : null);
+    })() : null));
     // 4 benchmark
     const db = p.decision_benchmark;
     root.appendChild(panel("4 · Decision benchmark (matched deals)", db.present, db.source, db.generated, db.present ? benchTable(db.data) : null));
     // 5 range checks
     const rc = p.range_checks;
-    root.appendChild(panel("5 · Range readout checks", rc.present, rc.source, rc.generated, rc.present ? el("pre", { class: "phh", text: JSON.stringify(rc.data, null, 1) }) : null));
+    root.appendChild(panel("5 · Range readout checks", rc.present, rc.source, rc.generated, rc.present ? rangeChecksBox(rc.data) : null));
     // population bot
     const pb = p.population_bot;
     root.appendChild(panel("Population bot training", pb.present, pb.source, pb.generated, pb.present ? el("div", {}, el("div", { text: `${pb.data.meta.episodes} episodes, seed ${pb.data.meta.seed}, ${pb.data.meta.train_seconds}s, oracle check ${pb.data.meta.oracle_check ? (pb.data.meta.oracle_check.pass ? "pass" : "fail") : "n/a"}` }),
       el("div", { class: "muted", text: "checkpoints: " + pb.data.checkpoints.map((c) => `${c.episode}: ${c.validation_mean_reward}`).join(" · ") })) : null));
+    // training sufficiency
+    const ts = p.training_sufficiency;
+    root.appendChild(panel("Training sufficiency (three seeds)", ts.present, ts.source, ts.generated, ts.present ? el("div", {},
+      el("div", { text: `Seeds agree on ${pct(ts.data.stage1_agreement, 0)} of first-decision cells. Disagreements only on near-ties: ${ts.data.disagreements_are_near_ties ? "yes" : "no"}. Every seed passes the oracle: ${ts.data.all_oracle_pass ? "yes" : "no"}.` })) : null));
+    // human sessions
+    const ss = p.sessions;
+    root.appendChild(panel("6 · Human sessions", true, ss.source, ss.generated, sessionsBox(ss.data)));
+  }
+
+  function rangeChecksBox(d) {
+    const out = el("div", {});
+    const h = d.held_out_sessions || {};
+    out.appendChild(el("p", {}, el("b", { text: "Held-out humans: " }), h.decisions
+      ? `${h.sessions} session(s), ${h.decisions} hands. Log score of the true strength bucket ${h.mean_log_score_readout} with the readout, ${h.mean_log_score_blind} without it.`
+      : "none yet, so nothing is claimed about humans."));
+    const pl = d.pluribus;
+    if (pl) {
+      const r = pl.by_response || {};
+      const line = ["fold", "call", "raise"].filter((k) => r[k]).map((k) => `${k} ${pct(r[k].mean_equity, 0)} (${r[k].n} spots)`).join(", ");
+      out.appendChild(el("p", {}, el("b", { text: "Pluribus, every card known: " }),
+        `${pl.spots} heads-up river spots. Mean defender equity by response: ${line}. ` +
+        (pl.monotone ? "Weaker hands fold more, which is what the readout assumes." : "The ordering does not hold, so treat the readout with care.")));
+    }
+    const t = d.twin_unit_check;
+    if (t) out.appendChild(el("p", { class: "muted", text: `Unit check on the twin's own responses: log score ${t.mean_log_score_readout} with the readout, ${t.mean_log_score_blind} without; top bucket right ${pct(t.top_bucket_accuracy, 0)} of the time. This only tests the code.` }));
+    return out;
+  }
+
+  function gateText(g) {
+    const a = g.type_vs_population_zero_history, b = g.type_vs_personal;
+    if (!a || !b) return `Log-loss lift over the population model ${g.lift_vs_population_log_loss}, 95% interval ${(g.ci95 || []).join(" to ")}.`;
+    const show = (c) => (c && c.ci95 ? `${c.lift} per decision, 95% interval ${c.ci95.join(" to ")}, ${c.players} players` : "no data");
+    return `Players with no river history, type prior against the population model: ${show(a)}. All test decisions, types plus history against history alone: ${show(b)}. ` +
+      (g.pass ? "Both intervals sit above zero, so the live model uses types."
+        : "Types ship only if both intervals sit above zero, so the live model ignores them and the map below only describes how people play.");
+  }
+
+  function sessionsBox(d) {
+    const lc = d.live_counts || {};
+    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "tag" }), el("th", { text: "sessions" }), el("th", { text: "decisions" }))));
+    const tb = el("tbody");
+    TAGS.forEach(([tag, label]) => tb.appendChild(el("tr", {}, el("td", { text: label }), el("td", { text: (lc[tag] || {}).sessions || 0 }), el("td", { text: (lc[tag] || {}).decisions || 0 }))));
+    t.appendChild(tb);
+    const ev = d.evaluation;
+    let res = el("p", { class: "hint", text: "No held-out scores yet. Tag judges in step 3 (calibration first, then held-out) and recompute. Nothing is claimed about humans until then." });
+    if (ev && ev.heldout_forecast && ev.heldout_forecast.decisions) {
+      const f = ev.heldout_forecast, r = ev.heldout_readout;
+      res = el("div", {},
+        el("p", { text: `Held-out: ${f.sessions} session(s), ${f.decisions} decisions. Log loss per decision: population ${f.log_loss.population}, personal ${f.log_loss.personal}.` + (f.lift_ci95_over_sessions ? ` Lift 95% interval over sessions: ${f.lift_ci95_over_sessions.join(" to ")}.` : " An interval needs at least three held-out sessions.") }),
+        r && r.decisions ? el("p", { text: `Range readout on held-out hands: log score ${r.mean_log_score_readout} against ${r.mean_log_score_blind} for the response-blind prior (strength table: ${r.strength_table}).` }) : null);
+    }
+    const cal = d.calibration;
+    return el("div", {}, t, res,
+      el("div", { class: "muted", text: cal ? `Strength calibration: ${cal.sessions} session(s), ${cal.decisions} decisions.` : "Strength table: synthetic default until calibration sessions exist." }),
+      el("div", { class: "row" }, el("button", { class: "btn small", onclick: recompute }, "Recompute from sessions")));
+  }
+  async function recompute() {
+    try { await api("/api/mirror/sessions/recompute", {}); toast("Recomputed calibration and held-out scores from the session logs."); renderEvidence(); } catch (e) { toast(e.message, true); }
+  }
+
+  // Small multiples: one panel per type, that type highlighted and everyone else grey (no colour has to carry identity).
+  function styleMap(st) {
+    const pts = st.map_points || [];
+    const wrap = el("div", { class: "stylemap" });
+    if (!pts.length) return el("p", { class: "hint", text: "No map points." });
+    const xs = pts.map((p) => p.x).sort((a, b) => a - b), ys = pts.map((p) => p.y).sort((a, b) => a - b);
+    const qt = (arr, f) => arr[Math.max(0, Math.min(arr.length - 1, Math.floor(f * (arr.length - 1))))];
+    const x0 = qt(xs, 0.01), x1 = qt(xs, 0.99), y0 = qt(ys, 0.01), y1 = qt(ys, 0.99);
+    const W = 240, H = 170, m = 10;
+    const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+    const sx = (x) => m + (W - 2 * m) * (clamp(x, x0, x1) - x0) / ((x1 - x0) || 1);
+    const sy = (y) => H - m - (H - 2 * m) * (clamp(y, y0, y1) - y0) / ((y1 - y0) || 1);
+    const ns = "http://www.w3.org/2000/svg";
+    const mk = (tag, attrs) => { const e = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
+    st.names.forEach((name, t) => {
+      const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${name}: ${pct(st.shares[t], 0)} of players` });
+      const mine = [];
+      pts.forEach((p) => { if (p.type !== t) svg.appendChild(mk("circle", { cx: sx(p.x).toFixed(1), cy: sy(p.y).toFixed(1), r: 1.3, fill: "var(--muted)", "fill-opacity": 0.3 })); else mine.push(p); });
+      mine.forEach((p) => svg.appendChild(mk("circle", { cx: sx(p.x).toFixed(1), cy: sy(p.y).toFixed(1), r: 1.6, fill: "var(--series-1)", "fill-opacity": 0.75 })));
+      const cxy = st.centroid_xy[t];
+      svg.appendChild(mk("circle", { cx: sx(cxy[0]).toFixed(1), cy: sy(cxy[1]).toFixed(1), r: 6, fill: "var(--series-1)", stroke: "var(--surface)", "stroke-width": 2 }));
+      const c = st.centroids[t];
+      const tip = el("div", { class: "chart-tip", hidden: true });
+      const cell = el("div", { class: "stylemap-cell" },
+        el("div", { class: "row between" }, el("b", { text: name }), el("span", { class: "muted", text: `${pct(st.shares[t], 0)} of players` })),
+        svg,
+        el("div", { class: "muted", text: `VPIP ${pct(c.vpip, 0)} · PFR ${pct(c.pfr, 0)} · aggression ${pct(c.af, 0)} · folds to bets ${pct(c.fold_to_bet, 0)}` }),
+        tip);
+      svg.addEventListener("mousemove", (e) => {
+        const rect = svg.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) * W / rect.width, my = (e.clientY - rect.top) * H / rect.height;
+        let best = null, bd = 64;
+        mine.forEach((p) => { const d = (sx(p.x) - mx) ** 2 + (sy(p.y) - my) ** 2; if (d < bd) { bd = d; best = p; } });
+        if (!best) { tip.hidden = true; return; }
+        tip.hidden = false;
+        tip.textContent = `${name} · ${best.venue} · ${best.hands} hands`;
+        tip.style.left = Math.min(e.clientX - cell.getBoundingClientRect().left + 10, cell.clientWidth - 150) + "px";
+        tip.style.top = (e.clientY - cell.getBoundingClientRect().top + 10) + "px";
+      });
+      svg.addEventListener("mouseleave", () => { tip.hidden = true; });
+      wrap.appendChild(cell);
+    });
+    return el("div", {}, wrap, el("div", { class: "muted", text: "Each dot is a player (3,000 sampled). Position summarises five style statistics: players close together play alike. Highlighted: the type named above the panel; grey: everyone else." }));
   }
   function ladderTable(d) {
-    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "earlier obs." }), el("th", { text: "n" }), el("th", { text: "pooled" }), el("th", { text: "population" }), el("th", { text: "type" }), el("th", { text: "personal" }))));
+    const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "earlier obs." }), el("th", { text: "n" }), el("th", { text: "pooled" }), el("th", { text: "population" }), el("th", { text: "type + history" }), el("th", { text: "history" }))));
     const tb = el("tbody");
     (d.ladder || []).forEach((r) => tb.appendChild(el("tr", {}, el("td", { text: r.bin }), el("td", { text: r.n }), ...["pooled", "population", "type", "personal"].map((k) => el("td", { text: r.log_loss && r.log_loss[k] !== undefined && r.log_loss[k] !== null ? r.log_loss[k].toFixed(4) : "-" })))));
     t.appendChild(tb);
@@ -354,15 +485,27 @@
   function benchTable(d) {
     const t = el("table", { class: "mini" }, el("thead", {}, el("tr", {}, el("th", { text: "opponent" }), el("th", { text: "probes" }), el("th", { text: "Δ chips / spot" }), el("th", { text: "95% CI" }), el("th", { text: "changed" }))));
     const tb = el("tbody");
-    (d.rows || []).forEach((r) => tb.appendChild(el("tr", {}, el("td", { text: r.opponent }), el("td", { text: r.probes }), el("td", { text: r.mean_diff_chips }), el("td", { text: r.ci95_chips.join(" .. ") }), el("td", { text: pct(r.fraction_changed) }))));
+    const sg = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+    const ci = (v) => `${sg(v[0])} .. ${sg(v[1])}`;
+    const missed = (d.rows || []).filter((r) => r.oracle_pass === false);
+    (d.rows || []).forEach((r) => {
+      const miss = r.oracle_pass === false;
+      tb.appendChild(el("tr", miss ? { class: "muted" } : {}, el("td", { text: r.opponent }), el("td", { text: r.probes }),
+        el("td", { text: sg(r.mean_diff_chips) + (miss ? " *" : "") }), el("td", { text: ci(r.ci95_chips) }), el("td", { text: pct(r.fraction_changed) })));
+    });
     t.appendChild(tb);
-    return el("div", {}, t, el("div", { class: "muted", text: d.label || "" }));
+    const c = d.control;
+    return el("div", {}, t,
+      missed.length ? el("div", { class: "muted", text: `* This bot failed its oracle check: it did not learn its own best response, so the row shows a training miss, not the value of knowing the opponent (${missed.length} of ${d.rows.length} rows).` }) : null,
+      c ? el("div", { text: `Control: the same population bot trained with another seed changes ${pct(c.fraction_changed)} of decisions, ${sg(c.mean_diff_chips)} chips per spot (interval ${ci(c.ci95_chips)}). An effect must be larger than this to count.` }) : null,
+      d.zero_probe_identical !== undefined && d.zero_probe_identical !== null ? el("div", { class: "muted", text: `Sanity: with 0 probes the two bettors are ${d.zero_probe_identical ? "identical, as they must be" : "NOT identical, check the setup"}.` }) : null,
+      el("div", { class: "muted", text: d.label || "" }));
   }
 
   // ------------------------------------------------------------ wiring
   function renderCurrent() {
     const fn = { reveal: renderReveal, filters: renderFilters, drill: renderDrill, play: renderPlay, compare: renderCompare }[M.step];
-    if (fn) fn();
+    return fn ? fn() : null;
   }
   function selectStep(step) {
     M.step = step;
@@ -381,11 +524,13 @@
       M.deepLinked = true;
       selectStep(params.get("mirror") || "reveal");
       if (params.has("reveal")) { M.revealed = true; M.guess = 0; }
-      if (params.has("deal")) { await newDrill(); return; }
-      if (params.has("spot")) { await freeze(); await newSpot(); return; }
-      if (params.has("respond")) { await newDrill(); const d = M.state.drill.pending; if (d) await respond(d.decision_id, params.get("respond")); return; }
+      if (params.has("deal")) await newDrill();
+      else if (params.has("respond")) { await newDrill(); const d = M.state.drill.pending; if (d) await respond(d.decision_id, params.get("respond")); }
+      else if (params.has("spot")) { await freeze(); await newSpot(); if (params.has("act")) await act(params.get("act")); }
+      if (params.has("deal") || params.has("respond")) return;  // the drill renderers already drew the table
+      if (params.has("spot") && M.step === "play") return;
     }
-    renderCurrent();
+    await renderCurrent();
     if (M.step === "reveal" && M.revealed && M.demo) showDemoHand(0);
   }
   $$("#mirrorSteps button").forEach((b) => b.addEventListener("click", () => { selectStep(b.dataset.step); renderCurrent(); }));

@@ -169,7 +169,7 @@ def build(styles_path: str, out_path: str, seed: int = 1, bootstrap: int = 20, k
     split = load_manifest(manifest_path)
     train, test = modelling_spots(spots, split)
     population = PopulationModel.from_spots(train)
-    s = 8.0
+    s = chosen_prior_strength(train, population)
     soft = [{c: {a: 0.0 for a in RESPONSES} for c in CONTEXTS} for _ in range(k)]
     matched = 0
     for sp in train:
@@ -189,23 +189,14 @@ def build(styles_path: str, out_path: str, seed: int = 1, bootstrap: int = 20, k
         q_k.append(q_t)
     type_prior = TypePrior(names, shares, q_k)
 
-    # the gate: does the type prior beat the population model on the frozen test?
-    resp_keys = responsibilities
-    gate_all = forecast_ladder(train, test, population, type_prior=type_prior, responsibilities=resp_keys, prior_strength=s, bootstrap=eval_bootstrap)
-    gate_out = forecast_ladder(train, test, population, type_prior=type_prior, responsibilities=resp_keys, prior_strength=s, bootstrap=eval_bootstrap,
-                               exclude_sources=("00035-of-00037", "00036-of-00037"))
-    lift = gate_all["paired_lift_log_loss"].get("type", {})
-    gate = {"pass": bool(lift.get("better")), "lift_vs_population_log_loss": lift.get("lift_vs_population"), "ci95": lift.get("ci95"),
-            "style_known_test_decisions": gate_all["style_known_decisions"], "test_decisions": gate_all["overall"]["n"],
-            "outside_shards_35_36": {"lift": gate_out["paired_lift_log_loss"].get("type", {}).get("lift_vs_population"),
-                                     "ci95": gate_out["paired_lift_log_loss"].get("type", {}).get("ci95")},
-            "rule": "type prior ships only if its log loss beats the population model with a 95% bootstrap interval (over players) above zero"}
+    gate = compute_gate(train, test, population, type_prior, responsibilities, s, bootstrap=eval_bootstrap)
+    ladder = gate.pop("ladder")
     result = {
         "generated": _dt.datetime.now().isoformat(timespec="seconds"), "k": k, "names": names, "shares": [round(x, 4) for x in shares],
         "centroids": centroids, "features": features, "reliability": rel, "players_used": len(kept), "players_total": len(rows),
         "selection": fit["table"], "stable": fit["stable"], "map_points": map_points,
         "centroid_xy": [[round(float(x), 3), round(float(y), 3)] for x, y in centroid_xy],
-        "type_prior": type_prior.to_dict(), "matched_training_offers": matched, "gate": gate, "ladder_with_types": gate_all["ladder"],
+        "type_prior": type_prior.to_dict(), "matched_training_offers": matched, "gate": gate, "ladder_with_types": ladder,
         "responsibilities_path": os.path.relpath(RESPONSIBILITIES_PATH, ROOT).replace(os.sep, "/"),
     }
     # Per-player responsibilities are large (one row per player) and keyed by handle: keep them out of git.
@@ -218,6 +209,69 @@ def build(styles_path: str, out_path: str, seed: int = 1, bootstrap: int = 20, k
     return result
 
 
+GATE_RULE = ("types ship only if (a) for style-known players with no earlier river decisions the type prior beats the "
+             "population model, and (b) the type-plus-history model beats the personal (population-plus-history) model, "
+             "each with a 95% bootstrap interval over players above zero")
+
+
+def chosen_prior_strength(train: Sequence[Any], population: PopulationModel) -> float:
+    """The prior weight frozen by forward validation (data/mirror/eval.json), recomputed if absent."""
+    path = os.path.join(SMALL_OUT, "eval.json")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            chosen = (json.load(f).get("prior_strength_selection") or {}).get("chosen")
+        if chosen:
+            return float(chosen)
+    from .mirror_eval import choose_prior_strength
+    return float(choose_prior_strength(train, population)["chosen"])
+
+
+def compute_gate(train: Sequence[Any], test: Sequence[Any], population: PopulationModel, type_prior: TypePrior,
+                 responsibilities: Dict[Tuple[str, str], Sequence[float]], prior_strength: float,
+                 bootstrap: int = 1000) -> Dict[str, Any]:
+    """Does knowing a player's type add anything the live model does not already have?
+
+    The plan's first wording compared the type model with the population model only; since the type model
+    also learns from the player's history, that comparison passes on history alone.  Both checks here
+    isolate what the types contribute."""
+    full = forecast_ladder(train, test, population, type_prior=type_prior, responsibilities=responsibilities,
+                           prior_strength=prior_strength, bootstrap=bootstrap)
+    outside = forecast_ladder(train, test, population, type_prior=type_prior, responsibilities=responsibilities,
+                              prior_strength=prior_strength, bootstrap=bootstrap, exclude_sources=("00035-of-00037", "00036-of-00037"))
+    a = full["gate_comparisons"]["type_vs_population_zero_history_style_known"]
+    b = full["gate_comparisons"]["type_vs_personal_all"]
+    orig = full["paired_lift_log_loss"].get("type", {})
+    return {
+        "pass": bool(a["better"] and b["better"]), "rule": GATE_RULE, "prior_strength": prior_strength,
+        "type_vs_population_zero_history": a, "type_vs_personal": b,
+        "original_rule_type_vs_population": {"lift": orig.get("lift_vs_population"), "ci95": orig.get("ci95"), "better": orig.get("better")},
+        "outside_shards_35_36": outside["gate_comparisons"],
+        "style_known_test_decisions": full["style_known_decisions"], "test_decisions": full["overall"]["n"],
+        "lift_vs_population_log_loss": orig.get("lift_vs_population"), "ci95": orig.get("ci95"),
+        "ladder": full["ladder"],
+    }
+
+
+def recompute_gate(styles_path: str, bootstrap: int = 1000) -> Dict[str, Any]:
+    """Re-run the gate on an existing type fit (no refit), e.g. after the prior weight was selected."""
+    from .mirror_eval import RESPONSIBILITIES_PATH as RP
+
+    with open(styles_path, encoding="utf-8") as f:
+        st = json.load(f)
+    type_prior = TypePrior.from_dict(st["type_prior"])
+    with open(RP, encoding="utf-8") as f:
+        responsibilities = {(r["venue"], r["handle"]): r["responsibilities"] for r in json.load(f)}
+    train, test = modelling_spots(load_spots(os.path.join(LARGE_OUT, "spots.jsonl")), load_manifest(os.path.join(LARGE_OUT, "manifest.csv")))
+    population = PopulationModel.from_spots(train)
+    gate = compute_gate(train, test, population, type_prior, responsibilities, chosen_prior_strength(train, population), bootstrap)
+    st["ladder_with_types"] = gate.pop("ladder")
+    st["gate"] = gate
+    st["gate_recomputed"] = _dt.datetime.now().isoformat(timespec="seconds")
+    with open(styles_path, "w", encoding="utf-8") as f:
+        json.dump(st, f)
+    return gate
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     import argparse
 
@@ -227,7 +281,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--bootstrap", type=int, default=20)
     ap.add_argument("--k-cap", type=int, default=6)
+    ap.add_argument("--gate-only", action="store_true", help="re-run the type-prior gate on the existing fit")
     args = ap.parse_args(argv)
+    if args.gate_only:
+        gate = recompute_gate(args.out)
+        print(json.dumps({k: v for k, v in gate.items() if k not in ("outside_shards_35_36",)}, indent=1))
+        return 0
     res = build(args.styles, args.out, seed=args.seed, bootstrap=args.bootstrap, k_cap=args.k_cap)
     print(json.dumps({k: res[k] for k in ("k", "names", "shares", "centroids", "players_used", "players_total", "stable", "gate",
                                           "matched_training_offers")}, indent=1))

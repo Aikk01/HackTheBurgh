@@ -183,3 +183,7 @@ Hand histories in `data/samples/` are excerpts of the `gabbler/PokerData` datase
 itself built from the PHH dataset by Juho Kim (University of Toronto Computer Poker Research
 Group), the Pluribus supplementary material (Brown & Sandholm, *Science* 2019), HandHQ logs and
 PokerGO/WSOP broadcasts. PHH format: Kim, "Recording and Describing Poker Hands", IEEE CoG 2024.
+
+Poker Mirror scans the [takara-ai/poker_hands](https://huggingface.co/datasets/takara-ai/poker_hands) Parquet
+release of the same PHH dataset (CC BY 4.0), pinned at revision `6acb5afb`. The files committed in `data/mirror/`
+are small derived artifacts: counts, model parameters, anonymous style-map points and a few demo hands.

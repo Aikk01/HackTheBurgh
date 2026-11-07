@@ -6,7 +6,32 @@ decided, and how to pick up**. Update it whenever a step completes or a decision
 
 Build started: 2026-11-07 18:00 (local). Hours in the checklist count from here.
 Builder so far: Claude as the single build agent. Commits go out under the team member's own git identity.
-Last update: 2026-11-07 19:35 — RL runs done on the second PC and committed (`policy_population.json`, `training_sufficiency.json`, `benchmark.json`).
+Last update: 2026-11-07 evening. RL runs finished on the second PC and were committed at 19:35
+(`policy_population.json`, `training_sufficiency.json`, `benchmark.json`). The post-push work is committed on top:
+volunteer-session tooling, style map, stricter type gate, range-check panel and UI fixes.
+
+## At a glance
+
+**What we are building.** Poker Mirror, a training and analysis tool inside PokerSim, built on 21.6 million real
+hands. It answers one question: on a heads-up river where the defender checks and faces a half-pot bet, how much
+does knowing *this* opponent help the bettor decide whether to bluff?
+
+**What works today.** Run `python -m pokersim serve` and open the Mirror tab:
+1. Replay two real river decisions by the same player and guess which one folded.
+2. See what data filters hide: folds never reveal cards.
+3. Defend: the app commits a forecast of your answer before each click and learns your profile.
+4. Bet against your frozen twin, with an EV advisor and a range X-ray of the twin's likely hand.
+5. Compare two Q-learning bots, one trained against an average player and one against your twin.
+
+The Evidence tab shows every number with its source and denominator.
+
+**Results so far.** Knowing the individual helps a little, and the effect is real. Knowing their playing type does
+not help. Folds never reveal cards: 0 of 4,156 offers where the defender's cards were shown. Pluribus hands confirm
+that weaker hands fold more. In the RL benchmark, a bot tuned to one opponent wins more chips when that
+opponent plays very differently from the crowd, such as a frequent caller or a frequent folder. Against an
+average opponent it loses a little, because a few dozen hands give a noisy profile.
+
+**Waiting on.** Volunteer sessions with real people, merging `poker-mirror` into `main`, and the team rehearsal.
 
 ## Status board
 
@@ -32,7 +57,7 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 - [x] 2.A1 First scan, 37 shards, 21,616,175 rows, 78 s on 15 workers (`python -m pokersim mirror-prepare`).
 - [x] 2.A2 Dedupe + chronological 80/20 manifests — train 9,925 / test 2,482 exact half-pot offers.
 - [x] 2.A3 Exports in `data/mirror/`: `exhibit.json`, `scan_counts.json`, `population.json`, `demo_hands.phhs`.
-- [-] 2.A4 Commit — human.
+- [x] 2.A4 Commit — only small artifacts are committed (`data/cache/` is ignored); the README credits the Takara corpus (CC BY 4.0).
 - [x] 2.B1 Population + personal Dirichlet model, legal mask, Beta interval (own incomplete beta, no SciPy).
 - [x] 2.B2 Exact river equity, rank-once per board (6–25 ms), brute-force verified (`mirror-check-ranges`).
 - [x] 2.B3 Twin + frozen snapshot (hash); hidden cards do not move the public forecast.
@@ -50,16 +75,16 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 - [x] 3.2 Style scan — 217,689 handles (`data/cache/mirror/style_table.csv`, `data/mirror/style_counts.json`).
 - [x] 3.3 Handle gate — handles repeat across shards (≥100 hands: PokerStars 50,781 · PartyPoker 10,669 · Full Tilt 8,416 · Absolute 7,850).
 - [x] 3.4 Types — N_min = 200 hands (reliability ≥ 0.7 on all five features); 48,059 players; K = 4, bootstrap-stable: tight-aggressive 15%, tight-passive 29%, loose-aggressive 35%, loose-passive 21%.
-- [x] 3.5 Type-prior gate — **FAILED** (recorded): log-loss lift +0.0011, 95% CI [−0.0049, +0.0069] over players. The live model runs K = 1; the type map is shown only as a labelled description.
-- [x] 3.6 Paired benchmark — full run on the second PC (9 min 38 s, 14 workers): `zero_probe_identical: true`, control 0.0 [0.0, 0.0]; personalised bot gains vs caller (+4.55 at 64 probes) and folder (+8.00), loses vs population (−2.75 [−4.4, −1.1]). Sufficiency: `all_oracle_pass: true`, seed disagreements only on near ties. Population policy reproduced exactly (only timing fields differ).
-- [~] 3.7 Visuals — range grid, policy charts, EV panel done; style map still to add to the UI.
+- [x] 3.5 Type-prior gate — **FAILED** (recorded). Re-run with the selected prior weight 24 and a stricter rule (decision 12): type prior vs population for players with no river history +0.0020, 95% CI [−0.0052, +0.0084]; types+history vs history alone +0.0005, CI [−0.0011, +0.0020]. The live model runs K = 1; the type map is shown only as a labelled description.
+- [x] 3.6 Paired benchmark — full run on the second PC (9 min 38 s, 14 workers): `zero_probe_identical: true`, control 0.0 [0.0, 0.0]; personalised bot gains vs caller (+4.55 at 64 probes) and folder (+8.00), loses vs population (−2.75 [−4.4, −1.1]). Sufficiency: `all_oracle_pass: true`, seed disagreements only on near ties. Population policy reproduced exactly (only timing fields differ). One row failed its oracle check (folder, 16 probes): it made the baseline's choice in every spot, so its 0.0 is a training miss, not a finding.
+- [~] 3.7 Visuals — range grid, policy chart, EV panel and the style map (Evidence tab, one small multiple per type) done. No judge dot, because the gate failed. The learning curve is shown as the forecast-ladder table, not yet as a chart.
 
 ### Phase 4 · Evidence and integration
-- [-] 4.1 Volunteer sessions — needs humans; strength table runs on a labelled synthetic default prior.
+- [~] 4.1 Volunteer sessions — tooling done, sessions need humans. In step 3, tag the judge as calibration or held-out; every answer is logged to `data/cache/mirror/sessions/` (ignored by git, never leaves the laptop). Evidence → "Recompute from sessions" (or `python -m pokersim mirror-eval --sessions`) fits the strength calibration from calibration sessions and scores held-out ones. Until then the strength table is the labelled synthetic default.
 - [~] 4.2 Held-out evaluation — historical part done (`data/mirror/eval.json`); volunteer part needs 4.1.
 - [x] 4.3 Pluribus check — 701 heads-up river spots, all cards known: mean defender equity fold 0.51 < call 0.74 < raise 0.84 (monotone; 211 spots in the half-pot band).
-- [~] 4.4 Evidence page — panels wired; benchmark and range-check panels fill in when their artifacts exist.
-- [ ] 4.5 Full 90-second run offline — blocked earlier by a stale server (fixed); redo after the benchmark lands.
+- [~] 4.4 Evidence page — every panel renders from the committed artifacts, checked in a headless browser after the RL results landed. The benchmark table marks the one row whose bot failed its oracle check. Only the human-session panel still waits for 4.1.
+- [~] 4.5 Browser pass done on a fresh server: every Mirror step and the Evidence tab render with real artifacts. The timed 90-second rehearsal is for the team.
 
 ### Phase 5 · Rehearse and ship
 - [ ] 5.1–5.5 — human.
@@ -72,8 +97,12 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 | Modelling cohort, exact half pot, all three responses legal | 12,407 | same |
 | Held-out log loss per decision: pooled / population / personal | 0.7901 / 0.7831 / 0.7803 | `data/mirror/eval.json` |
 | Personal history vs population | +0.0028 nats, 95% CI [+0.0002, +0.0060] — small but real | same |
-| Type prior vs population | +0.0011 nats, 95% CI [−0.0049, +0.0069] — gate failed | `data/mirror/styles.json` |
+| Type prior vs population, players with no river history | +0.0020 nats, 95% CI [−0.0052, +0.0084] — no effect | `data/mirror/styles.json` → `gate` |
+| Types + history vs history alone | +0.0005 nats, 95% CI [−0.0011, +0.0020] — no effect, gate failed | same |
 | Prior weight selected on forward windows (historical model) | 24 (from 2, 8, 24) | `data/mirror/eval.json` |
+| Pluribus check: mean defender equity by response, 701 heads-up river spots | fold 0.51 < call 0.74 < raise 0.84 | `data/mirror/eval.json` → `pluribus` |
+| RL benchmark at 64 probes: bot tuned to the twin minus average-trained bot, chips per spot (pot 100) | caller +4.55 [+2.00, +7.15] · folder +8.00 [+6.10, +10.05] · population −2.75 [−4.40, −1.10] · strength +0.70 [−0.70, +2.05] | `data/mirror/benchmark.json` |
+| RL training sufficiency, three seeds | every oracle check passes; 7 of 9 first-decision cells agree, the other 2 are near ties | `data/mirror/training_sufficiency.json` |
 
 ## Gate reports
 
@@ -89,12 +118,17 @@ Legend: `[x]` done and proven, `[~]` in progress / handed off, `[ ]` not started
 
 ### GATE H15 — decided
 - Type-prior gate failed; recorded in `data/mirror/styles.json` → `gate`. Live model stays K = 1.
+- Re-run after the push (`python -m pokersim mirror-cluster --gate-only`): the first run used prior weight 8 instead of the
+  selected 24, and its rule (beat the population model) passes on personal history alone. With 24 that old rule passes by a
+  hair (+0.0033, CI [+0.00001, +0.0068]), but both checks that isolate the types fail (see decision 12).
 - Benchmark: first full run (18:47) compared bots trained with *different* seeds; its control row showed seed noise
   of the same size as the effects, so it was retired to `data/cache/mirror/benchmark_unmatched_seed.json`.
   The fixed design trains the baseline with the candidates' seed; at 0 probes the two bots are now identical
   (smoke run: `zero_probe_identical: true`).
+- Full benchmark run on the second PC (19:35): `zero_probe_identical: true`; the control changed 0% of decisions,
+  0.0 chips [0.0, 0.0]. See 3.6.
 
-## Handoff: RL runs on a second PC
+## Handoff: RL runs on a second PC (done at 19:35, kept for reproduction)
 
 Everything the RL needs is in git: the code plus `data/mirror/population.json`. No dataset download, no GPU.
 All runs are seeded and deterministic, so the second PC reproduces the numbers this PC would get.
@@ -117,15 +151,22 @@ What to check in the output: `benchmark.json` → `zero_probe_identical: true`; 
 `control` row shows how much two trainings of the same bot differ. `training_sufficiency.json` →
 `all_oracle_pass` and whether disagreements between seeds sit on near-tie cells.
 
-## Next steps when the agent picks up
+## Next steps
 
-1. Pull the RL artifacts from the second PC (or rerun them here; results are identical).
-2. Add the style map to the UI as a labelled description (gate failed, so no type bars in drills).
-3. `python -m pokersim mirror-eval --range-checks` → `data/mirror/range_checks.json` for Evidence panel 5.
-4. Optional: rerun `mirror-eval` so the forecast ladder includes the type column (descriptive only).
-5. Fresh server + browser pass over every Mirror step and the Evidence tab (screenshots).
-6. Full `python -m unittest discover tests`, `scripts/smoke_server.py`, `scripts/smoke_mirror.py`.
-7. 90-second script rehearsal notes for the team (4.5).
+For the team:
+1. Volunteer sessions: two calibration sessions first, then at least three held-out sessions with people who have not
+   seen the model, about twenty drills each in step 3. Then Evidence → "Recompute from sessions".
+2. Merge `poker-mirror` into `main` when the team agrees.
+3. Phase 5: roles, timed 90-second rehearsal, backup recording, fresh-clone test on the demo laptop with Wi-Fi off.
+
+Optional, for the agent:
+1. Look into the benchmark row that failed its oracle check (folder, 16 probes), for example by training it longer.
+2. Calibrate the strength prior's shape on half of the 701 Pluribus spots, keep the other half for the check.
+3. Draw the forecast ladder as a learning-curve chart.
+
+Done: RL runs on the second PC (population policy, training sufficiency, benchmark) and their Evidence panels,
+volunteer-session tooling, stricter type gate, style map, range-check panel, policy-chart fix, replay deep link,
+browser pass of every screen, 67 tests and both smoke tests green.
 
 ## Decisions and deviations from the plan
 
@@ -140,6 +181,8 @@ What to check in the output: `benchmark.json` → `zero_probe_identical: true`; 
 9. **Per-player responsibilities** (5.4 MB, keyed by handle) live in `data/cache/mirror/style_responsibilities.json`, not in git; `styles.json` is 228 KB.
 10. **Prior weight.** The historical model uses the selected 24; live practice keeps the plan's starting value 8 until practice sessions exist to tune it.
 11. **Windows port reuse.** `serve` no longer sets `SO_REUSEADDR` on Windows: a stale server had silently kept port 8000 and answered 404 to every Mirror route.
+12. **Type gate rule.** The plan's wording (type model beats the population model) passes on personal history alone, because the type model also learns from history. Types now ship only if (a) for style-known players with no river history the type prior beats the population model and (b) types+history beat history alone, each with a 95% interval over players above zero. The gate uses the frozen prior weight (24). Stricter, not looser: the old rule's result is still reported.
+13. **Volunteer data.** Raw session logs stay in `data/cache/mirror/sessions/` (ignored). Only aggregates are committed: `strength_calibration.json`, `sessions_eval.json`, `range_checks.json`.
 
 ## Where things are
 

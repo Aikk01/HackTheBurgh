@@ -256,4 +256,9 @@ table.mini td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-var
 .grid13 { display: grid; grid-template-columns: repeat(13, 1fr); gap: 1px; margin-top: 6px; font-size: 9px; font-family: ui-monospace, Menlo, Consolas, monospace; }
 .grid13 .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid var(--line); }
 .grid13 .cell.own { outline: 2px solid var(--warning); }
-.matrix td.bet { outline: 1px solid var(--serious); }
+.matrix td.pc-bet { outline: 1px solid var(--serious); }
+.tag-row { margin: 4px 0 8px; }
+.chip-btn.active { border-color: var(--accent); background: var(--surface-3); color: var(--ink); }
+.stylemap { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 8px 0; }
+.stylemap-cell { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; position: relative; font-size: 12px; }
+.stylemap-cell svg { width: 100%; height: auto; display: block; margin: 4px 0; }

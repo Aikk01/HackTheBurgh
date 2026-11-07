@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import tempfile
 import threading
 import time
 import urllib.request
@@ -11,6 +12,7 @@ from http.server import ThreadingHTTPServer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from pokersim import mirror_session as ms  # noqa: E402
 from pokersim import server as srv  # noqa: E402
 
 
@@ -24,6 +26,8 @@ def call(base, path, body=None):
 
 
 def main() -> int:
+    logs = tempfile.TemporaryDirectory()  # keep smoke drills out of the real volunteer logs
+    ms.SHARED.sessions_dir = logs.name
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), srv.Handler)
     t = threading.Thread(target=httpd.serve_forever, daemon=True)
     t.start()
