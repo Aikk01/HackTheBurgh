@@ -28,7 +28,7 @@
     for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) n.append(c.nodeType ? c : String(c));
     return n;
   }
-  const noModel = () => el("span", { class: "nm", text: NO_MODEL });
+  const noModel = () => el("span", { class: "nm", text: L.st && L.st.active ? NO_MODEL : "Deal to start" });
 
   async function api(path, body) {
     const res = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -231,6 +231,15 @@
     const i = flat.findIndex(([n]) => n === name);
     return i < 0 ? null : i + 1;
   }
+  // where the real hand sat in our guess, in the calibrated zones of the scorecard (likeliest 50 / 80 / 90%)
+  function zoneOf(hands, name) {
+    const flat = [];
+    for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o", hands.grid[r][c]]);
+    flat.sort((x, y) => y[1] - x[1]);
+    let cum = 0;
+    for (const [n, q] of flat) { cum += q; if (n === name) break; }
+    return cum <= 0.5 + 1e-9 ? "inside our 50% zone" : cum <= 0.8 + 1e-9 ? "inside our 80% zone" : cum <= 0.9 + 1e-9 ? "inside our 90% zone" : "outside our 90% zone: a surprise";
+  }
   // the one sentence in the middle of the table: the last move, whether we read it, how much it moved our guess;
   // at the end, who won and where their cards were in our guess
   function story(h) {
@@ -244,8 +253,8 @@
       if (m && w.index === m.index) return `You win ${amt}`;
       const cs = w.cards.filter((c) => c && c !== "XX");
       const hs = predFor(w.seat) && predFor(w.seat).base && predFor(w.seat).base.hands;
-      const rk = cs.length === 2 && hs && hs.shown ? rankOf(hs, hs.shown) : null;
-      return `${w.name} wins ${amt}` + (cs.length === 2 ? ` with ${pretty(cs)}` : "") + (rk ? ` · our #${rk} guess of 169` : "");
+      const zn = cs.length === 2 && hs && hs.shown ? zoneOf(hs, hs.shown) : null;
+      return `${w.name} wins ${amt}` + (cs.length === 2 ? ` with ${pretty(cs)}` : "") + (zn ? ` · ${zn}` : "");
     }
     if (!last) return "";
     const p = h.players.find((q) => q.index === last.player);
@@ -284,10 +293,15 @@
     const should = $("#should");
     should.className = "mtable two";
     should.innerHTML = "";
-    should.append(el("span", { class: "k", text: "Base", title: "Learned from data: what Pluribus did in spots like this, given your cards" }),
-      barSlot(you && you.should && you.should.base, "base"),
-      el("span", { class: "k", text: "RL", title: "Reinforcement learning: a policy trained by self-play that reads everyone's predicted hands" }),
-      barSlot(you && you.should && you.should.rl, "rl"));
+    const sb = you && you.should && you.should.base, sr = you && you.should && you.should.rl;
+    should.append(el("span", { class: "k", title: "Learned from data: what Pluribus did in spots like this, given your cards" }, "Base", el("small", { text: "copies Pluribus" })),
+      barSlot(sb, "base"),
+      el("span", { class: "k", title: "Reinforcement learning: trained by playing millions of hands against players like these, reading everyone's predicted hands" }, "RL", el("small", { text: "trained vs these players" })),
+      barSlot(sr, "rl"));
+    const tb = sb && sb.actions && sb.actions.length ? grouped(sb.actions)[0] : null, tr = sr && sr.actions && sr.actions.length ? grouped(sr.actions)[0] : null;
+    if (tb && tr && GROUP(tb.action) !== GROUP(tr.action)) {
+      should.append(el("span", { class: "k" }), el("span", { class: "disagree", text: `Coaches disagree: Pluribus would ${actionText(tb).toLowerCase()}; RL, trained against players like these, would ${actionText(tr).toLowerCase()}.` }));
+    }
 
     const would = $("#would");
     would.className = "mtable two";
@@ -403,6 +417,7 @@
       if (key === bluffKey) renderBluff(b);
     }, 150);
   }
+  const pctSoft = (p) => (p < 0.05 ? "under 5%" : p > 0.95 ? "over 95%" : pct(p));  // a model never knows 0 or 100%
   function renderBluff(b) {
     const box = $("#bluff");
     box.innerHTML = "";
@@ -414,11 +429,11 @@
     const seatOf = (i) => { const p = h && h.players.find((q) => q.index === i); return p ? p.seat : null; };
     box.append(
       el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)}` }),
-      el("div", { class: "brow" }, "They all fold ", el("b", { text: pct(b.all_fold) }), " of the time ",
+      el("div", { class: "brow" }, "They all fold ", el("b", { text: pctSoft(b.all_fold) }), " of the time ",
         el("span", { class: "p2", text: `· it needs ${pct(b.needs)}` })),
       el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `Bluffing pays: about +${fmt(Math.round(b.worth * 10) / 10)} chips, even with nothing`
         : `Bluffing loses: about −${fmt(Math.round(-b.worth * 10) / 10)} chips with nothing` }),
-      el("div", { class: "bw" }, ...b.players.map((p) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` }, el("i"), `${p.name} ${pct(p.fold)}`)),
+      el("div", { class: "bw" }, ...b.players.map((p) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` }, el("i"), `${p.name} ${pctSoft(p.fold)}`)),
         worst && worst.fold < 0.3 && b.players.length ? el("span", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null));
   }
 
@@ -467,7 +482,7 @@
     if (hands && hands.shown) {  // where the real hand sat in our guess: the likeliest X% of it held the real hand
       top.append(el("div", { class: "row real", title: "The 169 hand types ranked from our likeliest guess down. On 44,036 unseen test hands, the real hand fell inside our likeliest half 47% of the time." },
         el("span", { class: "k", text: "Real hand" }),
-        el("span", { class: "v" }, el("b", { text: hands.shown }), el("span", { class: "p2", text: ` · our #${rankOf(hands, hands.shown)} guess of 169` }))));
+        el("span", { class: "v" }, el("b", { text: hands.shown }), ` · ${zoneOf(hands, hands.shown)}`, el("span", { class: "p2", text: ` (#${rankOf(hands, hands.shown)} of 169)` }))));
     }
     // how good the "This player" read has been at this table, scored before each of their moves
     const acc = pr && pr.this_player && pr.this_player.accuracy;
@@ -661,7 +676,8 @@
     rows.append(row("Their next move", m && m.ours ? bars([["Our model of that player", m.ours, true], ["People in general", m.people], ["Their usual move", m.usual]]) : noModel(),
       m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move; better for ${m.helped} of ${m.players}. ` : ""}` +
         `When it says ${pct(m.says)}, it happens ${pct(m.happens)} of the time (${m.calib_n.toLocaleString()} decisions).` : ""));
-    rows.append(row("Their hand", h ? bars([["Our top 10 guesses (of 169)", h.top10, true], ["Card counting alone", h.top10_counting]]) : noModel(),
+    rows.append(row("Their hand", h ? bars([["Our top 10 guesses (of 169)", h.top10, true], ["Card counting alone", h.top10_counting]].concat(
+      h.post ? [["After the flop: our top 10", h.post, true], ["After the flop: card counting", h.post_counting]] : [])) : noModel(),
       h ? `Share of ${h.n.toLocaleString()} guesses on about 2,000 unseen Pluribus hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect)` +
         (h.bots ? `. On this table's bots, after learning how wide each one plays: ${pct(h.bots[0])} / ${pct(h.bots[1])} / ${pct(h.bots[2])} inside our likeliest 50 / 80 / 90% (fresh hands).` : ".") : ""));
     rows.append(row("Your best move (RL coach)",

@@ -193,9 +193,12 @@ class PlayerModel:
                 if abs(math.log(ratio)) < math.log(1.3):
                     continue
                 move = ("check" if g == 1 else "bet") if facing == "free" and g > 0 else GROUPS[g]
-                often = f"{ratio:.1f}× as often" if ratio >= 1 else f"only {round(100 * ratio)}% as often"
+                raw = n[g] / max(e[g], 1e-9)  # the words follow the counts; the shrunk ratio only ranks the habits
+                text = (f"{where}: almost never {move}s, unlike most people" if raw < 0.05 else
+                        f"{where}: {move}s {raw:.1f}× as often as most people" if raw >= 1 else
+                        f"{where}: {move}s only {round(100 * raw)}% as often as most people")
                 out.append({"where": where, "move": move, "ratio": round(ratio, 2), "did": int(n[g]), "seen": int(seen),
-                            "people": round(e[g], 1), "text": f"{where}: {move}s {often} as most people",
+                            "people": round(e[g], 1), "text": text,
                             "detail": f"{int(n[g])} of {int(seen)} times; most people about {round(e[g])}",
                             "_rank": abs(math.log(ratio)) * math.sqrt(seen)})
         out.sort(key=lambda h: -h["_rank"])

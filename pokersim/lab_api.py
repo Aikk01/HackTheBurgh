@@ -243,6 +243,10 @@ def scorecard() -> Dict[str, Any]:
         a = cal["hand_range"]["pluribus"]["all_streets"]
         out["hands"] = {"top10": a["top10"], "top10_counting": a["baseline_top10"], "half": a["coverage"]["50"]["hit"],
                         "n": a["n"]}
+        post = [cal["hand_range"]["pluribus"][st] for st in ("flop", "turn", "river")]  # after the flop
+        npost = sum(x["n"] for x in post)
+        out["hands"]["post"] = sum(x["top10"] * x["n"] for x in post) / npost
+        out["hands"]["post_counting"] = sum(x["baseline_top10"] * x["n"] for x in post) / npost
         gb = load("demo", "grid_on_bots_widened.json")  # scripts/grid_on_bots.py --widen
         if gb:
             out["hands"]["bots"] = [gb["all"]["inside_50"], gb["all"]["inside_80"], gb["all"]["inside_90"]]
