@@ -184,7 +184,9 @@
     center.style.left = `${g.cx}px`;
     center.style.top = `${g.cy - 4}px`;
     center.append(el("div", { class: "board", "aria-label": `Board: ${h.board.filter(Boolean).join(" ") || "no cards yet"}` }, ...board),
-      el("div", { class: "pot" }, "Pot ", el("b", { text: fmt(h.total_pot) })),
+      el("div", { class: "pot" }, el("span", { class: "stack", "aria-hidden": "true" },
+        ...Array.from({ length: Math.max(1, Math.min(5, 1 + Math.floor(Math.log2(Math.max(1, h.total_pot / 2))))) }, () => el("i", { class: "pchip" }))),
+        "Pot ", el("b", { text: fmt(h.total_pot) })),
       el("div", { class: "last", text: story(h) || (last ? last.text : "") }));
 
     const order = clockwise();
@@ -220,7 +222,8 @@
       seats.append(seat);
       const bx = x + (g.cx - x) * 0.4, by = y + (g.cy - y) * 0.42;
       FX.xy[p.seat] = { x, y, bx, by };
-      if (p.bet > 0) seats.append(el("div", { class: "bet", "data-seat": p.seat, style: `left:${bx}px;top:${by}px`, text: fmt(p.bet) }));
+      if (p.bet > 0) seats.append(el("div", { class: "bet", "data-seat": p.seat, style: `left:${bx}px;top:${by}px;--pc: var(${isMe ? "--amber" : colourOf(p.seat)})` },
+        el("i", { class: "pchip" }), fmt(p.bet)));
     });
     motion(h, g, order);
   }
@@ -261,7 +264,7 @@
     // bets slide out from the player; at the end of a street they are gathered into the pot
     const potEl = $("#center .pot"), pot = potEl ? mid(potEl) : deck;
     const ghost = (x, y, text, to, dur, delay, cls) => {
-      const gEl = el("div", { class: "bet ghost " + (cls || ""), style: `left:${x}px;top:${y}px`, text });
+      const gEl = el("div", { class: "bet ghost " + (cls || ""), style: `left:${x}px;top:${y}px` }, el("i", { class: "pchip" }), text);
       fx.append(gEl);
       const a = gEl.animate([{ transform: "translate(-50%, -50%)", opacity: 1 }, { transform: `translate(calc(-50% + ${to.x - stage.left - x}px), calc(-50% + ${to.y - stage.top - y}px)) scale(.8)`, opacity: 0.9 }],
         { duration: dur, delay, easing: "cubic-bezier(.5,0,.2,1)", fill: "forwards" });
@@ -361,15 +364,22 @@
     // hands live in the grid on the right
     const top = (x) => (x && x.actions && x.actions.length ? grouped(x.actions)[0] : null);
     const ga = top(b && b.action), gt = top(t && t.action);
-    if (ga && gt && GROUP(ga.action) === GROUP(gt.action) && Math.abs(ga.p - gt.p) < 0.1) {
-      return el("div", { class: "mbox slim", "aria-label": `Next move for ${p.name}` },
-        el("div", { class: "mtable two" }, el("span", { class: "k", text: "Next move", title: "This player plays like people in general here" }), moveSlot(t.action, 1)));
-    }
-    return el("div", { class: "mbox slim", "aria-label": `Next move for ${p.name}` },
-      el("div", { class: "mtable two" },
-        el("span", { class: "k", text: "People" }), moveSlot(b && b.action, 1),
-        el("span", { class: "k mine", text: "This player", title: "Plays unlike most people here: learned from their own moves" }),
-        el("span", { class: "mine" }, moveSlot(t && t.action, 1))));
+    const box = el("div", { class: "mbox slim sbox", style: `--pc: var(${colourOf(p.seat)})`, "aria-label": `Next move for ${p.name}` });
+    if (ga && gt && GROUP(ga.action) === GROUP(gt.action) && Math.abs(ga.p - gt.p) < 0.1) box.append(miniBar(t.action, null, true));
+    else box.append(miniBar(b && b.action, "People", false), miniBar(t && t.action, "This player", true));
+    return box;
+  }
+  // one small fold / call / raise bar, in the same order as the coaches' bars, the likeliest move written beside it;
+  // in the seat's colour for this player's own model, grey for people in general
+  function miniBar(pred, label, mine) {
+    if (!pred || !pred.actions || !pred.actions.length) return el("div", { class: "mrow" }, el("span", { class: "nm", text: "…" }));
+    const g = grouped(pred.actions), best = g[0];
+    const order = [0, 1, 2].map((k) => g.find((a) => GROUP(a.action) === k)).filter(Boolean);
+    return el("div", { class: "mrow" + (mine ? " mine" : "") + (label ? "" : " solo"), title: label === "This player" ? "Plays unlike most people here: learned from their own moves" : "" },
+      label ? el("span", { class: "sk", text: label }) : null,
+      el("div", { class: "cbar mini", role: "img", "aria-label": g.map((a) => `${actionText(a)} ${pct(a.p)}`).join(", ") },
+        ...order.map((a) => el("span", { class: `g${GROUP(a.action)}` + (a === best ? " top" : ""), style: `flex-grow:${Math.max(a.p, 0.001)}` }))),
+      el("span", { class: "sv" }, el("b", { text: actionText(best) }), ` ${pct(best.p)}`));
   }
 
   function renderYou() {
@@ -558,7 +568,7 @@
       shiftEl.animate([{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: "ease-out" });
     }
     if (!hands) wrap.append(el("div", { class: "grid-over" }, noModel()));
-    wrap.append(el("div", { class: "readout", text: hands ? "Hover a cell or use the arrow keys." : "" }));
+    wrap.append(el("div", { class: "readout", text: "" }));
 
     const top = $("#top2");
     top.innerHTML = "";
@@ -584,7 +594,7 @@
     const ramp = $("#ramp");
     ramp.innerHTML = "";
     ramp.style.setProperty("--pc", `var(${pc})`);
-    ramp.append(el("span", { text: "less likely" }), el("span", { class: "bar" }), el("span", { text: "more likely" }));
+    ramp.hidden = true;  // the cell heights explain themselves
   }
 
   // a learned pattern in plain words, with the counts behind it
@@ -611,12 +621,13 @@
         const name = r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o";
         const p = hands ? hands.grid[r][c] : 0;
         const d = dens ? dens[r][c] : 0;
-        const a = d > 0 && max > 0 ? 0.1 + 0.9 * (d / max) : 0;
+        // the cell fills from the bottom; the square root keeps the order but lets a wide range look wide
+        const a = d > 0 && max > 0 && d / max >= 0.04 ? Math.sqrt(d / max) : 0;
         const shown = hands && hands.shown === name;
         const f = el("span", { class: "f", style: `--a:${a.toFixed(3)}` });
-        const cell = el("div", { class: "c" + (a > 0.55 ? " hi" : "") + (shown ? " shown" : ""), role: "gridcell", title: shown ? "their real hand" : "" }, f, el("span", { class: "t", text: name }));
+        const cell = el("div", { class: "c" + (a > 0.5 ? " hi" : "") + (shown ? " shown" : ""), role: "gridcell", title: shown ? "their real hand" : "" }, f, el("span", { class: "t", text: name }));
         const k = after.push(a) - 1;
-        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ opacity: before[k] }, { opacity: a }], { duration: L.replay && L.fastMs ? Math.min(700, L.fastMs) : 700, easing: "cubic-bezier(.2,.7,.2,1)" });
+        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700, L.fastMs) : 700, easing: "cubic-bezier(.2,.7,.2,1)" });
         cell.dataset.name = name;
         cell.dataset.p = p;
         if (hands) cell.addEventListener("mouseenter", () => focusCell(r * 13 + c));

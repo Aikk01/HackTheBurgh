@@ -130,7 +130,7 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
 
 **Done 05:30–05:45:**
 - **Human-like table:** the five opponents are the next-move model of human pros, each nudged to one instinct (Pro,
-  Sticky, Aggro, Nervous, Gambler; `lab_api.MIRROR_TABLE`). Grid on them after width learning: 46 / 79 / 91% inside
+  Sticky, Aggro, Nervous, Gambler; `lab_api.MIRROR_TABLE`). Grid on them after width learning: 45 / 78 / 88% inside
   the likeliest 50 / 80 / 90%.
 - **Bluff check, recalibrated:** on this table the raw fold chances were a few points high and "they all fold" said
   39.7% where 28.8% happened. A two-number correction (`data/demo/bluff_fit.json`) fitted on one simulated session;

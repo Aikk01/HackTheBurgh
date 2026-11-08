@@ -179,9 +179,10 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .grid-wrap { position: relative; }
 .g13 { display: grid; grid-template-columns: repeat(13, 1fr); gap: 2px; font-family: var(--mono); font-size: 9px; }
 .g13 .c { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 3px; background: var(--page-deep); color: var(--muted); position: relative; overflow: hidden; }
-.g13 .c .f { position: absolute; inset: 0; background: var(--pc); opacity: var(--a, 0); }
+.g13 .c .f { position: absolute; inset: 0; background: var(--pc); opacity: calc(0.35 + 0.65 * var(--a, 0)); transform: scaleY(var(--a, 0)); transform-origin: bottom; }
 .g13 .c .t { position: relative; }
-.g13 .c.hi .t { color: var(--ink); font-weight: 500; }
+.g13 .c .t { opacity: 0.35; }
+.g13 .c.hi .t { color: var(--ink); font-weight: 600; opacity: 1; }
 .g13 .c.cursor { outline: 2px solid var(--amber); outline-offset: -1px; }
 .g13 .c.shown { outline: 2px solid var(--ink); outline-offset: -2px; box-shadow: 0 0 0 2px var(--pc); z-index: 1; }
 .g13.empty .c { opacity: 0.55; }
@@ -299,3 +300,28 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .curve-legend .lg::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
 .curve-legend .l-you { color: var(--amber); } .curve-legend .l-ppl { color: #8fb8ff; } .curve-legend .l-usu { color: var(--muted); }
 .replay-actions, .replay-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* seat boxes: one small fold / call / raise bar per model, in the seat's colour for this player's own model */
+.mbox.sbox { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 4px 8px; }
+.mrow { display: grid; grid-template-columns: 62px 64px auto; align-items: center; gap: 6px; white-space: nowrap; }
+.mrow.solo { grid-template-columns: 76px auto; }
+.mrow .sk { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.mrow.mine .sk { color: var(--ink); }
+.mrow .sv { font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+.mrow .sv b { color: var(--ink); font-weight: 600; font-family: var(--sans); }
+.cbar.mini { height: 7px; border-radius: 4px; }
+.cbar.mini span { border-right: 1px solid var(--page-deep); }
+.cbar.mini span.top { background: var(--ink-2); }
+.mrow.mine .cbar.mini span.top { background: var(--pc, var(--amber)); }
+/* chips: a striped disc in the bettor's colour, a small stack on the pot */
+.pchip { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: -2px;
+  background: radial-gradient(circle, var(--pc, var(--amber)) 0 46%, transparent 47%), repeating-conic-gradient(var(--pc, var(--amber)) 0 22.5deg, rgba(255, 255, 255, 0.85) 22.5deg 45deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+.bet { display: flex; align-items: center; }
+.pot { display: flex; align-items: center; gap: 2px; }
+.pot .stack { display: inline-flex; flex-direction: column-reverse; margin-right: 6px; }
+.pot .stack .pchip { --pc: var(--amber); width: 16px; height: 16px; margin: -11px 0 0 0; }
+.pot .stack .pchip:last-child { margin-top: 0; }
+/* opponents' cards tucked behind the top of their plate, as online clients do */
+.seat:not(.me) .plate .hcards { position: absolute; right: 10px; top: -17px; z-index: -1; }
+.seat:not(.me) .mbox { bottom: calc(100% + 20px); }
