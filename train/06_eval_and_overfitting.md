@@ -60,3 +60,6 @@ and joins the candidates with its `export_heldout/`.
 **Added at 03:51, before any sealed result:** v3-bc (Eddie, range inputs on), PPO started from a network trained to
 imitate the Base model (`scripts/bc_init.py`) instead of from scratch. Same trainer, opponents and selection; it joins
 the candidates with its `export_heldout/`. It starts about two hours later than the others, so it gets fewer updates.
+
+**Added at 04:35, before any sealed result:** v3-bc-s2, a second imitation-start seed (Eddie), to tell whether v3-bc's early
+lead is the method or luck. It joins the candidates with its `export_heldout/`.
