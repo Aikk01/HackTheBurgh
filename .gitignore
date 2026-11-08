@@ -13,3 +13,7 @@ data/rl/runs/cpu-check/
 
 # local experiment tracking
 wandb/
+logs/
+data/players/
+data/rl/runs/**/keep/
+data/rl/v1_backup/

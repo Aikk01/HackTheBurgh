@@ -1,0 +1,29 @@
+[project]
+name = "pokersim"
+version = "0.1.0"
+description = "Hold'em simulator, Poker Mirror and the 6-max RL advisor"
+requires-python = ">=3.11"
+# Serving the demo (all models run in NumPy) needs only these.
+dependencies = [
+    "pokerkit==0.7.7",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+# Offline data preparation from the Takara shards.
+prep = ["pyarrow>=15", "scikit-learn>=1.4"]
+# Training: hand model, next-move model, PPO.  On Linux torch comes from the CUDA 12.8 index (RTX 50xx needs it;
+# the same wheel runs on CPU-only machines such as Eddie's processor nodes).
+train = ["torch>=2.7", "wandb>=0.19", "huggingface_hub>=0.25"]
+claude = ["anthropic>=1.0"]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
