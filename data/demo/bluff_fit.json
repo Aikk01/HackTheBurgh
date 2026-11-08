@@ -1,0 +1,15 @@
+{
+ "a": 1.1034,
+ "b": -0.3246,
+ "seed": 23,
+ "hands": 1500,
+ "n": 2040,
+ "table": [
+  "pro",
+  "type:style=lag",
+  "type:style=lp",
+  "type:style=tp",
+  "reader:style=tag"
+ ],
+ "note": "fitted on this session only; data/demo/bluff_calibration.json scores it on another"
+}

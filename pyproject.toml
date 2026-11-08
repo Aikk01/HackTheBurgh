@@ -1,0 +1,15 @@
+[project]
+name = "pokersim"
+version = "0.1.0"
+description = "Hold'em simulator and Poker Mirror"
+requires-python = ">=3.11"
+# Serving Poker Mirror needs only NumPy: every model runs in NumPy (data/rl/*.npz).
+dependencies = [
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+claude = ["anthropic>=1.0"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poker Mirror</title>
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/lab/lab.css">
+</head>
+<body>
+<a class="skip" href="#you">Skip to your decision</a>
+<header class="bar">
+  <div class="brand"><span class="mark" aria-hidden="true">♠</span><h1>Poker Mirror</h1></div>
+  <div class="hand-meta" id="handMeta" aria-live="polite"></div>
+  <ul class="models" id="models" aria-label="Model status"></ul>
+  <div class="bar-actions">
+    <button class="btn" id="scoreBtn" type="button" title="Measured on data no model was trained on">How good are the guesses?</button>
+    <button class="btn toggle" id="camBtn" type="button" aria-pressed="false" title="Like TV poker: turns every player's cards face up for you only. No model ever sees them.">Hole-card cam</button>
+    <button class="btn" id="replayBtn" type="button" title="A simulated player like you, or a real player no model has seen">Watch the model learn a player</button>
+    <button class="btn" id="newTable" type="button">New table</button>
+  </div>
+</header>
+<div class="inject-banner" id="injectBanner" hidden>Showing injected test values, not model output. <button class="linkbtn" id="clearInject" type="button">Clear</button></div>
+
+<div class="replay-card score-card" id="scoreCard" hidden>
+  <h2>How good are the guesses?</h2>
+  <p>Every number here is measured on data no model was trained on, next to the simple guess it has to beat.</p>
+  <div id="scoreRows"></div>
+  <div class="replay-actions"><button class="btn ghost" id="scoreExit" type="button">Back to my table</button></div>
+</div>
+
+<div class="replay-card" id="replayCard" hidden>
+  <div class="replay-who" id="replayWho" role="radiogroup" aria-label="Whose replay">
+    <button class="chip" type="button" role="radio" data-who="shark">The Shark learns you</button>
+    <button class="chip" type="button" role="radio" data-who="sim">A player like you</button>
+    <button class="chip" type="button" role="radio" data-who="unseen">A real unseen player</button>
+  </div>
+  <div class="replay-who" id="replayStyle" role="radiogroup" aria-label="Their style">
+    <button class="chip" type="button" role="radio" data-style="calls">Calls a lot</button>
+    <button class="chip" type="button" role="radio" data-style="raises">Raises a lot</button>
+  </div>
+  <h2 id="replayTitle">A real player, learned as they play</h2>
+  <p id="replayNote"></p>
+  <p class="habits-head" id="habitsHead">What our model learned about them</p>
+  <ul class="habits" id="replayHabits"></ul>
+  <div class="curve" id="replayCurve"></div>
+  <p class="curve-legend"><span class="lg l-you">This player's model</span><span class="lg l-ppl">People in general</span><span class="lg l-usu">Their usual move</span></p>
+  <div class="replay-actions">
+    <button class="btn primary" id="replayStep" type="button">Play their hands <kbd>→</kbd></button>
+    <button class="btn ghost" id="replayExit" type="button">Back to my table</button>
+  </div>
+</div>
+
+<main class="lab">
+  <section class="stage-col" aria-label="Table">
+    <div class="stage" id="stage">
+      <div class="felt" id="felt" aria-hidden="true"></div>
+      <div class="center" id="center"></div>
+      <div id="seats"></div>
+      <div id="fx" aria-hidden="true"></div>
+      <div class="ffwd" id="ffwd" hidden></div>
+      <div class="sit" id="sit" hidden>
+        <h2>Sit down with five bots</h2>
+        <p>You sit with five players built from the decisions of real professionals, one of each classic type: the Pro and the Shark (tight aggressive), the Gambler (loose aggressive), Sticky (loose passive) and the Rock (tight passive). Blinds 1/2, 200 chips each.</p>
+        <button class="btn primary" id="sitBtn" type="button">Deal</button>
+      </div>
+    </div>
+
+    <section class="you" id="you" aria-label="Your decision">
+      <div class="you-col">
+        <h2 class="kicker">What you should do</h2>
+        <div class="mtable" id="should"></div>
+      </div>
+      <div class="you-col">
+        <h2 class="kicker">What you would do</h2>
+        <div class="mtable" id="would"></div>
+      </div>
+      <div class="you-col act" id="act">
+        <h2 class="kicker" id="actTitle">Your move</h2>
+        <div class="act-row">
+          <button class="btn danger" id="btnFold" type="button">Fold <kbd>F</kbd></button>
+          <button class="btn" id="btnCall" type="button">Call <kbd>C</kbd></button>
+        </div>
+        <div class="raise" id="raise">
+          <input type="range" id="raiseSlider" aria-label="Raise amount">
+          <input type="number" id="raiseInput" aria-label="Raise to">
+          <button class="btn amber" id="btnRaise" type="button">Raise <kbd>R</kbd></button>
+        </div>
+        <div class="sizes" id="sizes" hidden></div>
+        <div class="bluff" id="bluff" hidden title="Counts only the pot you take when everyone folds (a pure bluff: nothing is won when called). Each player's fold chance comes from their own model, assuming the players before them folded."></div>
+        <div class="bluff whatif" id="whatif" hidden title="From your first move against the RL coach, the coach takes your seat in copies of this hand: same cards, and the other players choose again each time."></div>
+        <button class="btn primary" id="btnNext" type="button" hidden>Next hand <kbd>N</kbd></button>
+        <div class="replay-nav" id="replayNav" hidden>
+          <button class="btn" id="rpPlay" type="button">❚❚ Pause</button>
+          <button class="btn" id="rpPrev" type="button">← Back</button>
+          <button class="btn primary" id="rpNext" type="button">Next →</button>
+          <button class="btn primary" id="rpAdopt" type="button" hidden>Now you play ▸</button>
+          <button class="btn ghost" id="rpExit" type="button">Exit replay</button>
+        </div>
+        <p class="act-note" id="actNote"></p>
+      </div>
+    </section>
+  </section>
+
+  <aside class="side" aria-label="Likely hands">
+    <div class="side-head">
+      <h2>Likely hands</h2>
+    </div>
+    <div class="chips" id="chips" role="radiogroup" aria-label="Whose hand"></div>
+    <p class="shift" id="shift" aria-live="polite"></p>
+    <div class="grid-wrap" id="gridWrap"></div>
+    <div class="top2" id="top2"></div>
+    <div class="ramp" id="ramp"></div>
+    <p class="cam-note" id="camNote" hidden><span class="eyeoff" aria-hidden="true"></span>Hole-card cam: only you see these cards; no model does.</p>
+    <p class="side-note" title="Each cell is a type of starting hand: pairs on the diagonal, suited above it, offsuit below. Height is per card combination. Only what everyone can see goes into the guess, so it never gives a card away."> Taller = likelier. Built only from what everyone can see; at showdown the real hand is outlined.</p>
+  </aside>
+</main>
+<div class="sr-only" id="announcer" aria-live="polite"></div>
+<script src="/lab/lab.js"></script>
+</body>
+</html>

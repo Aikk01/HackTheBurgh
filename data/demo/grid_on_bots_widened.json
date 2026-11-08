@@ -1,0 +1,87 @@
+{
+ "hands": 600,
+ "table": [
+  "pro",
+  "type:style=lag",
+  "type:style=lp",
+  "type:style=tp",
+  "reader:style=tag"
+ ],
+ "levels": [
+  0.5,
+  0.8,
+  0.9
+ ],
+ "widths": {
+  "Pro": 0.19999999999999998,
+  "Gambler": 0.35,
+  "Sticky": 0.6,
+  "Rock": 0.44999999999999996,
+  "Shark": 0.15
+ },
+ "reference": "Pluribus test hands (humans and Pluribus): inside 50/80/90% = 0.47 / 0.78 / 0.89",
+ "all": {
+  "n": 14003,
+  "inside_50": 0.478,
+  "inside_80": 0.794,
+  "inside_90": 0.897
+ },
+ "by_player": {
+  "Gambler": {
+   "n": 2798,
+   "inside_50": 0.465,
+   "inside_80": 0.803,
+   "inside_90": 0.9
+  },
+  "Pro": {
+   "n": 2571,
+   "inside_50": 0.457,
+   "inside_80": 0.809,
+   "inside_90": 0.9
+  },
+  "Rock": {
+   "n": 2503,
+   "inside_50": 0.475,
+   "inside_80": 0.786,
+   "inside_90": 0.896
+  },
+  "Shark": {
+   "n": 2644,
+   "inside_50": 0.408,
+   "inside_80": 0.759,
+   "inside_90": 0.874
+  },
+  "Sticky": {
+   "n": 3487,
+   "inside_50": 0.56,
+   "inside_80": 0.809,
+   "inside_90": 0.913
+  }
+ },
+ "by_street": {
+  "preflop": {
+   "n": 10682,
+   "inside_50": 0.46,
+   "inside_80": 0.784,
+   "inside_90": 0.89
+  },
+  "flop": {
+   "n": 1611,
+   "inside_50": 0.525,
+   "inside_80": 0.819,
+   "inside_90": 0.917
+  },
+  "turn": {
+   "n": 1004,
+   "inside_50": 0.551,
+   "inside_80": 0.835,
+   "inside_90": 0.926
+  },
+  "river": {
+   "n": 706,
+   "inside_50": 0.534,
+   "inside_80": 0.836,
+   "inside_90": 0.925
+  }
+ }
+}

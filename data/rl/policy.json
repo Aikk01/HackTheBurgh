@@ -1,0 +1,222 @@
+{
+ "trained_at": "2026-11-08T04:14:53",
+ "updates": 50,
+ "steps": 3277669,
+ "hands": 1513364,
+ "seconds": 1216,
+ "device": "cpu",
+ "obs_dim": 193,
+ "hidden": [
+  512,
+  512,
+  256
+ ],
+ "actions": [
+  "fold",
+  "call",
+  "raise_min",
+  "raise_half",
+  "raise_pot",
+  "raise_2pot",
+  "all_in"
+ ],
+ "eval": {
+  "update": 50,
+  "final": false,
+  "hands_per_lineup": 3000,
+  "heldout_hands_per_lineup": 10000,
+  "lineups": {
+   "tight_passive": {
+    "heldout": false,
+    "rl": {
+     "bb100": 170.88,
+     "ci95": 53.48
+    },
+    "rl_nostyle": {
+     "bb100": 140.28,
+     "ci95": 61.75
+    },
+    "rl_norange": {
+     "bb100": 122.82,
+     "ci95": 36.83
+    },
+    "baseline_equity_bot": {
+     "bb100": -13.62,
+     "ci95": 57.59
+    },
+    "rl_minus_baseline": 184.5,
+    "rl_minus_baseline_ci95": 65.59,
+    "style_inputs_gain": 30.6,
+    "style_inputs_gain_ci95": 45.41,
+    "range_inputs_gain": 48.07,
+    "range_inputs_gain_ci95": 46.08
+   },
+   "loose_passive": {
+    "heldout": false,
+    "rl": {
+     "bb100": 3538.32,
+     "ci95": 379.2
+    },
+    "rl_nostyle": {
+     "bb100": 3210.32,
+     "ci95": 353.64
+    },
+    "rl_norange": {
+     "bb100": 2201.35,
+     "ci95": 312.8
+    },
+    "baseline_equity_bot": {
+     "bb100": 479.77,
+     "ci95": 135.3
+    },
+    "rl_minus_baseline": 3058.55,
+    "rl_minus_baseline_ci95": 357.59,
+    "style_inputs_gain": 328.0,
+    "style_inputs_gain_ci95": 187.95,
+    "range_inputs_gain": 1336.97,
+    "range_inputs_gain_ci95": 268.33
+   },
+   "loose_aggressive": {
+    "heldout": false,
+    "rl": {
+     "bb100": 426.28,
+     "ci95": 196.54
+    },
+    "rl_nostyle": {
+     "bb100": -2.25,
+     "ci95": 112.07
+    },
+    "rl_norange": {
+     "bb100": 677.55,
+     "ci95": 229.26
+    },
+    "baseline_equity_bot": {
+     "bb100": 191.47,
+     "ci95": 110.34
+    },
+    "rl_minus_baseline": 234.82,
+    "rl_minus_baseline_ci95": 186.73,
+    "style_inputs_gain": 428.53,
+    "style_inputs_gain_ci95": 180.73,
+    "range_inputs_gain": -251.27,
+    "range_inputs_gain_ci95": 203.1
+   },
+   "tight_aggressive": {
+    "heldout": false,
+    "rl": {
+     "bb100": 219.88,
+     "ci95": 63.48
+    },
+    "rl_nostyle": {
+     "bb100": 250.75,
+     "ci95": 76.64
+    },
+    "rl_norange": {
+     "bb100": 153.58,
+     "ci95": 53.71
+    },
+    "baseline_equity_bot": {
+     "bb100": 30.63,
+     "ci95": 74.56
+    },
+    "rl_minus_baseline": 189.25,
+    "rl_minus_baseline_ci95": 88.42,
+    "style_inputs_gain": -30.87,
+    "style_inputs_gain_ci95": 65.8,
+    "range_inputs_gain": 66.3,
+    "range_inputs_gain_ci95": 60.38
+   },
+   "mixed": {
+    "heldout": false,
+    "rl": {
+     "bb100": 1597.07,
+     "ci95": 212.83
+    },
+    "rl_nostyle": {
+     "bb100": 1255.43,
+     "ci95": 181.37
+    },
+    "rl_norange": {
+     "bb100": 1154.67,
+     "ci95": 189.03
+    },
+    "baseline_equity_bot": {
+     "bb100": 297.25,
+     "ci95": 97.3
+    },
+    "rl_minus_baseline": 1299.82,
+    "rl_minus_baseline_ci95": 208.6,
+    "style_inputs_gain": 341.63,
+    "style_inputs_gain_ci95": 173.43,
+    "range_inputs_gain": 442.4,
+    "range_inputs_gain_ci95": 178.08
+   },
+   "heldout_pluribus": {
+    "heldout": true,
+    "rl": {
+     "bb100": 54.83,
+     "ci95": 28.31
+    },
+    "rl_norange": {
+     "bb100": 25.83,
+     "ci95": 25.77
+    },
+    "baseline_equity_bot": {
+     "bb100": 20.2,
+     "ci95": 20.4
+    },
+    "rl_minus_baseline": 34.63,
+    "rl_minus_baseline_ci95": 31.46,
+    "range_inputs_gain": 29.0,
+    "range_inputs_gain_ci95": 30.24
+   },
+   "heldout_rules": {
+    "heldout": true,
+    "rl": {
+     "bb100": 239.6,
+     "ci95": 60.57
+    },
+    "rl_norange": {
+     "bb100": 182.21,
+     "ci95": 50.92
+    },
+    "baseline_equity_bot": {
+     "bb100": 10.93,
+     "ci95": 39.85
+    },
+    "rl_minus_baseline": 228.67,
+    "rl_minus_baseline_ci95": 59.76,
+    "range_inputs_gain": 57.39,
+    "range_inputs_gain_ci95": 44.96
+   },
+   "heldout_mix": {
+    "heldout": true,
+    "rl": {
+     "bb100": 184.78,
+     "ci95": 45.32
+    },
+    "rl_norange": {
+     "bb100": 100.75,
+     "ci95": 35.9
+    },
+    "baseline_equity_bot": {
+     "bb100": -3.24,
+     "ci95": 32.02
+    },
+    "rl_minus_baseline": 188.02,
+    "rl_minus_baseline_ci95": 49.0,
+    "range_inputs_gain": 84.03,
+    "range_inputs_gain_ci95": 41.49
+   }
+  },
+  "mean_rl_bb100": 1190.49,
+  "heldout_score": 150.44,
+  "heldout_min": 34.63,
+  "generated": "2026-11-08T04:14:53"
+ },
+ "run_dir": "../HackTheBurgh/data/rl/runs/v3-bc",
+ "algorithm": "PPO (clipped), GAE; self-play workers vs a style-diverse opponent pool + league snapshots",
+ "reward": "net big blinds per hand / 10",
+ "use_ranges": true,
+ "opponent_mix": "v3"
+}

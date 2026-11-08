@@ -1,0 +1,780 @@
+{
+ "generated": "2026-11-08T07:04:25",
+ "hands_per_table": 30000,
+ "seed0": 700000,
+ "lineups": {
+  "sealed_styles": [
+   "pro:temp=1.0,tilt_c=1.2",
+   "pro:temp=1.0,tilt_r=1.2",
+   "plur:temp=1.0,tilt_f=1.2",
+   "plur:temp=1.5",
+   "pro:temp=0.6"
+  ],
+  "sealed_rules": [
+   "overbettor",
+   "limper",
+   "checkraiser",
+   "limper",
+   "overbettor"
+  ],
+  "sealed_mix": [
+   "pro:temp=1.0,tilt_c=1.2",
+   "limper",
+   "plur:temp=1.5",
+   "overbettor",
+   "checkraiser"
+  ]
+ },
+ "unit": "bb/100, paired per hand, 95% CI",
+ "seconds": 576,
+ "policies": {
+  "v3-noranges-s2": {
+   "path": "data/rl/sealed_candidates/v3-noranges-s2",
+   "use_ranges": false,
+   "updates": 150,
+   "heldout_score": 185.92,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     34.1,
+     21.0
+    ],
+    "sealed_rules": [
+     177.6,
+     31.3
+    ],
+    "sealed_mix": [
+     131.7,
+     28.8
+    ],
+    "all": [
+     114.5,
+     15.8
+    ]
+   },
+   "range_inputs_gain": {},
+   "style_inputs_gain": {
+    "sealed_styles": [
+     -50.4,
+     29.0
+    ],
+    "sealed_rules": [
+     -124.3,
+     36.8
+    ],
+    "sealed_mix": [
+     -66.5,
+     34.1
+    ],
+    "all": [
+     -80.4,
+     19.3
+    ]
+   }
+  },
+  "v3-bc": {
+   "path": "data/rl/sealed_candidates/v3-bc",
+   "use_ranges": true,
+   "updates": 50,
+   "heldout_score": 150.44,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     47.3,
+     18.3
+    ],
+    "sealed_rules": [
+     245.8,
+     30.9
+    ],
+    "sealed_mix": [
+     174.0,
+     27.7
+    ],
+    "all": [
+     155.7,
+     15.1
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     35.2,
+     17.7
+    ],
+    "sealed_rules": [
+     115.4,
+     27.1
+    ],
+    "sealed_mix": [
+     96.6,
+     24.7
+    ],
+    "all": [
+     82.4,
+     13.6
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     -6.6,
+     21.9
+    ],
+    "sealed_rules": [
+     0.3,
+     27.1
+    ],
+    "sealed_mix": [
+     4.9,
+     26.1
+    ],
+    "all": [
+     -0.5,
+     14.5
+    ]
+   }
+  },
+  "v3-bc-kl10": {
+   "path": "data/rl/sealed_candidates/v3-bc-kl10",
+   "use_ranges": true,
+   "updates": 100,
+   "heldout_score": 122.96,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     31.9,
+     14.4
+    ],
+    "sealed_rules": [
+     145.1,
+     25.9
+    ],
+    "sealed_mix": [
+     60.2,
+     19.9
+    ],
+    "all": [
+     79.1,
+     11.9
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     11.5,
+     12.9
+    ],
+    "sealed_rules": [
+     48.0,
+     22.7
+    ],
+    "sealed_mix": [
+     35.4,
+     15.2
+    ],
+    "all": [
+     31.6,
+     10.1
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     -0.9,
+     14.1
+    ],
+    "sealed_rules": [
+     2.2,
+     20.4
+    ],
+    "sealed_mix": [
+     -39.5,
+     17.1
+    ],
+    "all": [
+     -12.7,
+     10.0
+    ]
+   }
+  },
+  "v3-bc-s2": {
+   "path": "data/rl/sealed_candidates/v3-bc-s2",
+   "use_ranges": true,
+   "updates": 100,
+   "heldout_score": 120.58,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     58.7,
+     19.8
+    ],
+    "sealed_rules": [
+     324.1,
+     37.2
+    ],
+    "sealed_mix": [
+     221.9,
+     32.4
+    ],
+    "all": [
+     201.6,
+     17.7
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     15.4,
+     21.2
+    ],
+    "sealed_rules": [
+     -22.1,
+     37.4
+    ],
+    "sealed_mix": [
+     -7.1,
+     34.2
+    ],
+    "all": [
+     -4.6,
+     18.3
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     16.6,
+     23.3
+    ],
+    "sealed_rules": [
+     44.0,
+     33.5
+    ],
+    "sealed_mix": [
+     18.9,
+     31.9
+    ],
+    "all": [
+     26.5,
+     17.3
+    ]
+   }
+  },
+  "v3-ranges-s2": {
+   "path": "data/rl/sealed_candidates/v3-ranges-s2",
+   "use_ranges": true,
+   "updates": 100,
+   "heldout_score": 110.18,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     18.9,
+     18.1
+    ],
+    "sealed_rules": [
+     152.1,
+     28.8
+    ],
+    "sealed_mix": [
+     52.5,
+     26.0
+    ],
+    "all": [
+     74.5,
+     14.3
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     7.1,
+     18.0
+    ],
+    "sealed_rules": [
+     -45.1,
+     30.5
+    ],
+    "sealed_mix": [
+     -24.8,
+     26.7
+    ],
+    "all": [
+     -20.9,
+     14.8
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     -26.2,
+     23.5
+    ],
+    "sealed_rules": [
+     22.1,
+     25.4
+    ],
+    "sealed_mix": [
+     -28.8,
+     25.5
+    ],
+    "all": [
+     -11.0,
+     14.3
+    ]
+   }
+  },
+  "v3-noranges": {
+   "path": "data/rl/sealed_candidates/v3-noranges",
+   "use_ranges": false,
+   "updates": 300,
+   "heldout_score": 95.69,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     28.6,
+     22.3
+    ],
+    "sealed_rules": [
+     106.5,
+     31.7
+    ],
+    "sealed_mix": [
+     39.8,
+     28.6
+    ],
+    "all": [
+     58.3,
+     16.1
+    ]
+   },
+   "range_inputs_gain": {},
+   "style_inputs_gain": {
+    "sealed_styles": [
+     31.1,
+     27.5
+    ],
+    "sealed_rules": [
+     2.2,
+     29.8
+    ],
+    "sealed_mix": [
+     12.4,
+     30.9
+    ],
+    "all": [
+     15.2,
+     17.0
+    ]
+   }
+  },
+  "v3-ranges": {
+   "path": "data/rl/sealed_candidates/v3-ranges",
+   "use_ranges": true,
+   "updates": 150,
+   "heldout_score": 93.92,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     50.5,
+     16.4
+    ],
+    "sealed_rules": [
+     48.6,
+     36.9
+    ],
+    "sealed_mix": [
+     48.5,
+     31.0
+    ],
+    "all": [
+     49.2,
+     17.0
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     12.2,
+     16.4
+    ],
+    "sealed_rules": [
+     -85.8,
+     35.3
+    ],
+    "sealed_mix": [
+     -57.0,
+     31.3
+    ],
+    "all": [
+     -43.6,
+     16.7
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     35.0,
+     23.3
+    ],
+    "sealed_rules": [
+     -127.4,
+     41.3
+    ],
+    "sealed_mix": [
+     -44.2,
+     36.4
+    ],
+    "all": [
+     -45.5,
+     19.9
+    ]
+   }
+  },
+  "v3-bc-kl30": {
+   "path": "data/rl/sealed_candidates/v3-bc-kl30",
+   "use_ranges": true,
+   "updates": 100,
+   "heldout_score": 86.62,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     20.0,
+     13.0
+    ],
+    "sealed_rules": [
+     84.1,
+     23.1
+    ],
+    "sealed_mix": [
+     29.8,
+     18.5
+    ],
+    "all": [
+     44.6,
+     10.8
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     7.4,
+     9.8
+    ],
+    "sealed_rules": [
+     44.0,
+     16.0
+    ],
+    "sealed_mix": [
+     31.5,
+     11.3
+    ],
+    "all": [
+     27.6,
+     7.3
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     0.4,
+     10.1
+    ],
+    "sealed_rules": [
+     -4.3,
+     12.9
+    ],
+    "sealed_mix": [
+     -10.1,
+     11.5
+    ],
+    "all": [
+     -4.7,
+     6.7
+    ]
+   }
+  },
+  "v2-eddie": {
+   "path": "data/rl/sealed_candidates/v2-eddie",
+   "use_ranges": true,
+   "updates": 150,
+   "heldout_score": 73.47,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     2.5,
+     16.9
+    ],
+    "sealed_rules": [
+     54.7,
+     30.9
+    ],
+    "sealed_mix": [
+     -3.8,
+     27.9
+    ],
+    "all": [
+     17.8,
+     15.0
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     -2.0,
+     14.8
+    ],
+    "sealed_rules": [
+     -31.2,
+     26.3
+    ],
+    "sealed_mix": [
+     -29.5,
+     27.3
+    ],
+    "all": [
+     -20.9,
+     13.6
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     15.2,
+     27.4
+    ],
+    "sealed_rules": [
+     -20.1,
+     32.1
+    ],
+    "sealed_mix": [
+     -2.3,
+     33.5
+    ],
+    "all": [
+     -2.4,
+     18.0
+    ]
+   }
+  },
+  "imitation-only": {
+   "path": "data/rl/sealed_candidates/imitation-only",
+   "use_ranges": true,
+   "updates": 0,
+   "heldout_score": null,
+   "vs_equity_bot": {
+    "sealed_styles": [
+     -10.4,
+     12.4
+    ],
+    "sealed_rules": [
+     27.6,
+     22.8
+    ],
+    "sealed_mix": [
+     -11.7,
+     17.7
+    ],
+    "all": [
+     1.9,
+     10.5
+    ]
+   },
+   "range_inputs_gain": {
+    "sealed_styles": [
+     10.7,
+     6.5
+    ],
+    "sealed_rules": [
+     15.3,
+     8.6
+    ],
+    "sealed_mix": [
+     11.3,
+     7.4
+    ],
+    "all": [
+     12.4,
+     4.3
+    ]
+   },
+   "style_inputs_gain": {
+    "sealed_styles": [
+     -2.5,
+     6.4
+    ],
+    "sealed_rules": [
+     -0.3,
+     7.3
+    ],
+    "sealed_mix": [
+     -0.2,
+     6.1
+    ],
+    "all": [
+     -1.0,
+     3.8
+    ]
+   }
+  }
+ },
+ "head_to_head": {
+  "v3-noranges-s2 - v3-bc": [
+   -41.2,
+   15.8
+  ],
+  "v3-noranges-s2 - v3-bc-kl10": [
+   35.4,
+   14.9
+  ],
+  "v3-noranges-s2 - v3-bc-s2": [
+   -87.1,
+   17.8
+  ],
+  "v3-noranges-s2 - v3-ranges-s2": [
+   40.0,
+   14.8
+  ],
+  "v3-noranges-s2 - v3-noranges": [
+   56.2,
+   16.3
+  ],
+  "v3-noranges-s2 - v3-ranges": [
+   65.3,
+   17.6
+  ],
+  "v3-noranges-s2 - v3-bc-kl30": [
+   69.8,
+   14.4
+  ],
+  "v3-noranges-s2 - v2-eddie": [
+   96.7,
+   15.9
+  ],
+  "v3-noranges-s2 - imitation-only": [
+   112.6,
+   14.4
+  ],
+  "v3-bc - v3-bc-kl10": [
+   76.6,
+   13.7
+  ],
+  "v3-bc - v3-bc-s2": [
+   -45.9,
+   17.1
+  ],
+  "v3-bc - v3-ranges-s2": [
+   81.2,
+   14.9
+  ],
+  "v3-bc - v3-noranges": [
+   97.4,
+   16.2
+  ],
+  "v3-bc - v3-ranges": [
+   106.5,
+   17.5
+  ],
+  "v3-bc - v3-bc-kl30": [
+   111.1,
+   13.5
+  ],
+  "v3-bc - v2-eddie": [
+   137.9,
+   15.9
+  ],
+  "v3-bc - imitation-only": [
+   153.8,
+   13.6
+  ],
+  "v3-bc-kl10 - v3-bc-s2": [
+   -122.5,
+   17.0
+  ],
+  "v3-bc-kl10 - v3-ranges-s2": [
+   4.6,
+   13.2
+  ],
+  "v3-bc-kl10 - v3-noranges": [
+   20.8,
+   15.4
+  ],
+  "v3-bc-kl10 - v3-ranges": [
+   29.9,
+   16.4
+  ],
+  "v3-bc-kl10 - v3-bc-kl30": [
+   34.4,
+   8.9
+  ],
+  "v3-bc-kl10 - v2-eddie": [
+   61.3,
+   14.3
+  ],
+  "v3-bc-kl10 - imitation-only": [
+   77.2,
+   9.1
+  ],
+  "v3-bc-s2 - v3-ranges-s2": [
+   127.0,
+   17.3
+  ],
+  "v3-bc-s2 - v3-noranges": [
+   143.3,
+   18.4
+  ],
+  "v3-bc-s2 - v3-ranges": [
+   152.4,
+   19.1
+  ],
+  "v3-bc-s2 - v3-bc-kl30": [
+   156.9,
+   16.7
+  ],
+  "v3-bc-s2 - v2-eddie": [
+   183.7,
+   18.1
+  ],
+  "v3-bc-s2 - imitation-only": [
+   199.7,
+   16.8
+  ],
+  "v3-ranges-s2 - v3-noranges": [
+   16.2,
+   14.9
+  ],
+  "v3-ranges-s2 - v3-ranges": [
+   25.3,
+   16.2
+  ],
+  "v3-ranges-s2 - v3-bc-kl30": [
+   29.9,
+   12.5
+  ],
+  "v3-ranges-s2 - v2-eddie": [
+   56.7,
+   13.9
+  ],
+  "v3-ranges-s2 - imitation-only": [
+   72.6,
+   12.4
+  ],
+  "v3-noranges - v3-ranges": [
+   9.1,
+   17.4
+  ],
+  "v3-noranges - v3-bc-kl30": [
+   13.7,
+   14.8
+  ],
+  "v3-noranges - v2-eddie": [
+   40.5,
+   15.6
+  ],
+  "v3-noranges - imitation-only": [
+   56.4,
+   14.6
+  ],
+  "v3-ranges - v3-bc-kl30": [
+   4.6,
+   15.8
+  ],
+  "v3-ranges - v2-eddie": [
+   31.4,
+   15.5
+  ],
+  "v3-ranges - imitation-only": [
+   47.3,
+   15.6
+  ],
+  "v3-bc-kl30 - v2-eddie": [
+   26.8,
+   13.5
+  ],
+  "v3-bc-kl30 - imitation-only": [
+   42.8,
+   6.5
+  ],
+  "v2-eddie - imitation-only": [
+   15.9,
+   13.3
+  ]
+ }
+}

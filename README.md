@@ -1,3 +1,29 @@
+# Poker Mirror
+
+A poker training simulator that holds up a mirror: you play against the four classic types of player, models trained on
+21.6 million real hands learn everyone's habits (yours included) and show them, a bluff check prices your bets, and a
+reinforcement-learning coach suggests a better move. Nothing on screen ever sees a hidden card.
+
+```bash
+uv sync                                         # Python 3.12 + NumPy, from uv.lock
+uv run python -m pokersim serve --port 8765     # then open http://localhost:8765/
+```
+
+Without uv: `pip install -r requirements.txt`, then `python -m pokersim serve --port 8765`.
+
+- **[DEMO.md](DEMO.md):** what is on the screen, the 4-minute demo, the numbers and what they were tested on.
+- **[train/TRAINING.md](train/TRAINING.md):** what each model was trained on, why, and how it was tested.
+- **[06_eval_and_overfitting.md](https://github.com/Aikk01/HackTheBurgh/blob/train-v3/train/06_eval_and_overfitting.md)** (on `train-v3`): the sealed RL test,
+  registered before any result, and every result.
+- **[PROGRESS.md](https://github.com/Aikk01/HackTheBurgh/blob/train-v3/PROGRESS.md)** (on `train-v3`): what was built when.
+
+This branch has the trained models and the code that serves them. The training and data-preparation code is on the
+`train-v3` branch.
+
+The rest of this file describes PokerSim, the engine and tools Poker Mirror is built on.
+
+---
+
 # PokerSim - interactive hold'em simulator + hand-history replayer
 
 A realistic, playable No-Limit Texas Hold'em table with a browser UI, a replayer for
@@ -25,9 +51,16 @@ The optional `anthropic` package enables the Claude agent.
 python -m pokersim serve --open        # http://127.0.0.1:8000/
 ```
 
-Use `--host 0.0.0.0` to share the table on a LAN. Deep links: `#demo` deals a bot-only table,
+Use `--host 0.0.0.0` to share the table on a LAN. Deep links (on `/index.html`): `#demo` deals a bot-only table,
 `#replay=pluribus-session-30.phhs&i=7&step=12&lens=tag` opens a sample hand at a step with a model
 lens, `#replay=<file>&eval=tag` runs an evaluation, `#sim=equity,tag,lag,random&hands=200` a match.
+
+**Poker Mirror** is the front page (`/`, also `/lab.html`); the PokerSim page is at `/index.html`. You and five
+bots at one table. Above each opponent it shows
+the base model's and the RL model's next-move and likely-hand guesses. On the right is a 13×13 likely-hand grid per
+opponent. Your panel shows what you should do (base, RL) and what you would do (your own model). Values come from
+`GET /api/lab/predict`; the response is documented in `pokersim/lab_api.py`. A model whose files are missing shows
+"No model loaded". Filling its field in `lab_api.py` is the only change needed when a model lands.
 
 Command line equivalents:
 
@@ -144,6 +177,12 @@ pokersim/simulate.py   self-play, PHH export
 pokersim/dataset.py    Hugging Face browsing/downloading (cache in data/cache)
 pokersim/server.py     HTTP + SSE API, serves web/
 web/                   index.html, style.css, app.js (table renderer, panes)
+pokersim/lab_api.py    Poker Mirror API (/api/lab/*): model guesses, bluff check, scorecard, replays
+pokersim/rl_policy.py  RL coach (NumPy inference); rl_features.py builds its inputs
+pokersim/hand_range.py hand-range model; next_move.py next-move model; opponent_model.py opponent styles
+pokersim/you_model.py  your own model; what_if.py "if you had followed the coach" replays
+web/lab.html, web/lab/ Poker Mirror page (served at /)
+data/rl/, data/demo/   trained models and precomputed Poker Mirror data
 data/samples/          small hand sets from the dataset for offline use
 scripts/               validation and smoke tests
 tests/                 unit tests (python -m unittest discover tests)
@@ -155,3 +194,7 @@ Hand histories in `data/samples/` are excerpts of the `gabbler/PokerData` datase
 itself built from the PHH dataset by Juho Kim (University of Toronto Computer Poker Research
 Group), the Pluribus supplementary material (Brown & Sandholm, *Science* 2019), HandHQ logs and
 PokerGO/WSOP broadcasts. PHH format: Kim, "Recording and Describing Poker Hands", IEEE CoG 2024.
+
+Poker Mirror scans the [takara-ai/poker_hands](https://huggingface.co/datasets/takara-ai/poker_hands) Parquet
+release of the same PHH dataset (CC BY 4.0), pinned at revision `6acb5afb`. `data/mirror/styles.json` is a small
+derived artifact: the player-style parameters fitted on that data.
