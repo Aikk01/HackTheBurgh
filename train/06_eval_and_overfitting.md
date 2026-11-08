@@ -88,3 +88,21 @@ candidates, each also with range inputs and style inputs blanked, 30,000 hands p
 this machine, so it would end after judging (08:00). It therefore runs at **10,000 hands per table** (the script's
 default), all candidates and questions unchanged. The intervals are about √3 wider (roughly ±25 bb/100 pooled for each
 policy against the equity bot).
+
+**Added at 06:00, before any sealed result (supersedes the 05:43 timing):** the sealed test runs now, once, on an Eddie
+CPU node (a separate checkout, so the training jobs are untouched), at 10,000 hands per table. The candidates are each
+run's best held-out export **as of now**, copied to a frozen folder first; training continues, but later checkpoints
+are not candidates. Frozen candidates (update, held-out score):
+
+| Candidate | Update | Held-out | Range inputs |
+|---|---|---|---|
+| v3-noranges-s2 | 150 | +185.9 | off |
+| v3-bc | 50 | +150.4 | on |
+| v3-bc-kl10 | 100 | +123.0 | on |
+| v3-bc-s2 | 100 | +120.6 | on |
+| v3-ranges-s2 | 100 | +110.2 | on |
+| v3-noranges | 300 | +95.7 | off |
+| v3-ranges | 150 | +93.9 | on |
+| v3-bc-kl30 | 100 | +86.6 | on |
+| v2-eddie | 150 | +73.5 | on |
+| imitation-only | 0 | — | on |
