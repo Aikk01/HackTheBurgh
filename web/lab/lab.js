@@ -39,7 +39,7 @@
 
   const L = { st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null,
     // motion: what each grid last showed, how much each guess moved and why, the ✓/✗ badges, when you last picked a chip
-    drawn: {}, mem: {}, shift: {}, flash: {}, logLen: 0, picked: 0, shownPick: null };
+    drawn: {}, mem: {}, shift: {}, flash: {}, scale: {}, logLen: 0, picked: 0, shownPick: null };
   const MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const GROUP = (a) => (a === "fold" ? 0 : a === "check" || a === "call" ? 1 : 2);
   const groupOfText = (t) => (/\bfold/.test(t) ? 0 : /\b(check|call)/.test(t) ? 1 : 2);
@@ -175,7 +175,7 @@
     center.style.top = `${g.cy - 4}px`;
     center.append(el("div", { class: "board", "aria-label": `Board: ${h.board.filter(Boolean).join(" ") || "no cards yet"}` }, ...board),
       el("div", { class: "pot" }, "Pot ", el("b", { text: fmt(h.total_pot) })),
-      el("div", { class: "last", text: last ? last.text : "" }));
+      el("div", { class: "last", text: story(h) || (last ? last.text : "") }));
 
     const order = clockwise();
     const n = order.length;
@@ -202,13 +202,49 @@
       const fl = L.flash[p.seat];
       const age = fl && fl.hid === h.hand_id ? Date.now() - fl.at : Infinity;
       if (age < 2200) plate.append(el("span", { class: "verdict " + (fl.hit ? "yes" : "no"), style: `animation-delay:-${age}ms`,
-        title: "Our read of this player, made before the move", text: fl.hit ? "✓ predicted" : "✗ missed" }));
+        title: "Our read of this player, made before the move", text: `${fl.verb} ${fl.hit ? "✓" : "✗"}` }));
       const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
-      if (!isMe && !p.folded) seat.append(seatBox(p));
+      const box = !isMe && !p.folded ? seatBox(p) : null;
+      if (box) seat.append(box);
       seat.append(plate);
       seats.append(seat);
       if (p.bet > 0) seats.append(el("div", { class: "bet", style: `left:${x + (g.cx - x) * 0.4}px;top:${y + (g.cy - y) * 0.42}px`, text: fmt(p.bet) }));
     });
+  }
+
+  const pretty = (cs) => cs.map((c) => (c[0] === "T" ? "10" : c[0]) + (SUITS[c[1]] || "")).join("");
+  // where a hand type sat in our guess: #1 = the likeliest of the 169
+  function rankOf(hands, name) {
+    const flat = [];
+    for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o", hands.grid[r][c]]);
+    flat.sort((x, y) => y[1] - x[1]);
+    const i = flat.findIndex(([n]) => n === name);
+    return i < 0 ? null : i + 1;
+  }
+  // the one sentence in the middle of the table: the last move, whether we read it, how much it moved our guess;
+  // at the end, who won and where their cards were in our guess
+  function story(h) {
+    const log = (L.st && L.st.log) || [];
+    const last = log[log.length - 1];
+    if (h.status !== "betting") {
+      const won = h.players.filter((p) => ((h.payouts && h.payouts[p.index]) || p.payout || 0) > 0);
+      if (won.length !== 1) return last ? last.text : "";
+      const w = won[0], amt = fmt((h.payouts && h.payouts[w.index]) || w.payout);
+      const m = me();
+      if (m && w.index === m.index) return `You win ${amt}`;
+      const cs = w.cards.filter((c) => c && c !== "XX");
+      const hs = predFor(w.seat) && predFor(w.seat).base && predFor(w.seat).base.hands;
+      const rk = cs.length === 2 && hs && hs.shown ? rankOf(hs, hs.shown) : null;
+      return `${w.name} wins ${amt}` + (cs.length === 2 ? ` with ${pretty(cs)}` : "") + (rk ? ` · our #${rk} guess of 169` : "");
+    }
+    if (!last) return "";
+    const p = h.players.find((q) => q.index === last.player);
+    let out = last.text;
+    const fl = p && L.flash[p.seat];
+    if (fl && fl.hid === h.hand_id && fl.text === last.text) out += fl.hit ? " · as we read it ✓" : ` · we read ${fl.expected} ✗`;
+    const sh = p && L.shift[p.seat];
+    if (sh && sh.hid === h.hand_id && sh.cause === last.text && sh.tv >= 0.1) out += ` · hand guess moved ${Math.round(100 * sh.tv)}%`;
+    return out;
   }
 
   // the box above an opponent: what people do here (Base) and what this player does (their own model, learned at
@@ -220,11 +256,17 @@
     const b = pr && pr.base, t = pr && pr.this_player;
     // one idea per box: their next move, as people in general play (Base) and as this player plays; their likely
     // hands live in the grid on the right
+    const top = (x) => (x && x.actions && x.actions.length ? grouped(x.actions)[0] : null);
+    const ga = top(b && b.action), gt = top(t && t.action);
+    if (ga && gt && GROUP(ga.action) === GROUP(gt.action) && Math.abs(ga.p - gt.p) < 0.1) {
+      return el("div", { class: "mbox slim", "aria-label": `Next move for ${p.name}` },
+        el("div", { class: "mtable two" }, el("span", { class: "k", text: "Next move", title: "This player plays like people in general here" }), moveSlot(t.action, 1)));
+    }
     return el("div", { class: "mbox slim", "aria-label": `Next move for ${p.name}` },
       el("div", { class: "mtable two" },
         el("span", { class: "k", text: "People" }), moveSlot(b && b.action, 1),
-        el("span", { class: "k", text: "This player", title: t && t.seen ? `learned from ${t.seen} of their moves` : "no moves seen yet" }),
-        moveSlot(t && t.action, 1)));
+        el("span", { class: "k mine", text: "This player", title: "Plays unlike most people here: learned from their own moves" }),
+        el("span", { class: "mine" }, moveSlot(t && t.action, 1))));
   }
 
   function renderYou() {
@@ -339,14 +381,9 @@
     top.innerHTML = "";
     top.append(el("div", { class: "row" }, el("span", { class: "k", text: "Top 2 hands" }), handSlot(hands, 2)));
     if (hands && hands.shown) {  // where the real hand sat in our guess: the likeliest X% of it held the real hand
-      const flat = [];
-      for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o", hands.grid[r][c]]);
-      flat.sort((x, y) => y[1] - x[1]);
-      let cum = 0;
-      for (const [n, q] of flat) { cum += q; if (n === hands.shown) break; }
-      top.append(el("div", { class: "row real", title: "Hand types ranked from likeliest down: the real hand came inside this share of our guess. On 44,036 unseen test hands, our likeliest half held the real hand 47% of the time." },
+      top.append(el("div", { class: "row real", title: "The 169 hand types ranked from our likeliest guess down. On 44,036 unseen test hands, the real hand fell inside our likeliest half 47% of the time." },
         el("span", { class: "k", text: "Real hand" }),
-        el("span", { class: "v" }, el("b", { text: hands.shown }), el("span", { class: "p2", text: ` · inside our likeliest ${Math.max(1, Math.round(100 * cum))}%` }))));
+        el("span", { class: "v" }, el("b", { text: hands.shown }), el("span", { class: "p2", text: ` · our #${rankOf(hands, hands.shown)} guess of 169` }))));
     }
     // how good the "This player" read has been at this table, scored before each of their moves
     const acc = pr && pr.this_player && pr.this_player.accuracy;
@@ -368,9 +405,13 @@
     // cell total would make offsuit hands look about 3x likelier than they are
     const dens = hands ? (hands.density || hands.grid) : null;
     const vals = dens ? dens.flat() : [];
-    const max = vals.length ? Math.max(...vals) : 0;
-    const cells = [];
     const hid = hand() ? hand().hand_id : null;
+    // one colour scale per player and hand, so a cell only changes shade when its own odds change
+    const sc = seat !== null && L.scale[seat] && L.scale[seat].hid === hid ? L.scale[seat] : { hid, max: 0 };
+    sc.max = Math.max(sc.max, vals.length ? Math.max(...vals) : 0);
+    if (seat !== null && hands) L.scale[seat] = sc;
+    const max = sc.max;
+    const cells = [];
     const before = seat !== null && L.drawn[seat] && L.drawn[seat].hid === hid ? L.drawn[seat].a : null;
     const after = [];
     for (let r = 0; r < 13; r++) {
@@ -453,7 +494,12 @@
       if (!p) return;
       const pr = i === 0 ? predFor(p.seat) : null;  // the guess on screen was made for the first of these moves only
       const t = pr && pr.this_player && pr.this_player.action;
-      if (t && t.actions && t.actions.length) L.flash[p.seat] = { hit: GROUP(grouped(t.actions)[0].action) === groupOfText(e.text), at: Date.now(), hid: h.hand_id };
+      if (t && t.actions && t.actions.length) {
+        const top = grouped(t.actions)[0];
+        const verb = (e.text.slice(p.name.length).trim().split(" ")[0] || "");
+        L.flash[p.seat] = { hit: GROUP(top.action) === groupOfText(e.text), at: Date.now(), hid: h.hand_id, text: e.text,
+          expected: actionText(top).toLowerCase(), verb: verb.charAt(0).toUpperCase() + verb.slice(1) };
+      }
       if (!p.folded && Date.now() - L.picked > 4000) L.sel = p.seat;
     });
     if (fresh.length) setTimeout(() => { if (L.st) renderTable(); }, 2300);  // clear the badges

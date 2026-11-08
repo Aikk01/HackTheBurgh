@@ -222,9 +222,12 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 @keyframes ring { 0% { box-shadow: 0 0 0 0 var(--ink); opacity: 1; } 100% { box-shadow: 0 0 0 9px var(--ink); opacity: 0; } }
 .g13 .c.shown { overflow: visible; }
 .top2 .row.real .v b { color: var(--ink); }
+.mbox .mine, .mbox .k.mine { color: var(--ink); }
+.mbox .mine .pp { color: var(--amber); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  .verdict, .g13 .c.shown::after { animation: none !important; }
 }
 
 /* slim opponent box: two rows, next move only */
