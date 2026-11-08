@@ -93,6 +93,8 @@ def recommend(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], policy: Op
     live = [p for p in obs["players"] if not p["folded"] and not p["is_hero"]]
     ranges = HR.predict_ranges(obs, [p["index"] for p in live])
     return {
+        # fold / check-call / raise (the four raise sizes and all-in together)
+        "summary": {"fold": round(float(pr[0]), 4), "call": round(float(pr[1]), 4), "raise": round(float(pr[2:].sum()), 4)},
         "ranges": [{"index": p["index"], "name": p["name"], "grid": HR.grid(ranges[p["index"]]),
                     "top": [{"hand": HR.CLASS_NAMES[k], "p": round(float(ranges[p["index"]][k]), 4)}
                             for k in np.argsort(-ranges[p["index"]])[:8]]}
