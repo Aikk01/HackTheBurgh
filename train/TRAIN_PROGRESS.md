@@ -6,8 +6,8 @@ Last update: 2026-11-08 03:49.
 
 ## Runs
 
-Four runs are on the University of Edinburgh's Eddie cluster since 02:53; a fifth (v3-noranges-s2) runs on the 5090
-PC from 03:48. The 5090 PC is also the hub (monitor, wandb mirror, demo server); the 2080 PC is no longer used.
+Five runs are on the University of Edinburgh's Eddie cluster (v3-bc from 03:52, in its own checkout so the running
+jobs' code is untouched); a sixth (v3-noranges-s2) runs on the 5090 PC from 03:48. The 5090 PC is also the hub (monitor, wandb mirror, demo server); the 2080 PC is no longer used.
 
 **Reading the evaluations:** single evaluations swing a lot (v3-ranges went −74.5 → +93.9 in 50 updates; its rule-bot
 score −293 → +229). Picking the highest of noisy evaluations flatters the winner, which is why the final verdict is
@@ -19,6 +19,7 @@ the sealed test (06), with two seeds per setting.
 | **v3-noranges** (ablation, inputs off) | 61797927, 32 cores, 30 workers | 02:06 (moved 02:53) | ~07:20 | 106 | ~2,480 steps/s (was ~1,630 on the 2080) | Healthy; best held-out so far |
 | **v3-ranges-s2** (second seed, inputs on) | 32 cores, 30 workers | 02:44 | ~07:20 | 38 | ~1,720 steps/s after past copies joined | Healthy |
 | **v3-noranges-s2** (second seed, inputs off) | 5090 PC, 14 workers | 03:48 | ~07:20 | 1 | ~3,500 steps/s before past copies join | Healthy; makes the ranges comparison two seeds against two |
+| **v3-bc** (inputs on, starts from imitation of the Base model) | Eddie 61798675, 32 cores, own checkout | 03:52 | ~07:15 | 0 | imitation stage first (300k Base decisions), then PPO | Starting |
 | **v2-eddie** (insurance, old opponents) | 8 cores | 02:07 | ~07:25 | 93 | ~780 steps/s | Healthy |
 
 **Evaluations** run every 50 updates; the two v3 runs are compared at equal update numbers.
