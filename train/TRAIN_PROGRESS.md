@@ -2,7 +2,7 @@
 
 The current state of every training run. Update it at each evaluation or event; the plan is in [README.md](README.md).
 
-Last update: 2026-11-08 02:25.
+Last update: 2026-11-08 02:55.
 
 ## Runs
 
@@ -11,6 +11,7 @@ Last update: 2026-11-08 02:25.
 | **v3-ranges** (predicted-hand inputs on) | 5090 PC, 14 workers | 02:05 | ~07:25 | 26 | ~780 steps/s from update 26 (1,640 before) | Healthy; past copies joined at update 25 (expected value-loss bump, entropy dip) |
 | **v3-noranges** (ablation, inputs off) | 2080 PC, 14 workers | 02:06 | ~07:25 | 30 | 1,630 steps/s from update 26 (3,300 before) | Healthy; same transition at update 26 |
 | **v2-eddie** (insurance, old opponents) | Eddie, 8 cores, `--cpu` | 02:07 | ~07:25 | 63 (resumed from 56) | ~830 steps/s | Healthy |
+| **v3-ranges-s2** (second seed, inputs on) | Eddie, 32 cores, `--cpu`, 30 workers | 02:44 | ~07:20 | 11 | ~2,630 steps/s before past copies join | Healthy; the fastest run |
 
 **Projected updates by the end:**
 - v3-ranges: about 250 (≈80 s per update; the hand simulation runs for the hero and for every past copy).
@@ -29,6 +30,9 @@ earlier.
 | 02:05 | v3-noranges | First 30 s reported to the borrowed PC's own wandb account | Restarted with wandb offline; logs are mirrored to the 5090 and sent from there |
 | 02:16–02:17 | v3-noranges | ALERT entropy dip at updates 27–28 | Expected: past copies joined at update 25. KL 0.02–0.03 and clip fraction 0.19–0.25, both inside the limits. No action |
 | 02:23 | v3-ranges | ALERT entropy dip at update 26 | Same transition; no action |
+| 02:32 | v3-noranges | First evaluation (update 50): held-out −32 bb/100 vs the equity bot: +46 ± 25 against Pluribus clones, −164 ± 64 against the rule bots | Exported as best; the rule bots are the weak spot |
+| 02:34 | v3-ranges | ALERT speed 621 steps/s | Our 30-player evaluation was sharing the 5090; moved it to Eddie |
+| 02:44 | — | Added v3-ranges-s2 on Eddie (32 cores) | Second seed, faster than the 5090 |
 
 ## Where things are
 
