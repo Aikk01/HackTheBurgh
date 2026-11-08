@@ -45,10 +45,11 @@ choices towards the moves that won chips. We chose PPO because:
   predictable.
 - **It runs on ordinary processors** with a small network.
 
-**Who it plays against while training:** about 40% of seats are players made from the next-move model of the
-professionals in the Pluribus games, each nudged to a different style. The rest are rule-based bots (a maths bot, a
-caller, a maniac, a random player, tight and loose aggressive bots) and, for a quarter of seats, earlier copies of
-itself. Training against data-driven, human-like players is the point: it should learn where people go wrong, not
+**Who it plays against while training:** at each seat:
+- **about 30%:** human-like players made from the next-move model of the professionals in the Pluribus games, each
+  nudged to a different style;
+- **about 45%:** rule-based bots: a maths bot, a caller, a maniac, a random player, and tight and loose aggressive bots;
+- **25%:** earlier copies of itself. Training against data-driven, human-like players is the point: it should learn where people go wrong, not
 just play itself.
 
 **Two ways to start:**
