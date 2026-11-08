@@ -268,11 +268,11 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 .size i { font-style: normal; font-size: 11px; font-weight: 600; color: var(--amber); }
 .bluff { margin-top: 8px; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(0, 0, 0, 0.15); font-size: 13px; }
 .bluff .bh { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; }
-.bluff .brow { color: var(--ink-2); } .bluff .brow b { color: var(--ink); font-family: var(--mono); }
+.bluff .brow { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); } .bluff .brow b { color: var(--ink); font-family: var(--mono); }
 .bluff .bv { margin: 5px 0 3px; font-weight: 600; } .bluff .bv.ok { color: var(--good); } .bluff .bv.bad { color: #e8836b; }
-.bluff .bw { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--ink-2); font-size: 13px; }
-.bluff .bw span i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--pc); margin-right: 4px; }
-.bluff .bw .tag { color: #e8836b; }
+.bluff .bw { display: flex; flex-wrap: wrap; gap: 2px 6px; color: var(--ink-2); font-size: 13px; }
+.bluff .bw b { color: var(--pc); font-weight: 600; }
+.bluff .tag { color: #e8836b; font-size: 13px; margin-top: 2px; }
 
 /* learned habits */
 .top2 .row.habit .v { white-space: normal; color: var(--ink); }

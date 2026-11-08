@@ -16,7 +16,7 @@ Run it: `python -m pokersim serve --port 8765`, then open http://localhost:8765/
 | Right panel | Their habit in plain words ("calls 2.3× as often as most people facing a bet") | Their own model, learned at this table |
 | Bottom left | Two coaches: **Base** copies Pluribus; **RL** was trained against players like these | |
 | Bottom middle | The model of **you**: its guess of your move (shown after you act), how often it has been right, your habit | |
-| Bottom right | Bet-size buttons and the **bluff check**: "if you bet X, they all fold Y% of the time; it needs Z%" | Each player's own model, on a copy of the hand with your bet in |
+| Bottom right | Bet-size buttons and the **bluff check**: "if you raise to X with nothing: everyone folds Y%, needed to break even Z%, so a bluff wins or loses N chips" | Each player's own model, on a copy of the hand with your bet in |
 
 **The players:** five models of real professionals, each nudged into one classic type: **Pro** and **Shark** (tight
 aggressive), **Gambler** (loose aggressive), **Sticky** (loose passive), **Rock** (tight passive).

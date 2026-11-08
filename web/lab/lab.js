@@ -545,14 +545,15 @@
     const word = lg && lg.raise_kind === "bet" ? "bet" : "raise to";
     const worst = b.players.slice().sort((x, y) => x.fold - y.fold)[0];
     const seatOf = (i) => { const p = h && h.players.find((q) => q.index === i); return p ? p.seat : null; };
+    const chips = (x) => fmt(Math.round(x * 10) / 10);
     box.append(
-      el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)}` }),
-      el("div", { class: "brow" }, "They all fold ", el("b", { text: pctSoft(b.all_fold) }), " of the time ",
-        el("span", { class: "p2", text: `· it needs ${pct(b.needs)}` })),
-      el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `Bluffing pays: about +${fmt(Math.round(b.worth * 10) / 10)} chips, even with nothing`
-        : `Bluffing loses: about −${fmt(Math.round(-b.worth * 10) / 10)} chips with nothing` }),
-      el("div", { class: "bw" }, ...b.players.map((p) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` }, el("i"), `${p.name} ${pctSoft(p.fold)}`)),
-        worst && worst.fold < 0.3 && b.players.length ? el("span", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null));
+      el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)} with nothing` }),
+      el("div", { class: "brow" }, el("span", { text: "Everyone folds" }), el("b", { text: pctSoft(b.all_fold) })),
+      el("div", { class: "brow" }, el("span", { text: "Needed to break even" }), el("b", { text: pct(b.needs) })),
+      el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `So a bluff wins about ${chips(b.worth)} chips` : `So a bluff loses about ${chips(-b.worth)} chips` }),
+      el("div", { class: "bw" }, "Each folds: ", ...b.players.map((p, i) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` },
+        el("b", { text: p.name }), ` ${pctSoft(p.fold)}${i < b.players.length - 1 ? "," : ""}`))),
+      worst && worst.fold < 0.3 ? el("div", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null);
   }
 
   function renderSide() {
