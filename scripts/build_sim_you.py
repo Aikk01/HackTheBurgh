@@ -69,16 +69,10 @@ def deal(spec: str, n: int, seed: int):
 
 
 def stand():
-    """A fresh stand-in table whose bots start from the same warm reads as the live table."""
+    """A fresh stand-in table where every model starts knowing nothing: the model of you and those of the five
+    players (the page hands all of them to the live table at the end)."""
     Y.PLAYERS_DIR = tempfile.mkdtemp(prefix="sim_you_players_")
-    s = BR.Stand()
-    warm = json.load(open(os.path.join(ROOT, "data", "demo", "warm_reads.json")))
-    for spec, name in MIRROR_TABLE:
-        if spec in warm["by_agent"]:
-            m = s.watch.model(name)
-            m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
-            m.warm_hands = int(warm["hands"])
-    return s
+    return BR.Stand()
 
 
 def main() -> None:
@@ -97,8 +91,8 @@ def main() -> None:
     for i, rec in enumerate(recs):
         _, c = BR.run_hand(_copy(rec), probe, ME, i + 1, False)
         per_hand[i] = c
-    early = [i for i in range(min(10, n)) if any(r[0] == 0 for r in per_hand[i]) and len(per_hand[i]) >= 2][:3] or \
-        [i for i in range(min(10, n)) if per_hand[i]][:3]
+    early = [i for i in range(min(20, n)) if any(r[0] == 0 for r in per_hand[i]) and len(per_hand[i]) >= 2][:3] or \
+        [i for i in range(min(20, n)) if per_hand[i]][:3]
     late = [i for i in range(max(0, n - 100), n) if any(r[0] == 1 and r[1] == 0 for r in per_hand[i])
             and BR.shown_cards(recs[i], BR.his_index(recs[i], ME))]
     late = [late[j] for j in np.linspace(0, len(late) - 1, min(3, len(late))).round().astype(int)] if late else []
@@ -106,14 +100,14 @@ def main() -> None:
 
     # pass 2: the real run, from knowing nothing, with frames for the picked hands
     st = stand()
-    curve, showcase = [], []
+    curve, showcase, opp = [], [], []
     for i, rec in enumerate(recs):
-        frames, c = BR.run_hand(_copy(rec), st, ME, i + 1, i in pick)
+        frames, c = BR.run_hand(_copy(rec), st, ME, i + 1, i in pick, opp_curve=opp)
         curve += [[i + 1] + row for row in c]
         if i in pick:
             showcase.append({"hand_no": i + 1, "phase": pick[i], "frames": frames})
     C_ = np.array([r[1:] for r in curve], float)
-    first = np.array([r[1:] for r in curve if r[0] <= 10], float)
+    first = np.array([r[1:] for r in curve if r[0] <= 20], float)
     last = np.array([r[1:] for r in curve if r[0] > n - 100], float)
     facing = np.array([r[1:] for r in curve if r[4]], float)  # facing a bet, where a style shows most
     facing_last = np.array([r[1:] for r in curve if r[4] and r[0] > n - 100], float)
@@ -123,13 +117,21 @@ def main() -> None:
         return {"personal": float(x[:, 0].mean()), "people": float(x[:, 1].mean()), "usual": float(x[:, 2].mean()),
                 "decisions": int(len(x))} if len(x) else None
 
+    def acc2(rows):  # the other players: [hand, their model right, people right]
+        x = np.array([r[1:] for r in rows], float)
+        return {"personal": float(x[:, 0].mean()), "people": float(x[:, 1].mean()), "decisions": int(len(x))} if len(x) else None
+
     out = {"player": {"label": "A player like you", "venue": "simulated", "hands": n, "decisions": len(curve),
                       "mine": True, "sim": True, "style": a.style, "style_text": text, "spec": spec,
                       "picked": "first hands (it knows nothing yet), then last hands (it has learned the player)",
                       "note": "simulated with the next-move model of human professionals, tilted to one style no model is told"},
            "habits": me.habits(top=3), "curve": curve,
-           "summary": {**acc(C_), "first10": acc(first), "last100": acc(last), "facing": acc(facing),
-                       "facing_last100": acc(facing_last)},
+           "summary": {**acc(C_), "first20": acc(first), "last100": acc(last), "facing": acc(facing),
+                       "facing_last100": acc(facing_last),
+                       "opp_first20": acc2([r for r in opp if r[0] <= 20]), "opp_last100": acc2([r for r in opp if r[0] > n - 100])},
+           "opp_curve": opp,
+           "opponents": {name: {"counts": st.watch.model(name).counts, "habits": st.watch.model(name).habits(top=1)}
+                         for _, name in MIRROR_TABLE},
            "showcase_rule": "up to 3 of the first 10 hands where the model of you missed, then up to 3 of the last 100 "
                             "where it was right and people in general were not",
            "hands": showcase, "counts": me.counts}
@@ -138,9 +140,12 @@ def main() -> None:
     with open(path + ".tmp", "w") as f:
         f.write(s)
     os.replace(path + ".tmp", path)
-    f10, l100 = out["summary"]["first10"], out["summary"]["last100"]
+    f10, l100 = out["summary"]["first20"], out["summary"]["last100"]
+    o20, o100 = out["summary"]["opp_first20"], out["summary"]["opp_last100"]
+    print(f"  the other players: first 20 hands theirs {o20['personal']:.0%} people {o20['people']:.0%} · "
+          f"last 100 theirs {o100['personal']:.0%} people {o100['people']:.0%}")
     print(f"{a.style}: {n} hands, {len(curve)} decisions, {len(showcase)} showcase hands, {len(s) / 1e6:.1f} MB; "
-          f"first 10 hands: you {f10['personal']:.0%} people {f10['people']:.0%} · last 100: you {l100['personal']:.0%} "
+          f"first 20 hands: you {f10['personal']:.0%} people {f10['people']:.0%} · last 100: you {l100['personal']:.0%} "
           f"people {l100['people']:.0%} · all: you {C_[:, 0].mean():.1%} people {C_[:, 1].mean():.1%}")
     fl = out["summary"]["facing_last100"]
     if fl:

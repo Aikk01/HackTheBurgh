@@ -36,9 +36,10 @@ from . import cards as C
 
 # The Poker Mirror table (served at /api/lab/table): five players from the next-move model of the human professionals
 # in the Pluribus games, with their own cards, each nudged into one of the four classic player types by a tilt on its
-# fold / call / raise logits.  (RL training used tilts within ±0.5; the sealed test uses 1.2.)
-MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_f=-0.8,tilt_r=0.8", "Gambler"), ("pro:tilt_f=-0.8,tilt_c=0.8,tilt_r=-0.5", "Sticky"),
-                ("pro:tilt_f=0.8,tilt_r=-0.6", "Rock"), ("pro:tilt_f=0.4,tilt_r=0.6", "Shark")]
+# fold / call / raise logits, strongly enough that each type is plain to see (RL training used tilts within ±0.5; the
+# sealed test uses 1.2).
+MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_f=-1.5,tilt_r=1.5", "Gambler"), ("pro:tilt_f=-1.5,tilt_c=1.5,tilt_r=-1.0", "Sticky"),
+                ("pro:tilt_f=1.5,tilt_r=-1.0", "Rock"), ("pro:tilt_f=0.6,tilt_r=1.0", "Shark")]
 MIRROR_TYPE = {"Pro": "tight aggressive", "Gambler": "loose aggressive", "Sticky": "loose passive", "Rock": "tight passive",
                "Shark": "tight aggressive"}
 

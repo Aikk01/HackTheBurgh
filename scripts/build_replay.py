@@ -113,7 +113,7 @@ def money(x):
     return f"{x:g}" if isinstance(x, (int, float)) else str(x)
 
 
-def run_hand(rec, stand, name, hand_no, frames_on, against=None):
+def run_hand(rec, stand, name, hand_no, frames_on, against=None, opp_curve=None):
     k = his_index(rec, name)
     sc = shown_cards(rec, k)
     actions = list(rec.actions)
@@ -157,7 +157,7 @@ def run_hand(rec, stand, name, hand_no, frames_on, against=None):
             if frames_on:
                 frame()
             obs, pred, _ = stand.watch.before(hand, p, human=(p == k))
-            prior = NM.predict(obs, p, with_cards=False) if p == k else None
+            prior = NM.predict(obs, p, with_cards=False) if p == k or opp_curve is not None else None
             usual = stand.watch.model(rec.players[p], p == k).usual_group(obs, p) if p == k else None
             to_call = float((obs.get("legal_actions") or {}).get("call") or 0.0)
             if a.verb == "f":
@@ -173,6 +173,9 @@ def run_hand(rec, stand, name, hand_no, frames_on, against=None):
                 hand.bet_raise_to(p, amt)
                 res, txt = {"action": "raise"}, f"raises to {money(amt)}"
             stand.watch.after(hand, p, p == k, obs, pred, res)
+            if p != k and opp_curve is not None:  # the other players: their own model against people in general
+                g = Y.group_of_action(res)
+                opp_curve.append([hand_no, int(int(Y.GROUP_OF[int(np.argmax(pred))]) == g), int(int(Y.GROUP_OF[int(np.argmax(prior))]) == g)])
             log.append({"text": f"{disp[p]} {txt}", "player": p})
             if p == k:
                 g = Y.group_of_action(res)

@@ -867,12 +867,16 @@
       if (!L.replay) { box.hidden = true; return; }
       const k = dur ? Math.min(1, (now - t0) / dur) : 1, i = Math.round(a + (b - a) * k);
       const w = rows.slice(Math.max(0, i - 100), i), acc = (m) => (w.length ? w.reduce((x, r) => x + r[1 + m], 0) / w.length : 0);
+      const upTo = i > 0 ? rows[i - 1][0] : 1, ow = (d.opp_curve || []).filter((r) => r[0] <= upTo).slice(-300);
+      const oacc = (m) => (ow.length ? ow.reduce((x, r) => x + r[1 + m], 0) / ow.length : 0);
       const cv = el("div", { class: "curve" });
       cv.innerHTML = curveSVG(rows, i);
       box.innerHTML = "";
       box.append(el("p", { class: "kicker", text: `Fast-forward · simulated hand ${i > 0 ? rows[i - 1][0] : 1} of ${d.player.hands}` }),
-        el("div", { class: "ff-now" }, el("span", { class: "ff-you" }, "Model of you ", el("b", { text: pct(acc(0)) })),
-          el("span", { class: "ff-ppl" }, "People in general ", el("b", { text: pct(acc(1)) })), el("span", { class: "p2", text: "right, last 100 moves" })),
+        el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "You" }), el("span", { class: "ff-you" }, "our model ", el("b", { text: pct(acc(0)) })),
+          el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(acc(1)) }))),
+        ow.length ? el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "The 5 players" }), el("span", { class: "ff-you" }, "our models ", el("b", { text: pct(oacc(0)) })),
+          el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(oacc(1)) }))) : null,
         cv, legend());
       if (k < 1) requestAnimationFrame(frame);
       else setTimeout(() => { box.hidden = true; done(); }, 350);
@@ -881,7 +885,7 @@
   }
   // the reveal, at the end: its last 100 hands, large, with the whole curve and what it learned
   function showSimEnd() {
-    const d = RP.data, s = d.summary.last100, box = $("#ffwd");
+    const d = RP.data, s = d.summary.last100, o = d.summary.opp_last100, f = d.summary.first20, box = $("#ffwd");
     const cv = el("div", { class: "curve" });
     cv.innerHTML = curveSVG(d.curve, d.curve.length);
     const go = el("button", { class: "btn primary", type: "button", text: "Now you play ▸" });
@@ -892,8 +896,12 @@
       el("div", { class: "ff-big" }, el("div", { class: "ff-you" }, el("b", { text: pct(s.personal) }), el("span", { text: "Model of you" })),
         el("div", { class: "ff-ppl" }, el("b", { text: pct(s.people) }), el("span", { text: "People in general" })),
         el("div", { class: "ff-usu" }, el("b", { text: pct(s.usual) }), el("span", { text: "Your usual move" }))),
+      o ? el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "The 5 players" }), el("span", { class: "ff-you" }, "our models ", el("b", { text: pct(o.personal) })),
+        el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(o.people) }))) : null,
+      f ? el("p", { class: "ff-note", text: `In the first 20 hands the model of you was right ${pct(f.personal)} (people in general ${pct(f.people)}): it starts as people in general and learns from there.` }) : null,
       cv, legend(),
-      el("ul", { class: "habits" }, ...(d.habits || []).slice(0, 2).map((h) => el("li", { text: h.text }))), go);
+      el("ul", { class: "habits" }, ...(d.habits || []).slice(0, 2).map((h) => el("li", { text: h.text }))),
+      el("p", { class: "ff-note", text: "Now you play: the model of you and all five player models carry over from these 500 hands." }), go);
     box.hidden = false;
     if (MOTION) box.animate([{ opacity: 0, transform: "translate(-50%, -46%)" }, { opacity: 1, transform: "translate(-50%, -50%)" }], { duration: 320, easing: "ease-out" });
   }

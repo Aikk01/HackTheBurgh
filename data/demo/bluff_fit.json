@@ -1,15 +1,15 @@
 {
- "a": 1.0154,
- "b": -0.1831,
+ "a": 1.0053,
+ "b": -0.412,
  "seed": 23,
  "hands": 1500,
- "n": 2105,
+ "n": 1997,
  "table": [
   "pro",
-  "pro:tilt_f=-0.8,tilt_r=0.8",
-  "pro:tilt_f=-0.8,tilt_c=0.8,tilt_r=-0.5",
-  "pro:tilt_f=0.8,tilt_r=-0.6",
-  "pro:tilt_f=0.4,tilt_r=0.6"
+  "pro:tilt_f=-1.5,tilt_r=1.5",
+  "pro:tilt_f=-1.5,tilt_c=1.5,tilt_r=-1.0",
+  "pro:tilt_f=1.5,tilt_r=-1.0",
+  "pro:tilt_f=0.6,tilt_r=1.0"
  ],
  "note": "fitted on this session only; data/demo/bluff_calibration.json scores it on another"
 }

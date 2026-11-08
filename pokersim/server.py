@@ -252,8 +252,9 @@ class GameSession:
                 traceback.print_exc()
 
     def adopt_you(self, style: str) -> Dict[str, Any]:
-        """"Now you play": the model of you starts from what it learned in the simulation (scripts/build_sim_you.py),
-        in memory only (your real history on disk is untouched), and keeps learning from your live moves."""
+        """"Now you play": the model of you and the models of the five players start from what they learned in the
+        simulation (scripts/build_sim_you.py), in memory only (your real history on disk is untouched), and keep
+        learning from the live moves."""
         path = os.path.join(os.path.dirname(__file__), "..", "data", "demo", f"sim_you_{re.sub(r'[^a-z]', '', style)}.json")
         try:
             with open(path, encoding="utf-8") as f:
@@ -261,7 +262,8 @@ class GameSession:
         except (OSError, ValueError):
             raise ApiError(f"no simulation for style {style!r} (python scripts/build_sim_you.py)", 404)
         with self.lock:
-            self.adopted = {"counts": d["counts"], "hands": int(d["player"]["hands"]), "style": d["player"]["style_text"]}
+            self.adopted = {"counts": d["counts"], "hands": int(d["player"]["hands"]), "style": d["player"]["style_text"],
+                            "opponents": {k: v["counts"] for k, v in (d.get("opponents") or {}).items()}}
             self._apply_adopted()
             return {"ok": True, "style": self.adopted["style"], "hands": self.adopted["hands"]}
 
@@ -270,13 +272,18 @@ class GameSession:
 
         if not self.adopted:
             return
-        for seat_no in self.human_seats:
-            seat = next((s for s in (self.table.seats if self.table else []) if s.seat_no == seat_no), None)
-            if seat is not None:
-                m = PlayerModel(seat.name, persist=False)  # scores start at zero: "right so far" counts live moves only
-                m.counts = json.loads(json.dumps(self.adopted["counts"]))
-                m.warm_hands = self.adopted["hands"]
-                self.watch.models[seat.name] = m
+        for seat in (self.table.seats if self.table else []):
+            human = seat.seat_no in self.human_seats
+            counts = self.adopted["counts"] if human else self.adopted["opponents"].get(seat.name)
+            if counts is None:
+                continue
+            old = self.watch.models.get(seat.name)
+            m = PlayerModel(seat.name, persist=False)  # scores start at zero: "right so far" counts live moves only
+            m.counts = json.loads(json.dumps(counts))
+            m.warm_hands = self.adopted["hands"]
+            if old is not None and not human:
+                m.range_obs = old.range_obs  # how wide each one plays stays from the warm reads
+            self.watch.models[seat.name] = m
         self.last_lab = None
 
     # -- scenario (fork a recorded hand) --------------------------------------
