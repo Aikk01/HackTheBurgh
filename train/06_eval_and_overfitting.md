@@ -56,3 +56,7 @@ intervals are ±150–450 bb/100, so those numbers carry no information and are 
 **Added at 03:49, before any sealed result:** v3-noranges-s2, a second seed without range inputs (5090, started 03:48),
 so the "are predicted hands worth anything?" comparison is two seeds against two. It runs to ~07:20 like the others
 and joins the candidates with its `export_heldout/`.
+
+**Added at 03:51, before any sealed result:** v3-bc (Eddie, range inputs on), PPO started from a network trained to
+imitate the Base model (`scripts/bc_init.py`) instead of from scratch. Same trainer, opponents and selection; it joins
+the candidates with its `export_heldout/`. It starts about two hours later than the others, so it gets fewer updates.
