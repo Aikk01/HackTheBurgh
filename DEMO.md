@@ -28,7 +28,7 @@ Its seat says so: "Reads the table: they fold 60% (people 45%) → bluffs more".
 - Only the Shark adapts, and its shift is capped, so there are no loops.
 
 **Hole-card cam** (header toggle, like on TV): shows every player's cards to the audience, see-through and tagged "hidden
-from the models". The grid outlines the real hand live ("our #3 guess of 169, inside our 50% zone"). It changes the
+from the models". The grid outlines the real hand live ("our #3 guess of 169, one of our top guesses"). It changes the
 display only. Turn it on for judges, off for real play.
 
 ## The 4-minute flow

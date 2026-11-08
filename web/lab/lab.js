@@ -195,7 +195,8 @@
       el("div", { class: "pot" }, el("span", { class: "stack", "aria-hidden": "true" },
         ...Array.from({ length: Math.max(1, Math.min(5, 1 + Math.floor(Math.log2(Math.max(1, h.total_pot / 2))))) }, () => el("i", { class: "pchip" }))),
         "Pot ", el("b", { text: fmt(h.total_pot) })),
-      el("div", { class: "last", text: story(h) || (last ? last.text : "") }));
+      el("div", { class: "last", text: story(h) || (last ? last.text : ""),
+        title: "Where the real hand sat in our guess, likeliest first. Top guesses: the likeliest hands holding half our guess. Expected: 80% of it. Possible: 90%. Measured on fresh hands, they hold the real hand 45%, 78% and 89% of the time." }));
 
     const order = clockwise();
     const n = order.length;
@@ -343,7 +344,7 @@
     flat.sort((x, y) => y[1] - x[1]);
     let cum = 0;
     for (const [n, q] of flat) { cum += q; if (n === name) break; }
-    return cum <= 0.5 + 1e-9 ? "inside our 50% zone" : cum <= 0.8 + 1e-9 ? "inside our 80% zone" : cum <= 0.9 + 1e-9 ? "inside our 90% zone" : "outside our 90% zone: a surprise, as about 1 hand in 9 is";
+    return cum <= 0.5 + 1e-9 ? "one of our top guesses" : cum <= 0.8 + 1e-9 ? "a hand we expected" : cum <= 0.9 + 1e-9 ? "a hand we thought possible" : "a surprise (about 1 hand in 9 is)";
   }
   // the one sentence in the middle of the table: the last move, whether we read it, how much it moved our guess;
   // at the end, who won and where their cards were in our guess
