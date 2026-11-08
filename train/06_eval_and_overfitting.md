@@ -89,9 +89,9 @@ this machine, so it would end after judging (08:00). It therefore runs at **10,0
 default), all candidates and questions unchanged. The intervals are about √3 wider (roughly ±25 bb/100 pooled for each
 policy against the equity bot).
 
-**Added at 06:00, before any sealed result (supersedes the 05:43 timing):** the sealed test runs now, once, on an Eddie
+**Added at 05:57, before any sealed result (supersedes the 05:43 timing):** the sealed test runs now, once, on an Eddie
 CPU node (a separate checkout, so the training jobs are untouched), at 10,000 hands per table. The candidates are each
-run's best held-out export **as of now**, copied to a frozen folder first; training continues, but later checkpoints
+run's best held-out export **as of 05:57**, copied to a frozen folder first; training continues, but later checkpoints
 are not candidates. Frozen candidates (update, held-out score):
 
 | Candidate | Update | Held-out | Range inputs |
