@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Poker Mirror</title>
+<title>gg ez poker</title>
 <link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -12,13 +12,14 @@
 <body>
 <a class="skip" href="#you">Skip to your decision</a>
 <header class="bar">
-  <div class="brand"><span class="mark" aria-hidden="true">♠</span><h1>Poker Mirror</h1></div>
+  <div class="brand"><span class="mark" aria-hidden="true">♠</span><h1>gg ez poker</h1></div>
   <div class="hand-meta" id="handMeta" aria-live="polite"></div>
   <ul class="models" id="models" aria-label="Model status"></ul>
   <div class="bar-actions">
     <button class="btn" id="scoreBtn" type="button" title="Measured on data no model was trained on">How good are the guesses?</button>
     <button class="btn toggle" id="camBtn" type="button" aria-pressed="false" title="Like TV poker: turns every player's cards face up for you only. No model ever sees them.">Hole-card cam</button>
     <button class="btn" id="replayBtn" type="button" title="A simulated player like you, or a real player no model has seen">Watch the model learn a player</button>
+    <button class="btn toggle" id="sideBtn" type="button" aria-pressed="false" title="The selected player's hand details: top hands, habits, where the real hand sat">Details</button>
     <button class="btn" id="newTable" type="button">New table</button>
   </div>
 </header>
@@ -53,7 +54,7 @@
   </div>
 </div>
 
-<main class="lab">
+<main class="lab noside">
   <section class="stage-col" aria-label="Table">
     <div class="stage" id="stage">
       <div class="felt" id="felt" aria-hidden="true"></div>
@@ -61,6 +62,7 @@
       <div id="seats"></div>
       <div id="fx" aria-hidden="true"></div>
       <div class="ffwd" id="ffwd" hidden></div>
+      <div class="legend" id="legend" hidden><span class="lg-base"><i></i>Base model: 21.6M hands, 169 hand types</span><span class="lg-live"><i></i>Live ML: 1,326-combo Bayesian posterior, updated on every action</span></div>
       <div class="sit" id="sit" hidden>
         <h2>Sit down with five bots</h2>
         <p>You sit with five players built from the decisions of real professionals, one of each classic type: the Pro and the Shark (tight aggressive), the Gambler (loose aggressive), Sticky (loose passive) and the Rock (tight passive). Blinds 1/2, 200 chips each.</p>

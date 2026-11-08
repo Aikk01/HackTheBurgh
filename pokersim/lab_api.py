@@ -51,9 +51,15 @@ def _status() -> Dict[str, Dict[str, bool]]:
     from . import hand_range as HR
     from . import next_move as NM
     from .rl_policy import POLICY_NPZ
+    try:
+        from market import live as ML
+        market_ok = ML.loaded()
+    except Exception:  # noqa: BLE001 - optional package (numpy/sklearn/eval7); the page shows "No model loaded"
+        market_ok = False
     return {"base": {"actions": os.path.exists(NM.MODEL_PATH), "hands": os.path.exists(HR.MODEL_PATH)},
             "rl": {"actions": os.path.exists(POLICY_NPZ)},
-            "personal": {"actions": True}}
+            "personal": {"actions": True},
+            "market": {"hands": market_ok}}
 
 
 def _hands(probs: np.ndarray, shown: Optional[str] = None) -> Dict[str, Any]:
@@ -152,6 +158,16 @@ def predict(game: Any) -> Dict[str, Any]:
         game.range_seen = (hand.hand_id, {j: (pr, count) for j, pr in ranges.items() if j != viewer})
         ranges = {j: HR.widen(pr, models[j].range_width() if j in models else 0.0, board + hole) for j, pr in ranges.items()}
 
+    # Real-time ML (market/): a 1,326-combo Bayesian posterior per opponent, rebuilt from the public history on every
+    # call, and the viewer's win probability against it after the flop.  Independent of the base hand model.
+    market: Dict[int, Dict[str, Any]] = {}
+    if obs is not None and status.get("market", {}).get("hands"):
+        from market import live as ML
+        try:
+            market = ML.ranges_for_table(obs, [p["index"] for p in players if not p["folded"]])
+        except Exception:  # noqa: BLE001
+            market = {}
+
     from .next_move import hypothetical_mask, predict as nm_predict
     rows = []
     for p in players:
@@ -177,6 +193,7 @@ def predict(game: Any) -> Dict[str, Any]:
         rows.append({"index": j, "seat": p["seat"], "name": p["name"], "folded": p["folded"],
                      **({"reads": rd} if rd and rd.get("hand_id") == hand.hand_id else {}),
                      "base": {"action": base_act, "hands": hands},
+                     "market": market.get(j),
                      "this_player": {"action": this_act, "hands": _summary(ranges[j], board) if j in ranges else None,
                                      "seen": m.total if m else 0, "accuracy": m.score() if m else None,
                                      "habits": m.habits(top=1) if m else [],

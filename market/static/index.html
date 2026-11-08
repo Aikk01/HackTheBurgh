@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poker Market Live</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --ink:#e8eaed; --mute:#8a919c; --line:#2a2f3a;
+          --price:#4c8dff; --odds:#f2a93b; --win:#3ecf8e; --lose:#ff5c6c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.4 -apple-system, system-ui, sans-serif; }
+  header { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); }
+  h1 { font-size:16px; margin:0 12px 0 0; font-weight:600; }
+  select, button { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 10px; font:inherit; }
+  button { cursor:pointer; } button:hover { border-color:var(--price); }
+  main { display:grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap:16px; padding:16px; max-width:1300px; margin:0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; min-width:0; }
+  .label { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+  .row { display:flex; gap:24px; flex-wrap:wrap; align-items:flex-end; }
+  .big { font-size:40px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .med { font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .cards { display:flex; gap:6px; min-height:58px; }
+  .card { width:40px; height:56px; border-radius:6px; background:#fff; color:#111; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; }
+  .card.red { color:#d0263a; } .card.back { background:repeating-linear-gradient(45deg,#2b3a67,#2b3a67 4px,#22305a 4px,#22305a 8px); }
+  .decision { padding:6px 14px; border-radius:20px; font-weight:700; font-size:18px; display:inline-block; }
+  .call { background:rgba(62,207,142,.15); color:var(--win); } .fold { background:rgba(255,92,108,.15); color:var(--lose); }
+  .none { color:var(--mute); }
+  svg { width:100%; display:block; }
+  #grid { display:grid; grid-template-columns:repeat(13, 1fr); gap:2px; }
+  #grid div { aspect-ratio:1; border-radius:3px; font-size:10px; display:flex; align-items:center; justify-content:center; color:#fff; overflow:hidden; }
+  #log { max-height:260px; overflow:auto; font-family: ui-monospace, Menlo, monospace; font-size:12.5px; }
+  #log div { padding:3px 0; border-bottom:1px solid var(--line); }
+  .opp { color:var(--odds); } .trk { color:var(--price); } .deal { color:var(--mute); }
+  #top span { display:inline-block; margin:0 10px 4px 0; font-family:ui-monospace, Menlo, monospace; }
+  .legend span { margin-right:14px; font-size:12px; color:var(--mute); }
+  .legend i { display:inline-block; width:14px; height:3px; vertical-align:middle; margin-right:5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Poker as a market — live</h1>
+  <label>Range model <select id="mode"><option value="model">model (prior + actions)</option><option value="prior">prior only</option><option value="uniform">uniform baseline</option></select></label>
+  <label>Speed <select id="speed"><option value="1500">slow</option><option value="800" selected>normal</option><option value="300">fast</option></select></label>
+  <label>Hand <select id="hand"></select></label>
+  <button id="play">▶ Play hand</button>
+  <button id="auto">⟳ Auto-stream</button>
+  <span id="status" class="none"></span>
+</header>
+<main>
+  <section class="panel">
+    <div class="row">
+      <div><div class="label">Price (win probability)</div><div class="big" id="price">–</div></div>
+      <div><div class="label">Pot-odds price</div><div class="med" id="odds">–</div></div>
+      <div><div class="label">Decision</div><div id="decision" class="decision none">–</div></div>
+      <div><div class="label">Opponent range</div><div class="med" id="eff">–</div></div>
+      <div><div class="label">Latency</div><div class="med" id="lat">–</div></div>
+    </div>
+    <div style="margin-top:14px" class="legend"><span><i style="background:var(--price)"></i>price</span><span><i style="background:var(--odds)"></i>pot-odds price (when facing a bet)</span></div>
+    <svg id="chart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+    <div class="row" style="margin-top:12px">
+      <div><div class="label">Tracked player <span id="trkpos"></span></div><div class="cards" id="hero"></div></div>
+      <div><div class="label">Board</div><div class="cards" id="board"></div></div>
+      <div><div class="label">Opponent <span id="opppos"></span></div><div class="cards" id="oppcards"></div></div>
+    </div>
+    <div style="margin-top:14px"><div class="label">Action log</div><div id="log"></div></div>
+  </section>
+  <section class="panel">
+    <div class="label">Opponent range — posterior over 1,326 combos (13×13)</div>
+    <div id="grid"></div>
+    <div style="margin-top:12px"><div class="label">Most likely opponent hands</div><div id="top"></div></div>
+    <div id="result" class="med" style="margin-top:12px"></div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const RED = s => s === 'h' || s === 'd';
+const SYM = {c:'♣', d:'♦', h:'♥', s:'♠'};
+let ws = null, auto = false, labels = null, series = [];
+
+function cardEl(c) {
+  const d = document.createElement('div');
+  if (!c) { d.className = 'card back'; return d; }
+  d.className = 'card' + (RED(c[1]) ? ' red' : '');
+  d.textContent = c[0] + SYM[c[1]];
+  return d;
+}
+function setCards(id, cards) { const el = $(id); el.replaceChildren(...cards.map(cardEl)); }
+
+function drawGrid(grid) {
+  const g = $('grid');
+  if (!g.children.length) for (let i = 0; i < 169; i++) g.appendChild(document.createElement('div'));
+  let mx = 0; grid.forEach(r => r.forEach(v => mx = Math.max(mx, v)));
+  for (let i = 0; i < 13; i++) for (let j = 0; j < 13; j++) {
+    const v = grid[i][j], t = mx > 0 ? Math.sqrt(v / mx) : 0, cell = g.children[i * 13 + j];
+    cell.style.background = `rgba(76,141,255,${0.06 + 0.94 * t})`;
+    cell.textContent = labels ? labels[i][j] : '';
+    cell.title = (labels ? labels[i][j] : '') + '  ' + (100 * v).toFixed(2) + '%';
+  }
+}
+
+function drawChart() {
+  const W = 600, H = 220, P = 24, svg = $('chart');
+  const n = Math.max(series.length, 2), x = i => P + (W - 2 * P) * i / (n - 1), y = v => H - P - (H - 2 * P) * v;
+  let s = '';
+  for (const v of [0, .25, .5, .75, 1]) s += `<line x1="${P}" x2="${W-P}" y1="${y(v)}" y2="${y(v)}" stroke="#2a2f3a"/><text x="2" y="${y(v)+4}" fill="#8a919c" font-size="10">${v*100|0}%</text>`;
+  series.forEach((p, i) => { if (p.deal) s += `<line x1="${x(i)}" x2="${x(i)}" y1="${P}" y2="${H-P}" stroke="#2a2f3a" stroke-dasharray="3 3"/><text x="${x(i)+3}" y="${P+10}" fill="#8a919c" font-size="10">${p.deal}</text>`; });
+  if (series.length) s += `<polyline fill="none" stroke="#4c8dff" stroke-width="2.5" points="${series.map((p, i) => x(i) + ',' + y(p.price)).join(' ')}"/>`;
+  series.forEach((p, i) => {
+    s += `<circle cx="${x(i)}" cy="${y(p.price)}" r="3" fill="#4c8dff"/>`;
+    if (p.odds != null) s += `<line x1="${x(i)-10}" x2="${x(i)+10}" y1="${y(p.odds)}" y2="${y(p.odds)}" stroke="#f2a93b" stroke-width="3"/>`;
+  });
+  svg.innerHTML = s;
+}
+
+function logLine(cls, text) { const d = document.createElement('div'); d.className = cls; d.textContent = text; $('log').prepend(d); }
+
+function reset() {
+  series = []; $('log').replaceChildren(); $('result').textContent = ''; setCards('board', []); setCards('oppcards', [null, null]);
+  for (const id of ['price','odds','eff','lat']) $(id).textContent = '–';
+  $('decision').className = 'decision none'; $('decision').textContent = '–'; drawChart();
+}
+
+function onMsg(m) {
+  if (m.type === 'meta') {
+    reset(); labels = m.grid_labels;
+    setCards('hero', m.tracked.cards);
+    $('trkpos').textContent = `(${m.tracked.position})`;
+    $('opppos').textContent = `(${m.opponent.position}, preflop ${m.opponent.preflop_role}${m.pre_raises >= 2 ? ', 3-bet pot' : ''})`;
+    $('status').textContent = `hand ${m.hand_id}`;
+  } else if (m.type === 'event') {
+    setCards('board', m.board);
+    $('price').textContent = (100 * m.price).toFixed(1) + '%';
+    $('odds').textContent = m.pot_odds_price == null ? '–' : (100 * m.pot_odds_price).toFixed(1) + '%';
+    const d = $('decision'); d.className = 'decision ' + (m.decision || 'none'); d.textContent = m.decision ? m.decision.toUpperCase() : '–';
+    $('eff').textContent = Math.round(m.effective_combos) + ' combos';
+    $('lat').textContent = m.latency_ms.toFixed(2) + ' ms';
+    drawGrid(m.grid);
+    $('top').innerHTML = m.top_combos.slice(0, 8).map(t => `<span>${t.combo} ${(100*t.p).toFixed(2)}%</span>`).join('');
+    const a = m.action;
+    series.push({ price: m.price, odds: m.pot_odds_price, deal: a ? null : m.street });
+    if (!a) logLine('deal', `── ${m.street}: ${m.board.join(' ')}   price ${(100*m.price).toFixed(1)}%`);
+    else if (a.actor === 'opponent') logLine('opp', `opponent ${a.kind}${a.size_frac_pot ? ' ' + a.size_frac_pot.toFixed(2) + '× pot' : ''}  → price ${(100*m.price).toFixed(1)}%`);
+    else logLine('trk', `tracked ${a.kind}${m.decision ? `   [model says ${m.decision.toUpperCase()}: ${(100*m.price).toFixed(1)}% vs ${(100*m.pot_odds_price).toFixed(1)}% needed]` : ''}`);
+    drawChart();
+  } else if (m.type === 'end') {
+    if (m.opponent_cards) setCards('oppcards', m.opponent_cards);
+    const s = m.tracked_share;
+    $('result').innerHTML = s == null ? 'No showdown' : s === 1 ? '<span style="color:var(--win)">Tracked player won</span>' : s === 0 ? '<span style="color:var(--lose)">Tracked player lost</span>' : 'Split pot';
+    logLine('deal', `── end: opponent ${m.opponent_cards ? m.opponent_cards.join(' ') : 'mucked'}`);
+  } else if (m.type === 'error') { $('status').textContent = m.error; }
+}
+
+function connect(path) {
+  if (ws) ws.close();
+  const q = `delay_ms=${$('speed').value}&mode=${$('mode').value}`;
+  ws = new WebSocket(`ws://${location.host}${path}${path.includes('?') ? '&' : '?'}${q}`);
+  ws.onmessage = e => onMsg(JSON.parse(e.data));
+  ws.onclose = () => { if (!auto) $('status').textContent += ' · done'; };
+}
+
+$('play').onclick = () => { auto = false; const [id, t] = $('hand').value.split(':'); connect(`/ws/hand/${id}?tracked=${t}`); };
+$('auto').onclick = () => { auto = true; connect(`/ws/stream?seed=${Date.now() % 100000}`); };
+
+fetch('/api/hands?limit=200').then(r => r.json()).then(hs => {
+  const sel = $('hand');
+  hs.forEach(h => [0, 1].forEach(t => { if (h.known[t]) {
+    const o = document.createElement('option'); o.value = `${h.hand_id}:${t}`;
+    o.textContent = `#${h.hand_id} — track ${h.positions[t]} vs ${h.positions[1-t]} (${h.n_actions} actions)`; sel.appendChild(o); } }));
+  sel.selectedIndex = 2;
+});
+reset(); drawGrid(Array.from({length: 13}, () => Array(13).fill(0)));
+</script>
+</body>
+</html>

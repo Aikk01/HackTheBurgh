@@ -7,13 +7,18 @@
 
 :root {
   color-scheme: dark;
-  --page: #0E302B;
-  --page-deep: #0A2622;
-  --surface: #123A33;
-  --surface-2: #164239;
-  --surface-3: #19453C;
-  --line: #24534A;
-  --line-2: #33665B;
+  /* PokerStars-style grey page: the green felt stands out, panels a shade lighter */
+  --page: #2B2B2B;
+  --page-deep: #1E1E1E;
+  --surface: #363636;
+  --surface-2: #3E3E3E;
+  --surface-3: #474747;
+  --line: #4A4A4A;
+  --line-2: #5C5C5C;
+  --base-grid: #F2A93B;  /* every Base range grid */
+  --live: #4CC9F0;       /* every Live ML range grid */
+  --coach: #B8A1FF;      /* the coaches: what you should do */
+  --coach-ink: #1B1433;
   --ink: #FFF8E7;
   --ink-2: #D8D2BF;
   --muted: #B6C5BC;
@@ -67,7 +72,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 .bar { height: var(--bar-h); display: flex; align-items: center; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--page-deep); }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand .mark { color: var(--amber); font-size: 18px; }
-.brand h1 { font-family: var(--serif); font-size: 26px; letter-spacing: 0.01em; }
+.brand h1 { font-family: var(--serif); font-size: 26px; letter-spacing: 0.01em; white-space: nowrap; }
 .hand-meta { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
 .models { list-style: none; display: flex; gap: 8px; margin: 0 0 0 auto; padding: 0; flex-wrap: nowrap; min-width: 0; }
 .models li { display: flex; align-items: baseline; gap: 6px; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 13px; white-space: nowrap; }
@@ -291,7 +296,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 
 /* replay of an unseen player */
 .replay-card { position: fixed; z-index: 50; left: 50%; top: 84px; transform: translateX(-50%); width: min(640px, calc(100vw - 32px));
-  background: var(--panel, #10322d); border: 1px solid var(--line-2); border-radius: 12px; padding: 20px 22px; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+  background: var(--panel, #141414); border: 1px solid var(--line-2); border-radius: 12px; padding: 20px 22px; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
 .replay-card h2 { margin: 0 0 6px; font-size: 22px; }
 .replay-card p { margin: 0 0 10px; color: var(--muted); line-height: 1.45; }
 .ffwd .curve svg, .replay-card .curve svg { width: 100%; height: auto; display: block; }
@@ -371,3 +376,44 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 
 /* type: smoother rendering, digits that line up in every table and bar */
 body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ gg ez poker: ranges beside each player */
+.lab.noside { grid-template-columns: minmax(0, 1fr); }
+.lab.noside .side { display: none; }
+/* two 13x13 grids per opponent: Base (seat colour) and Live ML (cyan).  Side seats: stacked beside the plate, on the
+   outside of the table; the top seat: side by side, above its next-move box (there is no room beside it). */
+.rbox { position: absolute; z-index: 3; display: flex; flex-direction: row; gap: 7px; padding: 5px 6px 6px; background: rgba(22, 22, 22, 0.94); border: 1px solid var(--line-2); border-radius: 8px; }
+.rbox.left { right: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+.rbox.right { left: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+.seat.folded .rbox { display: none; }
+.rg { display: flex; flex-direction: column; gap: 3px; width: 78px; }
+.rg .rk { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+.rg .rk i { width: 7px; height: 7px; border-radius: 2px; background: var(--pc); flex: none; }
+.rg.base { --pc: var(--base-grid); }
+.rg.base .rk { color: var(--base-grid); }
+.rg.live { --pc: var(--live); }
+.rg.live .rk { color: var(--live); }
+.rg .g13 { gap: 1px; font-size: 0; }
+.rg .g13 .c { border-radius: 1px; background: #262626; }
+.rg .g13 .c .t { display: none; }
+.rg .g13 .c.shown, .rg .g13 .c.cam { outline-width: 1px; outline-offset: -1px; box-shadow: 0 0 0 1px var(--pc); }
+.rg .g13 .c.shown::after { animation: none; }
+.rg .rc { font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); white-space: nowrap; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; }
+.rg .rc b { color: var(--ink); font-weight: 500; }
+.rg.live .rc .win { color: var(--live); font-weight: 600; }
+.rg .rc.nm { font-size: 10px; }
+.legend { position: absolute; left: 4px; bottom: 4px; font-size: 10.5px; display: flex; gap: 14px; font-size: 11px; color: var(--muted); z-index: 2; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 9px; height: 9px; border-radius: 2px; }
+.legend .lg-base i { background: var(--base-grid); }
+.legend .lg-live i { background: var(--live); }
+.btn.toggle#sideBtn[aria-pressed="true"] { border-color: var(--live); color: var(--live); background: rgba(76, 201, 240, 0.12); }
+.btn.toggle#sideBtn[aria-pressed="true"]::before { background: var(--live); border-color: var(--live); }
+
+/* what you should do: the coaches in their own colour (violet), distinct from the Base (amber) and Live ML (cyan) grids */
+.you-col:first-child { align-self: start; background: rgba(184, 161, 255, 0.07); border: 1px solid rgba(184, 161, 255, 0.25); border-radius: 10px; padding: 10px 12px 12px; margin: -4px 0 -6px -6px; }
+.you-col:first-child .kicker { color: var(--coach); }
+#should .cbar span.top { background: var(--coach); color: var(--coach-ink); }
+#should .k { color: var(--ink); }
+.size i { color: var(--coach); }
+.size:hover, .size.on { border-color: var(--coach); }

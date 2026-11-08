@@ -151,10 +151,10 @@
     $("#handMeta").textContent = h ? `Hand ${L.st.hand_no} · blinds ${fmt(t && t.small_blind)}/${fmt(t && t.big_blind)} · ${h.status === "betting" ? h.street : "hand over"}` : "";
     const ul = $("#models");
     ul.innerHTML = "";
-    const all = loaded("base", "actions") && loaded("base", "hands") && loaded("rl", "actions") && loaded("personal", "actions");
+    const all = loaded("base", "actions") && loaded("base", "hands") && loaded("rl", "actions") && loaded("personal", "actions") && loaded("market", "hands");
     ul.hidden = all;  // the pills matter only when something is missing
-    const parts = { base: [["actions", "moves"], ["hands", "hands"]], rl: [["actions", "moves"]], personal: [["actions", "moves"]] };
-    [["base", "Base model"], ["rl", "RL model"], ["personal", "Player models"]].forEach(([key, label]) => {
+    const parts = { base: [["actions", "moves"], ["hands", "hands"]], rl: [["actions", "moves"]], personal: [["actions", "moves"]], market: [["hands", "hands"]] };
+    [["base", "Base model"], ["rl", "RL model"], ["personal", "Player models"], ["market", "Live ML"]].forEach(([key, label]) => {
       const have = parts[key].filter(([p]) => loaded(key, p));
       const li = el("li", { class: have.length ? "on" : "" }, el("b", { text: label }));
       if (!have.length) li.append(noModel());
@@ -170,8 +170,9 @@
   function geometry() {
     const st = $("#stage");
     const W = st.clientWidth, H = st.clientHeight;
+    // ~180px of room beside each opponent for its two range grids (the top seat's go to its right)
     const cx = W / 2, cy = H / 2 + 28;
-    const rx = Math.max(160, W / 2 - 130), ry = Math.max(110, H / 2 - 76);
+    const rx = Math.max(160, W / 2 - 215), ry = Math.max(110, H / 2 - 76);
     // the cards grow with the table: full size on a 1040 x 420 stage, up to 1.4x on a big screen, 0.85x at the least
     st.style.setProperty("--cs", Math.max(0.85, Math.min(1.4, W / 1040, H / 420)).toFixed(3));
     return { W, H, cx, cy, rx, ry };
@@ -187,6 +188,7 @@
     const felt = $("#felt");
     Object.assign(felt.style, { left: `${g.cx - g.rx + 18}px`, top: `${g.cy - g.ry + 10}px`, width: `${2 * (g.rx - 18)}px`, height: `${2 * (g.ry - 10)}px` });
     $("#sit").hidden = !!(h && me());
+    $("#legend").hidden = !(h && me());
     if (!h) return;
 
     // centre: board, pot, last action
@@ -234,9 +236,12 @@
       if (age < 2200) plate.append(el("span", { class: "verdict " + (fl.hit ? "yes" : "no"), style: `animation-delay:-${age}ms`,
         title: "Our read of this player, made before the move", text: `${fl.verb} ${fl.hit ? "✓" : "✗"}` }));
       const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (cam ? " cam" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
+      // the two range grids sit beside the plate, on the outside of the table (the top seat's to its right)
+      const rbox = !isMe && !p.folded ? rangeBox(p, Math.cos(ang) < -0.35 ? "left" : "right") : null;
       const box = !isMe && !p.folded ? seatBox(p) : null;
       if (box) seat.append(box);
       seat.append(plate);
+      if (rbox) seat.append(rbox);
       seats.append(seat);
       const bx = x + (g.cx - x) * 0.4, by = y + (g.cy - y) * 0.42;
       FX.xy[p.seat] = { x, y, bx, by };
@@ -378,6 +383,26 @@
 
   // the box above an opponent: what people do here (Base) and what this player does (their own model, learned at
   // this table); likely hand: the top starting hand, and the range read on this board
+  // Base and Live ML ranges for one opponent, as two small 13x13 grids (the same drawing as the side panel's grid)
+  function rangeBox(p, where) {
+    const pr = predFor(p.seat);
+    const base = pr && pr.base ? pr.base.hands : null;
+    const live = pr && pr.market ? pr.market : null;
+    const over = hand() && hand().status !== "betting";
+    const mini = (hands, key, cls, label, caption) => {
+      const g = grid13(hands, `${p.name} (${label})`, key, null);
+      g.removeAttribute("tabindex");
+      Array.from(g.children).forEach((c) => { c.title = `${c.dataset.name} ${(100 * Number(c.dataset.p)).toFixed(1)}%`; });
+      return el("div", { class: "rg " + cls }, el("span", { class: "rk" }, el("i"), label), g,
+        hands ? el("span", { class: "rc" }, ...caption) : el("span", { class: "rc nm", text: over ? "hand over" : "…" }));
+    };
+    const top2 = (hs) => (hs && hs.top ? hs.top.slice(0, 2).map((t) => t.hand).join(" · ") : "");
+    const price = live && Number.isFinite(live.price) ? el("b", { class: "win", title: "Your win probability against this range (ties count half)", text: `you win ${pct(live.price)}` }) : null;
+    return el("div", { class: "rbox " + where, style: `--pc: var(${colourOf(p.seat)})`, "aria-label": `Likely hands for ${p.name}` },
+      mini(base, p.seat, "base", "Base", [top2(base)]),
+      mini(live && live.hands, `live${p.seat}`, "live", "Live ML", [top2(live && live.hands), price ? el("br") : null, price].filter(Boolean)));
+  }
+
   function seatBox(p) {
     const h = hand();
     if (p.folded || (h && h.status !== "betting")) return null;  // nothing left to predict
@@ -1194,6 +1219,13 @@
     $("#rpNext").addEventListener("click", () => stepReplay(1));
     $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);
+  $("#sideBtn").addEventListener("click", () => {  // the selected player's details on the right; the table shrinks to fit
+    const on = $("#sideBtn").getAttribute("aria-pressed") !== "true";
+    $("#sideBtn").setAttribute("aria-pressed", String(on));
+    $(".lab").classList.toggle("noside", !on);
+    render();
+  });
+  window.addEventListener("resize", () => { if (hand()) renderTable(); });
     $("#sitBtn").addEventListener("click", newTable);
     $("#btnFold").addEventListener("click", () => act("fold"));
     $("#btnCall").addEventListener("click", () => act("call"));
