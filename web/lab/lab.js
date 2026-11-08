@@ -172,6 +172,8 @@
     const W = st.clientWidth, H = st.clientHeight;
     const cx = W / 2, cy = H / 2 + 28;
     const rx = Math.max(160, W / 2 - 130), ry = Math.max(110, H / 2 - 76);
+    // the cards grow with the table: full size on a 1040 x 420 stage, up to 1.4x on a big screen, 0.85x at the least
+    st.style.setProperty("--cs", Math.max(0.85, Math.min(1.4, W / 1040, H / 420)).toFixed(3));
     return { W, H, cx, cy, rx, ry };
   }
 
@@ -192,7 +194,7 @@
     const last = (L.st.log || []).slice(-1)[0];
     const center = $("#center");
     center.style.left = `${g.cx}px`;
-    center.style.top = `${g.cy - 4}px`;
+    center.style.top = `${g.cy + 4}px`;
     center.append(el("div", { class: "board", "aria-label": `Board: ${h.board.filter(Boolean).join(" ") || "no cards yet"}` }, ...board),
       el("div", { class: "pot" }, el("span", { class: "stack", "aria-hidden": "true" },
         ...Array.from({ length: Math.max(1, Math.min(5, 1 + Math.floor(Math.log2(Math.max(1, h.total_pot / 2))))) }, () => el("i", { class: "pchip" }))),
