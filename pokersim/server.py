@@ -9,8 +9,7 @@ import mimetypes
 import os
 import queue
 import random
-import subprocess
-import sys
+import re
 import threading
 import time
 import traceback
@@ -107,6 +106,7 @@ class GameSession:
         from .you_model import TableWatch
         self.watch = TableWatch()  # personal models: predicts every player's next move before it happens
         self.last_lab: Optional[Dict[str, Any]] = None
+        self.adopted: Optional[Dict[str, Any]] = None  # "Now you play": the simulated model of you (adopt_you)
 
     # -- setup ----------------------------------------------------------------
     def new_game(self, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -166,6 +166,7 @@ class GameSession:
             self.mode = "table"
             self.scenario = None
             self.hand_counter = 0
+            self._apply_adopted()  # "Now you play" survives a new table
             return self.next_hand()
 
     def next_hand(self) -> Dict[str, Any]:
@@ -247,21 +248,36 @@ class GameSession:
                         n = sum(1 for line in f if line.startswith("[") and line.rstrip().endswith("]"))
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(f"{chr(10) if n else ''}[{n + 1}]\n{phh.dump_hand(rec)}")
-                if len(self.human_seats) == 1 and (n + 1) % 5 == 0:
-                    self._rebuild_your_replay(seat.name)
             except Exception:  # noqa: BLE001 - keeping history must never break the table
                 traceback.print_exc()
 
-    _replay_job: Optional[subprocess.Popen] = None
+    def adopt_you(self, style: str) -> Dict[str, Any]:
+        """"Now you play": the model of you starts from what it learned in the simulation (scripts/build_sim_you.py),
+        in memory only (your real history on disk is untouched), and keeps learning from your live moves."""
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "demo", f"sim_you_{re.sub(r'[^a-z]', '', style)}.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, ValueError):
+            raise ApiError(f"no simulation for style {style!r} (python scripts/build_sim_you.py)", 404)
+        with self.lock:
+            self.adopted = {"counts": d["counts"], "hands": int(d["player"]["hands"]), "style": d["player"]["style_text"]}
+            self._apply_adopted()
+            return {"ok": True, "style": self.adopted["style"], "hands": self.adopted["hands"]}
 
-    def _rebuild_your_replay(self, name: str) -> None:
-        """Every few hands, rebuild your replay (data/demo/replay_you.json) in the background."""
-        if self._replay_job is not None and self._replay_job.poll() is None:
+    def _apply_adopted(self) -> None:
+        from .you_model import PlayerModel
+
+        if not self.adopted:
             return
-        root = os.path.join(os.path.dirname(__file__), "..")
-        self._replay_job = subprocess.Popen(
-            ["nice", "-n", "10", sys.executable, os.path.join(root, "scripts", "build_replay.py"), "--me", name],
-            cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for seat_no in self.human_seats:
+            seat = next((s for s in (self.table.seats if self.table else []) if s.seat_no == seat_no), None)
+            if seat is not None:
+                m = PlayerModel(seat.name, persist=False)  # scores start at zero: "right so far" counts live moves only
+                m.counts = json.loads(json.dumps(self.adopted["counts"]))
+                m.warm_hands = self.adopted["hands"]
+                self.watch.models[seat.name] = m
+        self.last_lab = None
 
     # -- scenario (fork a recorded hand) --------------------------------------
     def start_scenario(self, sc: Dict[str, Any]) -> Dict[str, Any]:
@@ -1034,11 +1050,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/lab/bluff":
             from .lab_api import bluff
             return bluff(APP.game, float(qs.get("amount", 0) or 0))
+        if path == "/api/lab/table":  # the Poker Mirror opponents (lab_api.MIRROR_TABLE)
+            from .lab_api import MIRROR_TABLE
+            return {"seats": [{"agent": spec, "name": name} for spec, name in MIRROR_TABLE]}
         if path == "/api/lab/scorecard":
             from .lab_api import scorecard
             return scorecard()
         if path == "/api/lab/replay":  # precomputed by scripts/build_replay.py
-            rp = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "replay_you.json" if qs.get("who") == "you" else "replay.json")
+            name = f"sim_you_{re.sub(r'[^a-z]', '', qs.get('style', 'calls'))}.json" if qs.get("who") == "sim" else "replay.json"
+            rp = os.path.join(os.path.dirname(__file__), "..", "data", "demo", name)
             if not os.path.exists(rp):
                 raise ApiError("no replay built (python scripts/build_replay.py)", 404)
             with open(rp, encoding="utf-8") as f:
@@ -1110,6 +1130,8 @@ class Handler(BaseHTTPRequestHandler):
             return APP.game.human_act(body.get("seat"), body.get("action", ""), float(amt) if amt not in (None, "") else None)
         if path == "/api/game/reveal":
             return APP.game.set_reveal(bool(body.get("reveal", True)))
+        if path == "/api/lab/adopt":
+            return APP.game.adopt_you(str(body.get("style", "calls")))
         if path == "/api/game/observe":
             return APP.game.observe(int(body.get("hands", 60)))
         if path == "/api/replay/load":

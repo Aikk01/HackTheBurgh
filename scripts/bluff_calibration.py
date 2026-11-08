@@ -25,6 +25,7 @@ import numpy as np  # noqa: E402
 from pokersim import lab_api  # noqa: E402
 from pokersim.agents import make_agent, safe_act  # noqa: E402
 from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
+from pokersim.lab_api import MIRROR_TABLE  # noqa: E402
 from pokersim.you_model import TableWatch  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "bluff_calibration.json")
@@ -73,6 +74,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=23)
     ap.add_argument("--warm", default=os.path.join(ROOT, "data", "demo", "warm_reads.json"), help="its table is the one played")
     ap.add_argument("--out", default=OUT)
+    ap.add_argument("--fit", action="store_true", help="score the raw fold chances and fit the correction -> data/demo/bluff_fit.json")
     a = ap.parse_args()
     rng = random.Random(a.seed)
     warm = json.load(open(a.warm))
@@ -81,7 +83,7 @@ def main() -> None:
     agents, seats = {}, []
     for i, spec in enumerate(specs):
         ag = make_agent(spec, seed=rng.randrange(1 << 30))
-        ag.name = "stand-in" if i == 0 else ag.label
+        ag.name = "stand-in" if i == 0 else dict(MIRROR_TABLE).get(spec, ag.label)
         if i:  # as the server does for a new Mirror table
             m = watch.model(ag.name)
             m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
@@ -106,7 +108,7 @@ def main() -> None:
             obs, pred, _ = watch.before(hand, actor, human=False)
             if actor == me and probe is None and (obs.get("legal_actions") or {}).get("raise") and rng.random() < 0.5:
                 name, amt = rng.choice(list(sizes(obs).items()))
-                b = lab_api.bluff(stand, amt)
+                b = lab_api.bluff(stand, amt, raw=a.fit)
                 if b and b["players"]:
                     probe = {"size": name, "pred": b["all_fold"], "rows": b["players"], "seen": [], "worth": b["worth"],
                              "pot": b["pot"], "cost": b["cost"]}
@@ -159,6 +161,20 @@ def main() -> None:
            "by_opponent": {k: table_of(BINS, *v) for k, v in by_opp.items()},
            "worth": {"said": round(float(pw[:, 0].mean()), 2), "happened_bluff_only": round(float(pw[:, 1].mean()), 2),
                      "said_pays": int((pw[:, 0] > 0).sum()), "n": int(len(pw))} if len(pw) else None}
+    if a.fit:  # logistic recalibration of each player's fold chance: logit -> a * logit + b
+        x = np.log(np.clip(opp_p, 1e-4, 1 - 1e-4) / (1 - np.clip(opp_p, 1e-4, 1 - 1e-4)))
+        y, w = np.asarray(opp_r), np.array([1.0, 0.0])
+        for _ in range(50):  # Newton steps
+            q = 1 / (1 + np.exp(-(w[0] * x + w[1])))
+            g = np.array([np.sum((q - y) * x), np.sum(q - y)])
+            hs = q * (1 - q)
+            H = np.array([[np.sum(hs * x * x), np.sum(hs * x)], [np.sum(hs * x), np.sum(hs)]]) + 1e-6 * np.eye(2)
+            w = w - np.linalg.solve(H, g)
+        fit = {"a": round(float(w[0]), 4), "b": round(float(w[1]), 4), "seed": a.seed, "hands": a.hands, "n": len(opp_p),
+               "table": warm["table"], "note": "fitted on this session only; data/demo/bluff_calibration.json scores it on another"}
+        with open(os.path.join(ROOT, "data", "demo", "bluff_fit.json"), "w", encoding="utf-8") as f:
+            json.dump(fit, f, indent=1)
+        print("fit", fit)
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
     print(json.dumps({k: out[k] for k in ("all_fold", "each_opponent", "worth")}, indent=1))

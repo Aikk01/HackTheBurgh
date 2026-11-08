@@ -20,11 +20,12 @@ sys.path.insert(0, ROOT)
 
 from pokersim import hand_range as HR  # noqa: E402
 from pokersim.agents import make_agent, safe_act  # noqa: E402
+from pokersim.lab_api import MIRROR_TABLE  # noqa: E402
 from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
 from pokersim.you_model import TableWatch  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "warm_reads.json")
-LAB_TABLE = ["tag", "pro", "lag", "equity", "potodds"]  # the Lab's default opponents (web/lab/lab.js)
+LAB_TABLE = [spec for spec, _ in MIRROR_TABLE]
 STAND_IN = "pro"  # plays the human's seat; not recorded
 
 
@@ -32,10 +33,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hands", type=int, default=400)
     ap.add_argument("--seed", type=int, default=7)
-    ap.add_argument("--table", default=",".join(LAB_TABLE), help="the opponents, comma separated")
+    ap.add_argument("--table", default=";".join(LAB_TABLE), help="the opponents' specs, separated by ;")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
-    table_specs = a.table.split(",")
+    table_specs = a.table.split(";")
     rng = random.Random(a.seed)
     specs = [STAND_IN] + table_specs
     agents, seats = {}, []
@@ -82,7 +83,7 @@ def main() -> None:
         json.dump(out, f, separators=(",", ":"), default=lambda x: round(float(x), 3))
     for spec in table_specs:
         m = watch.model(spec)
-        print(f"{spec:8s} {m.total:5d} moves · right {m.right / max(m.total, 1):.0%} (people {m.people_right / max(m.total, 1):.0%})"
+        print(f"{spec:26s} {m.total:5d} moves · right {m.right / max(m.total, 1):.0%} (people {m.people_right / max(m.total, 1):.0%})"
               f" · range width {m.range_width():.2f}")
     print(f"{a.hands} hands in {time.time() - t0:.0f} s -> {os.path.relpath(a.out, ROOT)}")
 

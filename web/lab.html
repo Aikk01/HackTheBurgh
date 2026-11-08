@@ -31,9 +31,13 @@
 </div>
 
 <div class="replay-card" id="replayCard" hidden>
-  <div class="replay-who" id="replayWho" role="radiogroup" aria-label="Whose replay" hidden>
-    <button class="chip" type="button" role="radio" data-who="you">You</button>
-    <button class="chip" type="button" role="radio" data-who="unseen">An unseen player</button>
+  <div class="replay-who" id="replayWho" role="radiogroup" aria-label="Whose replay">
+    <button class="chip" type="button" role="radio" data-who="sim">A player like you</button>
+    <button class="chip" type="button" role="radio" data-who="unseen">A real unseen player</button>
+  </div>
+  <div class="replay-who" id="replayStyle" role="radiogroup" aria-label="Their style">
+    <button class="chip" type="button" role="radio" data-style="calls">Calls a lot</button>
+    <button class="chip" type="button" role="radio" data-style="raises">Raises a lot</button>
   </div>
   <h2 id="replayTitle">A real player, learned as they play</h2>
   <p id="replayNote"></p>
@@ -87,6 +91,7 @@
           <button class="btn" id="rpPlay" type="button">❚❚ Pause</button>
           <button class="btn" id="rpPrev" type="button">← Back</button>
           <button class="btn primary" id="rpNext" type="button">Next →</button>
+          <button class="btn primary" id="rpAdopt" type="button" hidden>Now you play ▸</button>
           <button class="btn ghost" id="rpExit" type="button">Exit replay</button>
         </div>
         <p class="act-note" id="actNote"></p>

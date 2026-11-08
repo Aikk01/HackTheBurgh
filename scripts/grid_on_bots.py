@@ -25,9 +25,11 @@ from pokersim import cards as C  # noqa: E402
 from pokersim import hand_range as HR  # noqa: E402
 from pokersim.agents import make_agent, safe_act  # noqa: E402
 from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
+from pokersim.lab_api import MIRROR_TABLE  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "grid_on_bots.json")
-LAB_TABLE = ["tag", "pro", "lag", "equity", "potodds"]  # web/lab/lab.js
+LAB_TABLE = [spec for spec, _ in MIRROR_TABLE]
+NAME = dict(MIRROR_TABLE)
 LEVELS = (0.5, 0.8, 0.9)
 
 
@@ -44,13 +46,13 @@ def main() -> None:
         for spec, obs_ in warm["range_obs"].items():
             m = PlayerModel(spec)
             m.range_obs = obs_
-            width[make_agent(spec).label] = m.range_width()
+            width[NAME.get(spec, make_agent(spec).label)] = m.range_width()
     rng = random.Random(a.seed)
     specs = ["pro"] + LAB_TABLE
     agents, seats = {}, []
     for i, spec in enumerate(specs):
         ag = make_agent(spec, seed=rng.randrange(1 << 30))
-        ag.name = "stand-in" if i == 0 else ag.label
+        ag.name = "stand-in" if i == 0 else NAME.get(spec, ag.label)
         agents[i + 1] = ag
         seats.append(Seat(seat_no=i + 1, name=ag.name, stack=200.0, agent=ag, kind=ag.kind, buy_in=200.0))
     table = Table(seats, small_blind=1.0, big_blind=2.0, rng=random.Random(rng.randrange(1 << 30)))

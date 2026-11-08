@@ -34,6 +34,12 @@ import numpy as np
 
 from . import cards as C
 
+# The Poker Mirror table (web/lab/lab.js newTable keeps the same list): five players from the next-move model of the
+# human professionals in the Pluribus games, with their own cards, each nudged towards one instinct by a tilt on its
+# fold / call / raise logits.  (RL training used tilts within ±0.5; the sealed test uses 1.2.)
+MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_c=0.8", "Sticky"), ("pro:tilt_r=0.8", "Aggro"), ("pro:tilt_f=0.8", "Nervous"),
+                ("pro:temp=1.3,tilt_f=-0.5", "Gambler")]
+
 _COMBOS = np.array([[6 if r == c else 4 if r < c else 12 for c in range(13)] for r in range(13)], dtype=float)
 
 
@@ -265,7 +271,23 @@ def scorecard() -> Dict[str, Any]:
     return out
 
 
-def bluff(game: Any, amount: float) -> Optional[Dict[str, Any]]:
+_FOLD_FIT: Dict[str, Any] = {}
+
+
+def _fold_fit() -> Optional[List[float]]:
+    """The bluff check's correction of the personal models' fold chances, logit -> a * logit + b, fitted on one
+    simulated session at the Mirror table (scripts/bluff_calibration.py --fit) and scored on another."""
+    if "v" not in _FOLD_FIT:
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "..", "data", "demo", "bluff_fit.json"), encoding="utf-8") as f:
+                d = json.load(f)
+            _FOLD_FIT["v"] = [float(d["a"]), float(d["b"])]
+        except (OSError, ValueError, KeyError):
+            _FOLD_FIT["v"] = None
+    return _FOLD_FIT["v"]
+
+
+def bluff(game: Any, amount: float, raw: bool = False) -> Optional[Dict[str, Any]]:
     """If you bet or raise to ``amount`` now, how likely is everyone still in to fold, and what is that worth?
 
     A copy of the hand takes your bet; then each opponent in turn order is asked by their own personal model
@@ -297,6 +319,10 @@ def bluff(game: Any, amount: float) -> Optional[Dict[str, Any]]:
         m = game.watch.model(h.players[j].name)
         probs, _ = m.predict(h.observation(j), j)
         f = float(probs[0])
+        fit = None if raw else _fold_fit()
+        if fit:
+            x = np.log(max(f, 1e-4) / max(1.0 - f, 1e-4))
+            f = float(1.0 / (1.0 + np.exp(-(fit[0] * x + fit[1]))))
         hb = m.habits(top=1)
         rows.append({"index": j, "name": h.players[j].name, "fold": round(f, 3), "habit": hb[0] if hb else None})
         all_fold *= f

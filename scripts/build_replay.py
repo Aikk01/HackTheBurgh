@@ -180,7 +180,7 @@ def run_hand(rec, stand, name, hand_no, frames_on, against=None):
                     against.add(hand_no)
                 hit = int(Y.GROUP_OF[int(np.argmax(pred))]) == g
                 curve.append([int(hit), int(int(Y.GROUP_OF[int(np.argmax(prior))]) == g) if prior is not None else 0,
-                              int(usual == g)])
+                              int(usual == g), int(to_call > 0)])  # last: facing a bet
                 if frames_on:
                     gp = int(Y.GROUP_OF[int(np.argmax(pred))])
                     frames[-1]["check"] = {"pred": Y.GROUPS[gp], "actual": Y.GROUPS[g], "hit": hit}

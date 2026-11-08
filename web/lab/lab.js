@@ -532,7 +532,7 @@
         const f = el("span", { class: "f", style: `--a:${a.toFixed(3)}` });
         const cell = el("div", { class: "c" + (a > 0.55 ? " hi" : "") + (shown ? " shown" : ""), role: "gridcell", title: shown ? "their real hand" : "" }, f, el("span", { class: "t", text: name }));
         const k = after.push(a) - 1;
-        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ opacity: before[k] }, { opacity: a }], { duration: 700, easing: "cubic-bezier(.2,.7,.2,1)" });
+        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ opacity: before[k] }, { opacity: a }], { duration: L.replay && L.fastMs ? Math.min(700, L.fastMs) : 700, easing: "cubic-bezier(.2,.7,.2,1)" });
         cell.dataset.name = name;
         cell.dataset.p = p;
         if (hands) cell.addEventListener("mouseenter", () => focusCell(r * 13 + c));
@@ -647,9 +647,10 @@
     try { onState(await api("/api/game/act", { action, amount })); } catch (e) { $("#actNote").textContent = e.message; }
   }
   async function newTable() {
+    exitReplay();  // a new game always goes back to your own table
     try {
       onState(await api("/api/game/new", {
-        seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "potodds" }],
+        seats: [{ name: "You", agent: "human" }].concat((await api("/api/lab/table")).seats),
         small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
@@ -681,7 +682,7 @@
       h ? `Share of ${h.n.toLocaleString()} guesses on about 2,000 unseen Pluribus hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect)` +
         (h.bots ? `. On this table's bots, after learning how wide each one plays: ${pct(h.bots[0])} / ${pct(h.bots[1])} / ${pct(h.bots[2])} inside our likeliest 50 / 80 / 90% (fresh hands).` : ".") : ""));
     if (b) rows.append(row("Bluff check: will they all fold?", bars([["Bluff check said", b.said, true], ["They really all folded", b.happened]]),
-      `${b.n.toLocaleString()} bets really made at this table, at the size buttons, with a stand-in in your seat. ` +
+      `${b.n.toLocaleString()} bets really made at this table, at the size buttons, with a stand-in in your seat, on a session other than the one its fold-chance correction was fitted on. ` +
       `Each player's own fold chance: said ${pct(b.each_said)}, folded ${pct(b.each_happened)} (${b.each_n.toLocaleString()} answers).`));
     rows.append(row("Your best move (RL coach)",
       c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
@@ -694,33 +695,29 @@
 
   // ------------------------------------------------------------ replay of a real player no model has seen
   // Precomputed by scripts/build_replay.py with the same models as the live table (GET /api/lab/replay).
-  const RP = { data: null, cache: {}, who: "unseen", h: 0, f: 0, timer: null };
+  // "A player like you": scripts/build_sim_you.py simulates a human-like player with a hidden style in your seat.
+  const RP = { data: null, cache: {}, who: "sim", style: "calls", h: 0, f: 0, timer: null };
   const theirs = () => L.replay && !(RP.data && RP.data.player.mine);
   const DONE = { fold: "folded", call: "called", raise: "raised" };
-  const YOU_MIN = 30;  // your own replay is offered once the model has studied this many of your moves
-  async function openReplay(fresh) {
-    if (!("unseen" in RP.cache)) {
-      try { RP.cache.unseen = await api("/api/lab/replay"); } catch (e) { RP.cache.unseen = null; }
+  async function openReplay() {
+    const key = RP.who === "sim" ? `sim:${RP.style}` : "unseen";
+    if (!(key in RP.cache)) {
+      try { RP.cache[key] = await api(RP.who === "sim" ? `/api/lab/replay?who=sim&style=${RP.style}` : "/api/lab/replay"); } catch (e) { RP.cache[key] = null; }
     }
-    if (fresh !== false) {  // your replay grows as you play (the server rebuilds it), so fetch it on every open
-      try { RP.cache.you = await api("/api/lab/replay?who=you"); } catch (e) { RP.cache.you = null; }
-    }
-    const yd = RP.cache.you, ready = !!(yd && yd.player.decisions >= YOU_MIN);
-    if (fresh !== false) RP.who = ready ? "you" : "unseen";
-    $("#replayWho").hidden = !(yd && RP.cache.unseen);
-    const yb = document.querySelector('#replayWho [data-who="you"]');
-    yb.disabled = !ready;
-    yb.textContent = ready ? "You" : `You (after ${YOU_MIN} of your moves; ${yd ? yd.player.decisions : 0} so far)`;
     document.querySelectorAll("#replayWho .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.who === RP.who)));
-    RP.data = RP.cache[RP.who];
-    if (!RP.data) { $("#actNote").textContent = "No replay built (python scripts/build_replay.py)"; return; }
-    const d = RP.data, s = d.summary, mine = d.player.mine;
-    $("#replayTitle").textContent = mine ? "You, learned as you play" : "A real player, learned as they play";
-    $("#habitsHead").textContent = mine ? "What the model learned about you" : "What our model learned about them";
-    $("#replayStep").firstChild.textContent = mine ? "Play my hands " : "Play their hands ";
-    $("#replayNote").textContent = mine
-      ? `${d.player.hands} of your hands at this table, studied in order. Before each of your ${d.player.decisions.toLocaleString()} moves every model guessed: ` +
-        `the model of you was right ${pct(s.personal)}, people in general ${pct(s.people)}, your usual move ${pct(s.usual)}.`
+    $("#replayStyle").hidden = RP.who !== "sim";
+    document.querySelectorAll("#replayStyle .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.style === RP.style)));
+    RP.data = RP.cache[key];
+    if (!RP.data) { $("#actNote").textContent = "No replay built (python scripts/build_sim_you.py, scripts/build_replay.py)"; return; }
+    const d = RP.data, s = d.summary, sim = !!d.player.sim, mine = d.player.mine;
+    $("#replayTitle").textContent = sim ? "A player like you, simulated" : "A real player, learned as they play";
+    $("#habitsHead").textContent = sim ? "What the model of you learned" : "What our model learned about them";
+    $("#replayStep").firstChild.textContent = sim ? `Simulate ${d.player.hands} hands ` : "Play their hands ";
+    const last = s.last100, face = s.facing_last100;
+    $("#replayNote").textContent = sim
+      ? `A human-like player who ${d.player.style_text} sits in your seat for ${d.player.hands} hands; no model is told the style. ` +
+        `At first the model of you guesses like people in general. Over the last 100 hands it was right ${pct(last.personal)} of the time, ` +
+        `people in general ${pct(last.people)}${face ? ` (facing a bet: ${pct(face.personal)} vs ${pct(face.people)})` : ""}. Then you take the seat and play like that.`
       : `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
         `We picked them out of 30 unseen players for a strong style (across all 30, our model beat people in general for 28). ` +
         `Before each of their ${d.player.decisions.toLocaleString()} moves every model guessed: ours was right ${pct(s.personal)}, people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
@@ -761,13 +758,16 @@
     document.querySelectorAll("#you .kicker")[0].textContent = mine ? "What you should do" : "What they should do";
     document.querySelectorAll("#you .kicker")[1].textContent = mine ? "What you would do" : "What they will do";
     L.flash = {}; L.shift = {}; L.mem = {}; L.drawn = {}; L.logLen = 0;
+    $("#rpAdopt").hidden = !RP.data.player.sim;
     showFrame();
     play(true);
   }
-  // the replay plays itself like a live table; pause, or step with the arrow keys
+  // the replay plays itself like a fast-forwarded live table, all of it in about 9 s; pause, or step with the arrow keys
   function play(on) {
     clearInterval(RP.timer);
-    RP.timer = on ? setInterval(() => stepReplay(1, true), 1500) : null;
+    const total = RP.data ? RP.data.hands.reduce((a, h) => a + h.frames.length, 0) : 1;
+    L.fastMs = on ? Math.max(80, Math.min(1500, Math.round(9000 / total))) : 0;
+    RP.timer = on ? setInterval(() => stepReplay(1, true), L.fastMs) : null;
     $("#rpPlay").textContent = on ? "❚❚ Pause" : "▶ Play";
   }
   function showFrame(forward) {
@@ -785,21 +785,49 @@
     }
     L.lastCheck = prev ? { pred: prev.pred, actual: DONE[prev.actual] || prev.actual, hit: prev.hit } : null;
     render();
-    $("#actTitle").textContent = `Replay · hand ${RP.h + 1} of ${RP.data.hands.length} · step ${RP.f + 1}/${hnd.frames.length}`;
-    $("#actNote").textContent = `Their real hand no. ${hnd.hand_no} of ${RP.data.player.hands}. Their cards are from the showdown (for the coach only); the guesses never see them.`;
+    if (RP.data.player.sim) {
+      $("#actTitle").textContent = `Simulated hand ${hnd.hand_no} of ${RP.data.player.hands} · ${hnd.phase === "early" ? "it knows nothing yet" : "it has learned this player"}`;
+      $("#actNote").textContent = hnd.phase === "early" ? "The model of you starts as people in general." :
+        `The model of you has watched ${hnd.hand_no - 1} hands of this player. It never sees their cards.`;
+    } else {
+      $("#actTitle").textContent = `Replay · hand ${RP.h + 1} of ${RP.data.hands.length} · step ${RP.f + 1}/${hnd.frames.length}`;
+      $("#actNote").textContent = `Their real hand no. ${hnd.hand_no} of ${RP.data.player.hands}. Their cards are from the showdown (for the coach only); the guesses never see them.`;
+    }
   }
   function stepReplay(d, auto) {
     if (!L.replay) return;
     if (!auto) play(false);
     const hands = RP.data.hands;
-    if (auto && RP.h === hands.length - 1 && RP.f === hands[RP.h].frames.length - 1) { play(false); return; }
+    if (auto && RP.h === hands.length - 1 && RP.f === hands[RP.h].frames.length - 1) {
+      play(false);
+      const s = RP.data.summary, mine = RP.data.player.mine;
+      if (RP.data.player.sim) {
+        $("#actTitle").textContent = `Simulation done · ${RP.data.player.hands} hands`;
+        $("#actNote").textContent = `Last 100 hands: the model of you was right ${pct(s.last100.personal)}, people in general ${pct(s.last100.people)}. ` +
+          `Your turn: press "Now you play" and play like a player who ${RP.data.player.style_text}.`;
+        return;
+      }
+      $("#actTitle").textContent = `Replay done · ${hands.length} hands`;
+      $("#actNote").textContent = `Over all ${RP.data.player.decisions.toLocaleString()} ${mine ? "of your" : "of their"} moves, the model of ${mine ? "you" : "them"} ` +
+        `was right ${pct(s.personal)}; people in general ${pct(s.people)}. ← → to step through it.`;
+      return;
+    }
     RP.f += d;
     if (RP.f >= hands[RP.h].frames.length) { if (RP.h < hands.length - 1) { RP.h++; RP.f = 0; } else RP.f = hands[RP.h].frames.length - 1; }
     if (RP.f < 0) { if (RP.h > 0) { RP.h--; RP.f = hands[RP.h].frames.length - 1; } else RP.f = 0; }
     showFrame(d > 0);
   }
+  // "Now you play": the live model of you starts from what it learned about the simulated player
+  async function adopt() {
+    let r = null;
+    try { r = await api("/api/lab/adopt", { style: RP.style }); } catch (e) { r = null; }
+    exitReplay();
+    $("#actNote").textContent = r ? `The model of you has watched ${r.hands} hands of a player who ${r.style}. Play like that, and watch "What you would do".` :
+      "Could not hand over the simulated model (python scripts/build_sim_you.py)";
+  }
   function exitReplay() {
     play(false);
+    $("#rpAdopt").hidden = true;
     $("#replayCard").hidden = true;
     if (!L.replay) return;
     L.replay = false;
@@ -820,7 +848,9 @@
     $("#replayExit").addEventListener("click", exitReplay);
     $("#rpPrev").addEventListener("click", () => stepReplay(-1));
     $("#rpPlay").addEventListener("click", () => play(!RP.timer));
-    document.querySelectorAll("#replayWho .chip").forEach((b) => b.addEventListener("click", () => { RP.who = b.dataset.who; openReplay(false); }));
+    document.querySelectorAll("#replayWho .chip").forEach((b) => b.addEventListener("click", () => { RP.who = b.dataset.who; openReplay(); }));
+    document.querySelectorAll("#replayStyle .chip").forEach((b) => b.addEventListener("click", () => { RP.style = b.dataset.style; openReplay(); }));
+    $("#rpAdopt").addEventListener("click", adopt);
     $("#rpNext").addEventListener("click", () => stepReplay(1));
     $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);
