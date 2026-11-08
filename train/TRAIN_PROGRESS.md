@@ -2,18 +2,23 @@
 
 The current state of every training run. Update it at each evaluation or event; the plan is in [README.md](README.md).
 
-Last update: 2026-11-08 03:05.
+Last update: 2026-11-08 03:49.
 
 ## Runs
 
-All four runs are on the University of Edinburgh's Eddie cluster since 02:53. The 5090 PC is the hub (monitor, wandb
-mirror, demo server); the 2080 PC is no longer used.
+Four runs are on the University of Edinburgh's Eddie cluster since 02:53; a fifth (v3-noranges-s2) runs on the 5090
+PC from 03:48. The 5090 PC is also the hub (monitor, wandb mirror, demo server); the 2080 PC is no longer used.
+
+**Reading the evaluations:** single evaluations swing a lot (v3-ranges went −74.5 → +93.9 in 50 updates; its rule-bot
+score −293 → +229). Picking the highest of noisy evaluations flatters the winner, which is why the final verdict is
+the sealed test (06), with two seeds per setting.
 
 | Run | Eddie job | Started | Ends (auto) | Update | Speed | Status |
 |---|---|---|---|---|---|---|
 | **v3-ranges** (predicted-hand inputs on) | 61797926, 32 cores, 30 workers | 02:05 (moved 02:53) | ~07:20 | 64 | ~2,230 steps/s (was ~730 on the 5090) | Healthy |
 | **v3-noranges** (ablation, inputs off) | 61797927, 32 cores, 30 workers | 02:06 (moved 02:53) | ~07:20 | 106 | ~2,480 steps/s (was ~1,630 on the 2080) | Healthy; best held-out so far |
 | **v3-ranges-s2** (second seed, inputs on) | 32 cores, 30 workers | 02:44 | ~07:20 | 38 | ~1,720 steps/s after past copies joined | Healthy |
+| **v3-noranges-s2** (second seed, inputs off) | 5090 PC, 14 workers | 03:48 | ~07:20 | 1 | ~3,500 steps/s before past copies join | Healthy; makes the ranges comparison two seeds against two |
 | **v2-eddie** (insurance, old opponents) | 8 cores | 02:07 | ~07:25 | 93 | ~780 steps/s | Healthy |
 
 **Evaluations** run every 50 updates; the two v3 runs are compared at equal update numbers.
@@ -22,7 +27,13 @@ mirror, demo server); the 2080 PC is no longer used.
 |---|---|---|---|---|---|---|
 | v3-noranges | 50 | −32.4 | +46 ± 25 | −164 ± 64 | +21 ± 40 | +847 |
 | v3-noranges | 100 | **+28.0** | +24 ± 31 | +13 ± 57 | +47 ± 47 | +749 |
+| v3-noranges | 150 | +25.1 | −56 ± 41 | +40 ± 60 | +91 ± 43 | +908 |
+| v3-noranges | 200 | **+82.2** | −12 ± 34 | +159 ± 52 | +99 ± 50 | +695 |
 | v3-ranges | 50 | −64.5 | +63 ± 26 | −274 ± 69 | +18 ± 44 | +694 |
+| v3-ranges | 100 | −74.5 | +62 ± 26 | −293 ± 74 | +8 ± 45 | +944 |
+| v3-ranges | 150 | **+93.9** | +51 ± 26 | +229 ± 71 | +2 ± 61 | +645 |
+| v3-ranges-s2 | 50 | +57.7 | +10 ± 34 | +154 ± 55 | +8 ± 53 | +1,233 |
+| v2-eddie | 100 | −34.1 | +33 ± 25 | −207 ± 71 | +73 ± 44 | +1,206 |
 
 At update 50, zeroing v3-ranges' range inputs costs 150 bb/100. That measures how much the policy leans on them,
 not their value; the comparison with v3-noranges at equal updates answers that.

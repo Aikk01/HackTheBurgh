@@ -52,3 +52,7 @@ ends (~07:20). Each policy plays greedily.
 
 **Before this was written:** one pipeline check with 200 hands per table on the 03:1x exports. At that size the
 intervals are ±150–450 bb/100, so those numbers carry no information and are not used.
+
+**Added at 03:49, before any sealed result:** v3-noranges-s2, a second seed without range inputs (5090, started 03:48),
+so the "are predicted hands worth anything?" comparison is two seeds against two. It runs to ~07:20 like the others
+and joins the candidates with its `export_heldout/`.
