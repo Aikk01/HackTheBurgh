@@ -483,3 +483,27 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 .zoom-top .zr { grid-template-columns: 40px 1fr 46px; font-size: 13px; gap: 6px; }
 .zoom-top .zwin { font-size: 13px; } .zoom-top .zwin b { display: block; font-size: 26px; }
 .zoom-read { margin-top: 8px; }
+
+/* expanded view: the two grids as large as the window allows; everything else compact */
+.zoom { padding: 10px; }
+.zoom-card { width: min(1900px, 100%); max-height: calc(100vh - 20px); padding: 10px 16px 10px; }
+.zoom-head { margin-bottom: 2px; }
+.zoom-head h2 { font-size: 22px; }
+.zoom-how { font-size: 12.5px; margin: 0 0 6px; }
+.zoom-body { gap: 14px; }
+.zoom-col { display: flex; flex-direction: column; gap: 5px; padding: 6px 10px 8px; }
+.zoom-col h3 { font-size: 20px; display: flex; align-items: baseline; gap: 10px; }
+.zoom-col .zoom-sub { display: none; }
+.zoom-grid { width: min(100%, calc(100vh - 200px)); align-self: center; }
+.zoom-grid .g13 { gap: 3px; font-size: 13px; }
+.zoom-grid .g13 .c .pz { font-size: 10px; }
+.zoom-top { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.zoom-top .zk { width: 100%; margin: 0; }
+.zoom-top .zr { display: inline-grid; grid-template-columns: auto 54px auto; gap: 6px; font-size: 13px; }
+.zoom-top .zr .zb { width: 54px; height: 8px; }
+.zoom-top .zwin { margin: 0 0 0 auto; font-size: 13px; }
+.zoom-top .zwin b { display: inline; font-size: 20px; margin-left: 4px; }
+.zoom-read { margin: 6px 0 0; font-size: 14px; }
+.zoom-top .zk { width: auto; margin-right: 2px; }
+.zoom-how { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1250px) { .zoom-how { white-space: normal; } }
