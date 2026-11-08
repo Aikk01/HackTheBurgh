@@ -414,10 +414,8 @@
     const seatOf = (i) => { const p = h && h.players.find((q) => q.index === i); return p ? p.seat : null; };
     box.append(
       el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)}` }),
-      el("div", { class: "brow" }, el("span", { class: "bl", text: "They all fold" }),
-        el("span", { class: "track" }, el("i", { class: pays ? "ok" : "bad", style: `width:${(100 * b.all_fold).toFixed(1)}%` }),
-          el("b", { class: "need", style: `left:${(100 * b.needs).toFixed(1)}%` })),
-        el("span", { class: "bn", text: pct(b.all_fold) }), el("span", { class: "p2", text: `needs ${pct(b.needs)}` })),
+      el("div", { class: "brow" }, "They all fold ", el("b", { text: pct(b.all_fold) }), " of the time ",
+        el("span", { class: "p2", text: `· it needs ${pct(b.needs)}` })),
       el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `Bluffing pays: about +${fmt(Math.round(b.worth * 10) / 10)} chips, even with nothing`
         : `Bluffing loses: about −${fmt(Math.round(-b.worth * 10) / 10)} chips with nothing` }),
       el("div", { class: "bw" }, ...b.players.map((p) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` }, el("i"), `${p.name} ${pct(p.fold)}`)),

@@ -262,13 +262,7 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .size i { font-style: normal; font-size: 10px; font-weight: 600; color: var(--amber); }
 .bluff { margin-top: 8px; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(0, 0, 0, 0.15); font-size: 12.5px; }
 .bluff .bh { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; }
-.bluff .brow { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; }
-.bluff .bl { color: var(--ink-2); }
-.bluff .track { position: relative; height: 9px; border-radius: 5px; background: var(--page-deep); }
-.bluff .track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width 0.4s ease; }
-.bluff .track i.ok { background: var(--good); } .bluff .track i.bad { background: #e8836b; }
-.bluff .need { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
-.bluff .bn { font-family: var(--mono); color: var(--ink); }
+.bluff .brow { color: var(--ink-2); } .bluff .brow b { color: var(--ink); font-family: var(--mono); }
 .bluff .bv { margin: 5px 0 3px; font-weight: 600; } .bluff .bv.ok { color: var(--good); } .bluff .bv.bad { color: #e8836b; }
 .bluff .bw { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--ink-2); font-size: 12px; }
 .bluff .bw span i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--pc); margin-right: 4px; }
