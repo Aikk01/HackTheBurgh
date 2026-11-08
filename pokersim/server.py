@@ -944,6 +944,12 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/lab/predict":
             from .lab_api import predict
             return predict(APP.game)
+        if path == "/api/lab/replay":  # precomputed by scripts/build_replay.py
+            rp = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "replay.json")
+            if not os.path.exists(rp):
+                raise ApiError("no replay built (python scripts/build_replay.py)", 404)
+            with open(rp, encoding="utf-8") as f:
+                return json.load(f)
         if path == "/api/game/export":
             recs = APP.game.records
             if not recs:

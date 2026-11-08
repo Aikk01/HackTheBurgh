@@ -5,7 +5,7 @@
 | Done | Corpus extraction; hand model; next-move model; RL code with held-out tables and paired evaluation; supervisor | uv env | uv env | — |
 | T | Start **v3-ranges** under the supervisor | Start **v3-noranges** under the supervisor | Submit **v2-eddie** | Decision log, personal model, `/advice` additions |
 | T to T+5:30 | All runs watched from the 5090 hub; resets automatic (08); every evaluation reported | — | Pulled every 15 minutes | Screen; rehearsal hands |
-| T+5:30 | Stop (`STOP` file). Final evaluation on fresh deals. Copy the best held-out export to `data/rl/policy.npz`. Commit and push | Stop; copy run folder back | `qdel`; copy back | Pull; rehearsal with models frozen |
+| T+5:30 | Stop (`STOP` file). Final evaluation on fresh deals. Copy the best held-out export to `data/rl/policy.npz`, then **rebuild the replay** (`python scripts/build_replay.py`, ~10 s: its coach advice comes from `policy.npz`). Commit and push | Stop; copy run folder back | `qdel`; copy back | Pull; rehearsal with models frozen |
 
 ## Commands
 

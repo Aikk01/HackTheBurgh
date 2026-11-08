@@ -16,11 +16,23 @@
   <div class="hand-meta" id="handMeta" aria-live="polite"></div>
   <ul class="models" id="models" aria-label="Model status"></ul>
   <div class="bar-actions">
+    <button class="btn" id="replayBtn" type="button" title="Replay a real player no model has seen">Watch an unseen player</button>
     <button class="btn" id="newTable" type="button">New table</button>
     <a class="btn ghost" href="/" title="The full app: Mirror, Simulator, Evidence">Main app</a>
   </div>
 </header>
 <div class="inject-banner" id="injectBanner" hidden>Showing injected test values, not model output. <button class="linkbtn" id="clearInject" type="button">Clear</button></div>
+
+<div class="replay-card" id="replayCard" hidden>
+  <h2>A real player no model has ever seen</h2>
+  <p id="replayNote"></p>
+  <div class="curve" id="replayCurve"></div>
+  <p class="curve-legend"><span class="lg you">This player's model</span><span class="lg ppl">People in general</span><span class="lg usu">His usual move</span></p>
+  <div class="replay-actions">
+    <button class="btn primary" id="replayStep" type="button">Step through his hands <kbd>→</kbd></button>
+    <button class="btn ghost" id="replayExit" type="button">Back to my table</button>
+  </div>
+</div>
 
 <main class="lab">
   <section class="stage-col" aria-label="Table">
@@ -56,6 +68,11 @@
           <button class="btn amber" id="btnRaise" type="button">Raise <kbd>R</kbd></button>
         </div>
         <button class="btn primary" id="btnNext" type="button" hidden>Next hand <kbd>N</kbd></button>
+        <div class="replay-nav" id="replayNav" hidden>
+          <button class="btn" id="rpPrev" type="button">← Back</button>
+          <button class="btn primary" id="rpNext" type="button">Next →</button>
+          <button class="btn ghost" id="rpExit" type="button">Exit replay</button>
+        </div>
         <p class="act-note" id="actNote"></p>
       </div>
     </section>

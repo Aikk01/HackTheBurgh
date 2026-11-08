@@ -37,7 +37,7 @@
     return data;
   }
 
-  const L = { st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "" };
+  const L = { st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null };
   const SEAT_COLOURS = ["--p1", "--p2", "--p3", "--p4", "--p5", "--p1", "--p2", "--p3", "--p4"];
   const RANKS = "AKQJT98765432";
   const ACT = { fold: "Fold", check: "Check", call: "Call", bet: "Bet", raise: "Raise to", all_in: "All-in" };
@@ -84,7 +84,7 @@
   function yourSlot(value, model, n = 2) {
     if (value) return moveSlot(value, n);
     const you = L.pred && L.pred.you;
-    if (loaded(model, "actions") && you && !you.your_turn) return el("span", { class: "nm", text: "Waits for your turn" });
+    if (loaded(model, "actions") && you && !you.your_turn) return el("span", { class: "nm", text: L.replay ? "Waits for their turn" : "Waits for your turn" });
     return noModel();
   }
 
@@ -214,17 +214,18 @@
     would.className = "mtable two";
     would.innerHTML = "";
     const acc = you && you.accuracy;
-    // your model's guess is made before you act but shown only afterwards, so it cannot steer you
-    const hidden = you && you.your_turn && you.would && you.would.personal;
-    would.append(el("span", { class: "k", text: "Your model" }),
-      hidden ? el("span", { class: "nm", text: "Revealed after you act" }) : yourSlot(null, "personal"),
+    // your model's guess is made before you act but shown only afterwards, so it cannot steer you (in a replay of a
+    // recorded player it is shown openly: the move is already history)
+    const guess = you && you.your_turn && you.would && you.would.personal;
+    would.append(el("span", { class: "k", text: L.replay ? "Their model" : "Your model" }),
+      guess ? (L.replay ? moveSlot(guess, 1) : el("span", { class: "nm", text: "Revealed after you act" })) : yourSlot(null, "personal"),
       el("span", { class: "k", text: "Right so far" }),
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
         el("span", { class: "p2", text: ` · usual-move guess ${acc.baseline_right}` })) : noModel());
     if (L.lastCheck) {
       const c = L.lastCheck;
       would.append(el("span", { class: "k", text: "Last move" }), el("span", { class: "check" },
-        `Predicted ${c.pred.toLowerCase()}, you ${c.actual} `, el("span", { class: c.hit ? "yes" : "no", text: c.hit ? "✓" : "✗" })));
+        `Predicted ${c.pred.toLowerCase()}, ${L.replay ? "they" : "you"} ${c.actual} `, el("span", { class: c.hit ? "yes" : "no", text: c.hit ? "✓" : "✗" })));
     }
 
     // your action controls
@@ -234,9 +235,10 @@
     const over = !!(h && h.status !== "betting");
     $("#you").classList.toggle("turn", yourTurn);
     $("#act").classList.toggle("wait", !yourTurn);
-    $("#btnNext").hidden = !over;
-    $("#raise").hidden = over;
-    $(".act-row").hidden = over;
+    $("#btnNext").hidden = !over || L.replay;
+    $("#raise").hidden = over || L.replay;
+    $(".act-row").hidden = over || L.replay;
+    $("#replayNav").hidden = !L.replay;
     const actor = h && h.players.find((p) => p.index === h.actor);
     $("#actTitle").textContent = !h ? "Your move" : over ? "Hand over" : yourTurn ? "Your move" : `Waiting for ${actor ? actor.name : "the table"}`;
     $("#actNote").textContent = yourTurn ? "" : over ? "Press N or Enter for the next hand." : m && m.folded ? "You folded this hand." : "";
@@ -342,6 +344,7 @@
 
   // ------------------------------------------------------------ data flow
   function onState(st) {
+    if (L.replay) { L.liveSt = st; return; }  // the live table keeps going in the background during a replay
     L.st = st;
     const last = st && st.log && st.log.length ? st.log[st.log.length - 1].text : "";
     if (last && last !== L.lastLog) { L.lastLog = last; announce(last); }
@@ -396,7 +399,86 @@
     try { onState(await api("/api/game/next", {})); } catch (e) { $("#actNote").textContent = e.message; }
   }
 
+  // ------------------------------------------------------------ replay of a real player no model has seen
+  // Precomputed by scripts/build_replay.py with the same models as the live table (GET /api/lab/replay).
+  const RP = { data: null, h: 0, f: 0 };
+  const DONE = { fold: "folded", call: "called", raise: "raised" };
+  async function openReplay() {
+    if (!RP.data) {
+      try { RP.data = await api("/api/lab/replay"); } catch (e) { $("#actNote").textContent = e.message; return; }
+    }
+    const d = RP.data, s = d.summary;
+    $("#replayNote").textContent = `${d.player.hands} of their real hands from many different online tables, studied in order the way a poker tracker would. ` +
+      `Before each of their ${d.player.decisions} decisions every model made its guess, then we checked. Right overall: this player's model ${pct(s.personal)}, ` +
+      `people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
+    drawCurve(d.curve);
+    $("#replayCard").hidden = false;
+  }
+  function drawCurve(rows) {
+    // share right over the last 100 decisions, for each model, as the hands go by
+    const W = 560, H = 150, win = 100, lo = 0.5, hi = 1.0;
+    const pts = [[], [], []];
+    for (let i = win; i <= rows.length; i++) {
+      const w = rows.slice(i - win, i);
+      for (let m = 0; m < 3; m++) pts[m].push([i, w.reduce((a, r) => a + r[1 + m], 0) / win]);
+    }
+    const X = (i) => 30 + ((W - 40) * (i - win)) / Math.max(1, rows.length - win);
+    const Yv = (v) => 10 + (H - 30) * (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo));
+    const line = (p) => p.map(([i, v], k) => `${k ? "L" : "M"}${X(i).toFixed(1)},${Yv(v).toFixed(1)}`).join("");
+    const ticks = [0.5, 0.75, 1].map((v) => `<line x1="30" x2="${W - 10}" y1="${Yv(v)}" y2="${Yv(v)}" class="gl"/><text x="2" y="${Yv(v) + 4}">${Math.round(v * 100)}%</text>`).join("");
+    $("#replayCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last 100 decisions">${ticks}` +
+      `<path d="${line(pts[2])}" class="ln usu"/><path d="${line(pts[1])}" class="ln ppl"/><path d="${line(pts[0])}" class="ln you"/>` +
+      `<text x="${W - 10}" y="${H - 4}" text-anchor="end">decisions studied →</text></svg>`;
+  }
+  function enterSteps() {
+    if (!RP.data || !RP.data.hands.length) return;
+    $("#replayCard").hidden = true;
+    L.liveSt = L.st;
+    L.replay = true;
+    L.injected = true;  // no live model calls while replaying
+    RP.h = 0; RP.f = 0;
+    document.querySelectorAll("#you .kicker")[0].textContent = "What they should do";
+    document.querySelectorAll("#you .kicker")[1].textContent = "What they will do";
+    showFrame();
+  }
+  function showFrame() {
+    const hnd = RP.data.hands[RP.h], fr = hnd.frames[RP.f];
+    L.st = fr.st;
+    L.pred = fr.pred;
+    const prev = RP.f > 0 ? hnd.frames[RP.f - 1].check : null;
+    L.lastCheck = prev ? { pred: prev.pred, actual: DONE[prev.actual] || prev.actual, hit: prev.hit } : null;
+    render();
+    $("#actTitle").textContent = `Replay · hand ${RP.h + 1} of ${RP.data.hands.length} · step ${RP.f + 1}/${hnd.frames.length}`;
+    $("#actNote").textContent = `Their real hand no. ${hnd.hand_no} of ${RP.data.player.hands}. Their cards are from the showdown (for the coach only); the guesses never see them.`;
+  }
+  function stepReplay(d) {
+    if (!L.replay) return;
+    const hands = RP.data.hands;
+    RP.f += d;
+    if (RP.f >= hands[RP.h].frames.length) { if (RP.h < hands.length - 1) { RP.h++; RP.f = 0; } else RP.f = hands[RP.h].frames.length - 1; }
+    if (RP.f < 0) { if (RP.h > 0) { RP.h--; RP.f = hands[RP.h].frames.length - 1; } else RP.f = 0; }
+    showFrame();
+  }
+  function exitReplay() {
+    $("#replayCard").hidden = true;
+    if (!L.replay) return;
+    L.replay = false;
+    L.injected = false;
+    L.lastCheck = null;
+    document.querySelectorAll("#you .kicker")[0].textContent = "What you should do";
+    document.querySelectorAll("#you .kicker")[1].textContent = "What you would do";
+    L.predKey = null;
+    L.pred = null;
+    onState(L.liveSt);
+  }
+
   function bind() {
+    $("#replayBtn").addEventListener("click", openReplay);
+    $("#replayStep").addEventListener("click", enterSteps);
+    $("#replayExit").addEventListener("click", exitReplay);
+    $("#rpPrev").addEventListener("click", () => stepReplay(-1));
+    $("#rpNext").addEventListener("click", () => stepReplay(1));
+    $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);
     $("#sitBtn").addEventListener("click", newTable);
     $("#btnFold").addEventListener("click", () => act("fold"));
@@ -410,6 +492,12 @@
     document.addEventListener("keydown", (e) => {
       if (e.target.matches("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key.toLowerCase();
+      if (L.replay || !$("#replayCard").hidden) {
+        if (e.key === "ArrowRight") { if (L.replay) stepReplay(1); else enterSteps(); }
+        else if (e.key === "ArrowLeft") stepReplay(-1);
+        else if (e.key === "Escape") exitReplay();
+        return;
+      }
       if (k === "f") act("fold");
       else if (k === "c") act("call");
       else if (k === "r" && !$("#btnRaise").disabled) act("raise", Number($("#raiseInput").value));
