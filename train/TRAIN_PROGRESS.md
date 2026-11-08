@@ -2,26 +2,30 @@
 
 The current state of every training run. Update it at each evaluation or event; the plan is in [README.md](README.md).
 
-Last update: 2026-11-08 02:55.
+Last update: 2026-11-08 03:05.
 
 ## Runs
 
-| Run | Machine | Started | Ends (auto) | Update | Speed | Status |
+All four runs are on the University of Edinburgh's Eddie cluster since 02:53. The 5090 PC is the hub (monitor, wandb
+mirror, demo server); the 2080 PC is no longer used.
+
+| Run | Eddie job | Started | Ends (auto) | Update | Speed | Status |
 |---|---|---|---|---|---|---|
-| **v3-ranges** (predicted-hand inputs on) | 5090 PC, 14 workers | 02:05 | ~07:25 | 26 | ~780 steps/s from update 26 (1,640 before) | Healthy; past copies joined at update 25 (expected value-loss bump, entropy dip) |
-| **v3-noranges** (ablation, inputs off) | 2080 PC, 14 workers | 02:06 | ~07:25 | 30 | 1,630 steps/s from update 26 (3,300 before) | Healthy; same transition at update 26 |
-| **v2-eddie** (insurance, old opponents) | Eddie, 8 cores, `--cpu` | 02:07 | ~07:25 | 63 (resumed from 56) | ~830 steps/s | Healthy |
-| **v3-ranges-s2** (second seed, inputs on) | Eddie, 32 cores, `--cpu`, 30 workers | 02:44 | ~07:20 | 11 | ~2,630 steps/s before past copies join | Healthy; the fastest run |
+| **v3-ranges** (predicted-hand inputs on) | 61797926, 32 cores, 30 workers | 02:05 (moved 02:53) | ~07:20 | 64 | ~2,230 steps/s (was ~730 on the 5090) | Healthy |
+| **v3-noranges** (ablation, inputs off) | 61797927, 32 cores, 30 workers | 02:06 (moved 02:53) | ~07:20 | 106 | ~2,480 steps/s (was ~1,630 on the 2080) | Healthy; best held-out so far |
+| **v3-ranges-s2** (second seed, inputs on) | 32 cores, 30 workers | 02:44 | ~07:20 | 38 | ~1,720 steps/s after past copies joined | Healthy |
+| **v2-eddie** (insurance, old opponents) | 8 cores | 02:07 | ~07:25 | 93 | ~780 steps/s | Healthy |
 
-**Projected updates by the end:**
-- v3-ranges: about 250 (≈80 s per update; the hand simulation runs for the hero and for every past copy).
-- v3-noranges: about 480.
-- v2-eddie: about 300.
+**Evaluations** run every 50 updates; the two v3 runs are compared at equal update numbers.
 
-The two v3 runs are compared at equal update numbers, so the slower one sets the comparison range.
+| Run | Update | Held-out vs equity bot (bb/100) | Pluribus clones | Rule bots | Mixed | In-distribution |
+|---|---|---|---|---|---|---|
+| v3-noranges | 50 | −32.4 | +46 ± 25 | −164 ± 64 | +21 ± 40 | +847 |
+| v3-noranges | 100 | **+28.0** | +24 ± 31 | +13 ± 57 | +47 ± 47 | +749 |
+| v3-ranges | 50 | −64.5 | +63 ± 26 | −274 ± 69 | +18 ± 44 | +694 |
 
-**Evaluations:** every 50 updates. The first comes at v3-ranges update 50, around 03:20; v3-noranges gets there
-earlier.
+At update 50, zeroing v3-ranges' range inputs costs 150 bb/100. That measures how much the policy leans on them,
+not their value; the comparison with v3-noranges at equal updates answers that.
 
 ## Events so far
 
@@ -33,10 +37,14 @@ earlier.
 | 02:32 | v3-noranges | First evaluation (update 50): held-out −32 bb/100 vs the equity bot: +46 ± 25 against Pluribus clones, −164 ± 64 against the rule bots | Exported as best; the rule bots are the weak spot |
 | 02:34 | v3-ranges | ALERT speed 621 steps/s | Our 30-player evaluation was sharing the 5090; moved it to Eddie |
 | 02:44 | — | Added v3-ranges-s2 on Eddie (32 cores) | Second seed, faster than the 5090 |
+| 02:52–02:53 | v3-ranges, v3-noranges | Moved to Eddie (32 cores each) for speed | Graceful stop (saves `latest.pt`), copied, resumed with `--first-resume`; the 2080 is freed |
+| 02:57 | v3-ranges | First evaluation (update 50): held-out −64.5 | Exported as best. Better than v3-noranges against Pluribus clones, worse against rule bots |
+| 03:01 | v3-noranges | Evaluation at update 100: held-out **+28.0**, rule bots now +13 | New best; the rule-bot weakness is closing |
 
 ## Where things are
 
-- **Live curves:** wandb project `poker-mirror-rl`, runs `v3-ranges`, `v3-noranges`, `v2-eddie`.
+- **Live curves:** wandb project `poker-mirror-rl`, runs `v3-ranges`, `v3-noranges`, `v3-ranges-s2`, `v2-eddie`.
+  The Eddie runs log offline; the 5090 mirrors their folders every 5 minutes and sends the metrics.
 - **Per run:**
   - `data/rl/runs/<run>/supervise.log`: events;
   - `eval.json`: evaluations;
@@ -44,7 +52,7 @@ earlier.
   - `best_heldout_history/`: every best;
   - `keep/`: every 10-minute checkpoint.
 - **Remote runs** are mirrored to `data/rl/remote/<run>/` every 5 minutes.
-- **Stopping a run:** `touch data/rl/runs/<run>/STOP` on its machine. It saves and exits; for Eddie, use `qdel`.
+- **Stopping a run:** `touch <run dir>/STOP` on Eddie. The run saves and exits; `qdel` only as a last resort.
 
 ## Base models (finished)
 
