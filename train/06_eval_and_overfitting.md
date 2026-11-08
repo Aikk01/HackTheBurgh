@@ -79,11 +79,11 @@ lead is the method or luck. It joins the candidates with its `export_heldout/`.
 pipeline smoke test on other deals (seed 900,000, 500 hands per table, v3-bc and imitation-only); its numbers were not
 read. The registered test keeps the default seeds (700,000). Speed: about 220 hands/s on 6 busy cores.
 
-**Added at 06:00, before any sealed result:** v3-bc (held-out +150 → +138 → +68 → +38: it drifts away from the
+**Added at 05:40, before any sealed result:** v3-bc (held-out +150 → +138 → +68 → +38: it drifts away from the
 imitation start) and v3-ranges-s2 (flat at about +90 since update 100) stopped early to free Eddie. Their best held-out
 exports stay candidates.
 
-**Added at 06:10, before any sealed result:** training runs to its planned end (~07:15), and the full test (10
+**Added at 05:43, before any sealed result:** training runs to its planned end (~07:15), and the full test (10
 candidates, each also with range inputs and style inputs blanked, 30,000 hands per table) takes about 80 minutes on
 this machine, so it would end after judging (08:00). It therefore runs at **10,000 hands per table** (the script's
 default), all candidates and questions unchanged. The intervals are about √3 wider (roughly ±25 bb/100 pooled for each

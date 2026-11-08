@@ -128,7 +128,7 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
   of you / Your usual move" labels.
 - `/` and `/mirror` open Poker Mirror (no `.html` in the address).
 
-**Done 05:30–06:10:**
+**Done 05:30–05:45:**
 - **Human-like table:** the five opponents are the next-move model of human pros, each nudged to one instinct (Pro,
   Sticky, Aggro, Nervous, Gambler; `lab_api.MIRROR_TABLE`). Grid on them after width learning: 46 / 79 / 91% inside
   the likeliest 50 / 80 / 90%.
