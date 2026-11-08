@@ -14,6 +14,7 @@ Paths are relative to the repository root.
 | [judges/hrt.md](../../judges/hrt.md), [judges/g-research.md](../../judges/g-research.md) | What the judges score |
 | [README.md](../../README.md) | One-paragraph description and how to run it |
 | `docs/slides/img/*.png` | Screenshots (below) |
+| [docs/slides/PokerMirror.pptx](PokerMirror.pptx) | The deck: 5 slides with speaker notes; rebuild with `python docs/slides/build_deck.py` (needs python-pptx) |
 
 ## Numbers and where they come from
 
