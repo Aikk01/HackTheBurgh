@@ -212,3 +212,7 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
 }
+
+/* slim opponent box: two rows, next move only */
+.mbox.slim .mtable.two { grid-template-columns: auto 1fr; }
+.mbox.slim { min-width: 0; padding: 3px 8px 4px; }

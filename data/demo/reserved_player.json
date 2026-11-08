@@ -1,0 +1,32 @@
+{
+ "venue": "PartyPoker",
+ "player": "KsdS3CqVKoZ9FsoxzScmwg",
+ "hands_5_6_max": 666,
+ "hands_written": 666,
+ "touched_by_training_or_eval": 0,
+ "rule": "no hand of this player was available to the hand-model or next-move extraction (conservative reconstruction, 300-hand margin past each cap); both scripts now skip any hand containing them",
+ "note": "population-level statistics from the Mirror pipeline (styles.json type centres over 48k players, population.json river counts) were computed over the whole corpus and may include this player as 1 of tens of thousands; no model was fitted on this player's own decisions",
+ "why_not_the_first_candidate": "iPoker Network records stacks as inf, so those hands cannot be replayed",
+ "runner_up_candidates": [
+  {
+   "venue": "Absolute Poker",
+   "player": "NX+SmeQ+96PcDBG5fFPKZw",
+   "hands": 643
+  },
+  {
+   "venue": "Absolute Poker",
+   "player": "Z6vr0cy+fvYD/SwMlgCbaQ",
+   "hands": 578
+  },
+  {
+   "venue": "Absolute Poker",
+   "player": "gVZUur7MFRB3yMcCZUG/vg",
+   "hands": 515
+  },
+  {
+   "venue": "PartyPoker",
+   "player": "UKqaR6ogEitE+azFFDI/NQ",
+   "hands": 435
+  }
+ ]
+}

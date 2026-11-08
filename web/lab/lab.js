@@ -81,8 +81,8 @@
   }
   const loaded = (model, part) => !!(L.pred && L.pred.models && L.pred.models[model] && L.pred.models[model][part]);
   // your own decision: a loaded model that has nothing to say yet is waiting for your turn, not missing
-  function yourSlot(value, model) {
-    if (value) return moveSlot(value, 2);
+  function yourSlot(value, model, n = 2) {
+    if (value) return moveSlot(value, n);
     const you = L.pred && L.pred.you;
     if (loaded(model, "actions") && you && !you.your_turn) return el("span", { class: "nm", text: "Waits for your turn" });
     return noModel();
@@ -193,12 +193,13 @@
     if (p.folded) return null;  // nothing left to predict
     const pr = predFor(p.seat);
     const b = pr && pr.base, t = pr && pr.this_player;
-    return el("div", { class: "mbox", "aria-label": `Model reads for ${p.name}` },
-      el("div", { class: "mtable" },
-        el("span"), el("span", { class: "h", text: "Next move" }), el("span", { class: "h", text: "Likely hand" }),
-        el("span", { class: "k", text: "Base" }), moveSlot(b && b.action, 1), handSlot(b && b.hands, 1),
+    // one idea per box: their next move, as people in general play (Base) and as this player plays; their likely
+    // hands live in the grid on the right
+    return el("div", { class: "mbox slim", "aria-label": `Next move for ${p.name}` },
+      el("div", { class: "mtable two" },
+        el("span", { class: "k", text: "People" }), moveSlot(b && b.action, 1),
         el("span", { class: "k", text: "This player", title: t && t.seen ? `learned from ${t.seen} of their moves` : "no moves seen yet" }),
-        moveSlot(t && t.action, 1), handSlot(t && t.hands, 1)));
+        moveSlot(t && t.action, 1)));
   }
 
   function renderYou() {
@@ -206,13 +207,8 @@
     const should = $("#should");
     should.className = "mtable two";
     should.innerHTML = "";
-    should.append(el("span", { class: "k", text: "Base" }), yourSlot(you && you.should && you.should.base, "base"),
-      el("span", { class: "k", text: "RL" }), yourSlot(you && you.should && you.should.rl, "rl"));
-    const ev = you && you.should && you.should.rl_value_bb;
-    if (ev !== null && ev !== undefined) {
-      should.append(el("span", { class: "k", text: "RL expects" }),
-        el("span", { class: "v" }, el("b", { text: `${ev >= 0 ? "+" : ""}${ev.toFixed(1)} bb` }), el("span", { class: "p2", text: " this hand (estimate)" })));
-    }
+    should.append(el("span", { class: "k", text: "Base" }), yourSlot(you && you.should && you.should.base, "base", 1),
+      el("span", { class: "k", text: "RL" }), yourSlot(you && you.should && you.should.rl, "rl", 1));
 
     const would = $("#would");
     would.className = "mtable two";

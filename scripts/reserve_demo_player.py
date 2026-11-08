@@ -68,6 +68,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--min-hands", type=int, default=150)
+    ap.add_argument("--exclude-venue", default="iPoker Network", help="iPoker records stacks as inf: its hands cannot be replayed")
     a = ap.parse_args()
     hands, touched = Counter(), Counter()
     with Pool(a.workers) as pool:
@@ -75,7 +76,7 @@ def main():
             hands.update(h)
             touched.update(t)
             print(f"{k + 1}/{N_SHARDS} shards", flush=True)
-    clean = [(n, key) for key, n in hands.items() if touched[key] == 0 and n >= a.min_hands]
+    clean = [(n, key) for key, n in hands.items() if touched[key] == 0 and n >= a.min_hands and key[0] != a.exclude_venue]
     clean.sort(reverse=True)
     print(f"{len(hands):,} online players in 5-6-max hands; {len(clean):,} untouched with >= {a.min_hands} hands")
     if not clean:

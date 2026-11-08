@@ -6,7 +6,7 @@ decided, and how to pick up**. Update it whenever a step completes or a decision
 
 Build started: 2026-11-07 18:00 (local). Hours in the checklist count from here.
 Builder so far: Claude as the single build agent. Commits go out under the team member's own git identity.
-Last update: 2026-11-07 evening. RL runs finished on the second PC and were committed at 19:35
+Last update: 2026-11-08 02:25 (Phase 7 below). Earlier: RL runs finished on the second PC and were committed at 19:35
 (`policy_population.json`, `training_sufficiency.json`, `benchmark.json`). The post-push work is committed on top:
 volunteer-session tooling, style map, stricter type gate, range-check panel and UI fixes.
 
@@ -38,6 +38,64 @@ because almost everyone folds often enough that a half-pot bluff is nearly alway
 
 **Waiting on.** The GPU run (see "Handoff: GPU run"), the rest of Phase 6, merging `poker-mirror` into `main`,
 and the team rehearsal. Volunteer sessions are now optional.
+
+## Phase 7 · 6-max Table Lab (branch `train-v3`, 2026-11-08)
+
+**What it is.** One clean screen (`/lab.html`): you against five bots. At every decision it shows three views of
+the same moment:
+- what people in general do (the Base model, learned from recorded hands);
+- what wins against these opponents (the RL model);
+- what *this* player does (a personal model per player, for you and for each opponent, learning live).
+
+A 13×13 grid shows each opponent's likely starting hands in their own colour. Any missing model shows
+"No model loaded". The training plan and its review are in [train/](train/README.md). Live training state is in
+[train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+
+**Done:**
+- **GPU runs from Phase 6:**
+  - The neural forecaster on the RTX 5090 (`data/mirror/neural_forecaster.json`): test log loss 0.7902 against
+    0.7899 for situation + personal.
+  - The heads-up river Q-learning runs reproduced exactly (`benchmark.json`, `training_sufficiency.json`).
+- **Hand model** (`pokersim/hand_range.py`, `data/rl/hand_range.npz`): P(each opponent holds each of 169 starting
+  hands) from public information. Trained on Pluribus (all cards known) plus online showdowns. The honest test, on
+  Pluribus: +0.31 nats over card counting.
+- **Next-move model** (`pokersim/next_move.py`, `data/rl/next_move.npz`): P(next action) over 7 classes.
+  - Data: 3.24M decisions from 5–6-player hands, with no showdown filter. Cards come only from the Pluribus logs.
+  - Test: +0.12 nats over frequency baselines (public view), +0.40 with cards (top-1 81%).
+  - Its uses: Base advice (plays like Pluribus), opponents' next move, the prior of every personal model, and the
+    "Pro"/"Machine" bots.
+- **RL (PPO, 193 inputs)** with the predicted ranges as input. The opponents are:
+  - scripted bots;
+  - Pro bots cloned from the 13 Pluribus-log professionals;
+  - past copies of itself.
+
+  Models are chosen only on held-out tables: Pluribus-cloned bots plus four new rule bots, with paired per-hand
+  evaluation. A matched run without the predicted-hand inputs measures whether they help. Every run has a
+  supervisor: checkpoints, wandb, automatic reset or restart, and a health check.
+- **Personal models** (`pokersim/you_model.py`): Dirichlet shrinkage of the next-move prior per street and
+  facing-a-bet bucket.
+  - Every prediction is made before the action and scored after it, against the "usual move" baseline.
+  - Your counts and a full decision log persist in `data/players/<name>/`.
+- **Table Lab frontend** (built on the `table-lab` branch design):
+  - Each opponent box shows only the next move (People / This player).
+  - The grid is shaded per card combination, and real hands are outlined at showdown.
+  - Your panel shows Base and RL top actions; your model's guess is revealed only after you act, with a running
+    score.
+- **Bots renamed for the demo:** Shark, Hustler, Calculator, Caller, Pro, Machine, Rock, Trapper, Nibbler,
+  Accountant, Wildcard, Maniac.
+- **Reserved demo player:** one real PartyPoker player (666 hands) that no model has trained or been evaluated on
+  (`data/demo/`). Extraction scripts skip their hands.
+- **Tooling:** uv with `pyproject.toml` and `uv.lock` (Python 3.12, CUDA 12.8 torch on Linux), identical on every
+  machine.
+
+**Running now:**
+- three RL runs until about 07:25: v3-ranges (5090), v3-noranges (2080), v2-eddie (Eddie);
+- see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+
+**Next:**
+- Ship the best held-out policy to `data/rl/policy.npz`.
+- A replay mode for the reserved player (watch "This player" learn them hand by hand).
+- Rehearsal.
 
 ## Status board
 
