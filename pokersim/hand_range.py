@@ -80,6 +80,17 @@ def live_combos(dead: Sequence[int]) -> np.ndarray:
     return np.bincount(COMBO_CLASS[mask], minlength=N_CLASSES).astype(np.float32)
 
 
+def counting(dead: Sequence[int]) -> np.ndarray:
+    """Plain card counting: each hand type in proportion to its combinations that avoid the known cards."""
+    lc = live_combos(dead)
+    return lc / max(float(lc.sum()), 1.0)
+
+
+def widen(probs: np.ndarray, width: float, dead: Sequence[int]) -> np.ndarray:
+    """A guess blended towards card counting by ``width`` (a player's learned range width, 0 = unchanged)."""
+    return probs if width <= 0 else (1.0 - width) * probs + width * counting(dead)
+
+
 # ----------------------------------------------------------------- features
 def _board_texture(board: Sequence[int]) -> List[float]:
     if not board:

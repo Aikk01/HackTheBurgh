@@ -141,6 +141,7 @@ class GameSession:
                         m = self.watch.model(name)
                         m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
                         m.warm_hands = int(warm["hands"])
+                        m.range_obs = [list(x) for x in (warm.get("range_obs") or {}).get(spec, [])]
                     if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
                         agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
                 self.agents[seat_no] = agent
@@ -201,11 +202,29 @@ class GameSession:
             self.styles.add_hand(hand)
         except Exception:  # noqa: BLE001
             traceback.print_exc()
+        self._learn_ranges(hand)
         rec = hand_to_record(hand, extra_meta={"venue": "pokersim live table"})
         self.records.append(rec)
         self._keep_hand(rec)
         if self.table is not None and self.table.current is hand:
             self.table.finish_hand()
+
+    def _learn_ranges(self, hand: Hand) -> None:
+        """Cards shown at showdown teach each player's range width: how likely our last guess made their real hand."""
+        seen = getattr(self, "range_seen", None)
+        if not seen or seen[0] != hand.hand_id:
+            return
+        from . import hand_range as HR
+
+        for j, (guess, count) in seen[1].items():
+            p = hand.players[j]
+            if p.mucked or not p.shown or len(p.shown) < 2 or None in p.shown[:2]:
+                continue
+            try:
+                k = HR.class_of(p.shown[0], p.shown[1])
+                self.watch.model(p.name).observe_range(float(guess[k]), float(count[k]))
+            except Exception:  # noqa: BLE001 - learning must never break the table
+                traceback.print_exc()
 
     def _keep_hand(self, rec: Any) -> None:
         """Append a finished hand to each human player's history (data/players/<name>/hands.phhs), so

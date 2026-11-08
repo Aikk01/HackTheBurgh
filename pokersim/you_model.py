@@ -29,6 +29,8 @@ from .rl_features import ACTIONS, N_ACTIONS
 # test and review servers point this elsewhere so they never touch real players' histories
 PLAYERS_DIR = os.environ.get("POKERSIM_PLAYERS_DIR") or os.path.join(os.path.dirname(__file__), "..", "data", "players")
 ALPHA = 8.0
+RANGE_KEEP = 400  # hands remembered for the range width
+RANGE_PRIOR = 3.0  # pull of the width towards 0 (people in general's guess) when little is seen
 GROUPS = ("fold", "call", "raise")
 GROUP_OF = np.array([0, 1, 2, 2, 2, 2, 2])
 
@@ -52,6 +54,8 @@ class PlayerModel:
         self.counts: Dict[str, List[float]] = {}
         self.right = self.total = self.baseline_right = self.people_right = 0
         self.warm_hands = 0  # earlier hands the counts were seeded from (Lab bots), not scored here
+        # for each hand whose cards we learned: P(their real hand type) under the guess and under plain card counting
+        self.range_obs: List[List[float]] = []
         self.last: Optional[Dict[str, Any]] = None
         # where this player and the coach (RL) disagree: "bucket|you|coach" -> count, and decisions per bucket
         self.gaps: Dict[str, int] = {}
@@ -71,6 +75,7 @@ class PlayerModel:
             self.gaps, self.gap_totals = d.get("gaps", {}), d.get("gap_totals", {})
             self.right, self.total, self.baseline_right = d.get("right", 0), d.get("total", 0), d.get("baseline_right", 0)
             self.people_right = d.get("people_right", 0)
+            self.range_obs = d.get("range_obs", [])
         except (OSError, ValueError):
             pass
 
@@ -80,6 +85,7 @@ class PlayerModel:
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"counts": self.counts, "right": self.right, "total": self.total,
                        "baseline_right": self.baseline_right, "people_right": self.people_right, "gaps": self.gaps,
+                       "range_obs": self.range_obs,
                        "gap_totals": self.gap_totals}, f)
         os.replace(tmp, os.path.join(self._dir(), "model.json"))
 
@@ -199,6 +205,23 @@ class PlayerModel:
                 seen_where.add(h["where"])
                 best.append({k: v for k, v in h.items() if k != "_rank"})
         return best[:top]
+
+    def observe_range(self, p_guess: float, p_count: float) -> None:
+        """Their real hand turned up: remember how likely the guess and plain card counting each made it."""
+        self.range_obs.append([float(p_guess), float(p_count)])
+        del self.range_obs[:-RANGE_KEEP]
+        if self.persist:
+            self._save()
+
+    def range_width(self) -> float:
+        """How far this player's hand guess is blended towards plain card counting: 0 keeps people in general's
+        guess, higher means they play wider hands than most people.  Fitted by likelihood on the hands we saw."""
+        if len(self.range_obs) < 3:
+            return 0.0
+        o = np.asarray(self.range_obs, dtype=float)
+        ws = np.linspace(0.0, 0.95, 39)
+        ll = [np.log((1 - w) * o[:, 0] + w * o[:, 1] + 1e-12).sum() + RANGE_PRIOR * np.log(1 - w) for w in ws]
+        return float(ws[int(np.argmax(ll))])
 
     def score(self) -> Dict[str, int]:
         return {"right": self.right, "total": self.total, "baseline_right": self.baseline_right,

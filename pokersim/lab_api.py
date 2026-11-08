@@ -135,6 +135,12 @@ def predict(game: Any) -> Dict[str, Any]:
             ranges = HR.predict_ranges(obs, [p["index"] for p in players if not p["folded"]])
         except Exception:  # noqa: BLE001 - a broken model file shows as "No model loaded", not a crash
             ranges = {}
+        # each player's guess widened by how wide their hands have turned out to be (learned at showdowns); the raw
+        # guess is kept so the server can score it when the cards are shown (server._learn_ranges)
+        hole = [c for c in (C.parse_card(x) for x in obs["hero"].get("cards") or []) if c is not None]
+        count = HR.counting(board + hole)
+        game.range_seen = (hand.hand_id, {j: (pr, count) for j, pr in ranges.items() if j != viewer})
+        ranges = {j: HR.widen(pr, models[j].range_width() if j in models else 0.0, board + hole) for j, pr in ranges.items()}
 
     from .next_move import hypothetical_mask, predict as nm_predict
     rows = []
@@ -160,7 +166,9 @@ def predict(game: Any) -> Dict[str, Any]:
                      "base": {"action": base_act, "hands": hands},
                      "this_player": {"action": this_act, "hands": _summary(ranges[j], board) if j in ranges else None,
                                      "seen": m.total if m else 0, "accuracy": m.score() if m else None,
-                                     "habits": m.habits(top=1) if m else []}})
+                                     "habits": m.habits(top=1) if m else [],
+                                     "width": round(m.range_width(), 2) if m else 0.0,
+                                     "width_seen": len(m.range_obs) if m else 0}})
 
     should_base = should_rl = rl_value = would = None
     if your_turn and obs is not None:
@@ -235,6 +243,9 @@ def scorecard() -> Dict[str, Any]:
         a = cal["hand_range"]["pluribus"]["all_streets"]
         out["hands"] = {"top10": a["top10"], "top10_counting": a["baseline_top10"], "half": a["coverage"]["50"]["hit"],
                         "n": a["n"]}
+        gb = load("demo", "grid_on_bots_widened.json")  # scripts/grid_on_bots.py --widen
+        if gb:
+            out["hands"]["bots"] = [gb["all"]["inside_50"], gb["all"]["inside_80"], gb["all"]["inside_90"]]
     sealed, meta = load("rl", "sealed_eval.json"), load("rl", "policy.json") or {}
     if sealed and sealed.get("policies"):
         run = os.path.basename(str(meta.get("run_dir", "")))

@@ -479,6 +479,9 @@
     }
     const hb = pr && pr.this_player && pr.this_player.habits && pr.this_player.habits[0];
     if (hb) top.append(habitRow("Habit", hb));
+    const wd = pr && pr.this_player ? pr.this_player.width || 0 : 0;  // learned from their real hands
+    if (wd >= 0.15) top.append(el("div", { class: "row habit", title: `Learned from their real hands: our guess is blended ${pct(wd)} towards plain card counting, because their hands keep turning out wider than people in general's.` },
+      el("span", { class: "k", text: "Their range" }), el("span", { class: "v", text: `${wd >= 0.5 ? "Much wider" : "Wider"} than most people's: guess widened to match` })));
     const ramp = $("#ramp");
     ramp.innerHTML = "";
     ramp.style.setProperty("--pc", `var(${pc})`);
@@ -659,7 +662,8 @@
       m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move; better for ${m.helped} of ${m.players}. ` : ""}` +
         `When it says ${pct(m.says)}, it happens ${pct(m.happens)} of the time (${m.calib_n.toLocaleString()} decisions).` : ""));
     rows.append(row("Their hand", h ? bars([["Our top 10 guesses (of 169)", h.top10, true], ["Card counting alone", h.top10_counting]]) : noModel(),
-      h ? `Share of ${h.n.toLocaleString()} unseen hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect): slightly overconfident.` : ""));
+      h ? `Share of ${h.n.toLocaleString()} guesses on about 2,000 unseen Pluribus hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect)` +
+        (h.bots ? `. On this table's bots, after learning how wide each one plays: ${pct(h.bots[0])} / ${pct(h.bots[1])} / ${pct(h.bots[2])} inside our likeliest 50 / 80 / 90% (fresh hands).` : ".") : ""));
     rows.append(row("Your best move (RL coach)",
       c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
         el("div", { class: "sbig muted", text: "Tested once, on sealed tables, when training ends." }),

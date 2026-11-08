@@ -18,6 +18,7 @@ import time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
+from pokersim import hand_range as HR  # noqa: E402
 from pokersim.agents import make_agent, safe_act  # noqa: E402
 from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
 from pokersim.you_model import TableWatch  # noqa: E402
@@ -48,9 +49,18 @@ def main() -> None:
             s.stack = 200.0
         hand = table.new_hand()
         guard = 0
+        me = next(i for i, p in enumerate(hand.players) if p.name == "stand-in")
         while hand.status == "betting" and hand.actor is not None and guard < 400:
             guard += 1
             actor = hand.actor
+            if actor != me:  # range width: every card is known here, so score the guess on every player, every move
+                o = hand.observation(me)
+                opp = [p["index"] for p in o["players"] if p["index"] != me and not p["folded"]]
+                dead = [c for c in hand.board if c is not None] + [c for c in hand.players[me].hole if c is not None]
+                count = HR.counting(dead)
+                for j, pr in HR.predict_ranges(o, opp).items():
+                    k = HR.class_of(*hand.players[j].hole[:2])
+                    watch.model(hand.players[j].name).observe_range(float(pr[k]), float(count[k]))
             obs, pred, _ = watch.before(hand, actor, human=False)
             action = safe_act(agents[table.seat_for_player(actor).seat_no], obs)
             try:
@@ -63,12 +73,14 @@ def main() -> None:
         table.finish_hand()
     out = {"hands": a.hands, "table": LAB_TABLE,
            "note": "personal-model counts after watching the Lab's default bots; live accuracy starts from zero",
-           "by_agent": {spec: watch.model(spec).counts for spec in LAB_TABLE}}
+           "by_agent": {spec: watch.model(spec).counts for spec in LAB_TABLE},
+           "range_obs": {spec: [[round(a, 5), round(b, 5)] for a, b in watch.model(spec).range_obs] for spec in LAB_TABLE}}
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, separators=(",", ":"), default=lambda x: round(float(x), 3))
     for spec in LAB_TABLE:
         m = watch.model(spec)
-        print(f"{spec:8s} {m.total:5d} moves · right {m.right / max(m.total, 1):.0%} (people {m.people_right / max(m.total, 1):.0%})")
+        print(f"{spec:8s} {m.total:5d} moves · right {m.right / max(m.total, 1):.0%} (people {m.people_right / max(m.total, 1):.0%})"
+              f" · range width {m.range_width():.2f}")
     print(f"{a.hands} hands in {time.time() - t0:.0f} s -> {os.path.relpath(OUT, ROOT)}")
 
 
