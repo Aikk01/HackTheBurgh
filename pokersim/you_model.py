@@ -160,7 +160,8 @@ class PlayerModel:
             street, facing, you, coach = k.split("|")  # key: "<street>|<bet|free>|<you>|<coach>"
             b = f"{street}|{facing}"
             where = f"{'preflop' if street == 'preflop' else 'on the ' + street}, {'facing a bet' if facing == 'bet' else 'when you can check'}"
-            out.append({"where": where, "you": you, "coach": coach, "times": c, "of": self.gap_totals.get(b, c)})
+            word = (lambda g: "check" if facing == "free" and g == "call" else "bet" if facing == "free" and g == "raise" else g)
+            out.append({"where": where, "you": word(you), "coach": word(coach), "times": c, "of": self.gap_totals.get(b, c)})
         out.sort(key=lambda g: (-g["times"], -g["times"] / max(g["of"], 1)))
         return out[:top]
 
