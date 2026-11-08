@@ -2,7 +2,7 @@
 
 The current state of every training run. Update it at each evaluation or event; the plan is in [README.md](README.md).
 
-Last update: 2026-11-08 03:49.
+Last update: 2026-11-08 04:48.
 
 ## Runs
 
@@ -38,6 +38,20 @@ the sealed test (06), with two seeds per setting.
 
 At update 50, zeroing v3-ranges' range inputs costs 150 bb/100. That measures how much the policy leans on them,
 not their value; the comparison with v3-noranges at equal updates answers that.
+
+## Line-up since 04:48
+
+| Run | Where | Start | Status |
+|---|---|---|---|
+| v3-ranges-s2 (scratch, hand inputs) | Eddie 32 | 02:44 | Training to ~07:20; best +110 (update 100) |
+| v3-noranges-s2 (scratch, no hand inputs) | 5090 | 03:48 | Training to ~07:20; best +152 (update 100) |
+| **v3-bc** (imitation start, hand inputs) | Eddie 32 | 03:52 | Training to ~07:15; best +150 (update 50); **live coach** since 04:42 |
+| v3-bc-s2 (imitation start, seed 4) | Eddie 32 | 04:36 | Training to ~07:15 |
+| v3-bc-kl10 / v3-bc-kl30 (imitation start + pull towards it, 0.1 / 0.3) | Eddie 32 each | ~04:50 | Training to ~07:10 |
+| v3-ranges (seed 1), v3-noranges (seed 1), v2-eddie | — | — | Stopped 04:46–04:48 to free Eddie slots; best exports kept (+94, +96, +74) |
+| imitation-only | — | — | No training: the imitation network itself, a sealed-test candidate (`data/rl/coaches/v3-bc-imitation-only/`) |
+
+The live coach is changed only when asked (`python scripts/swap_coach.py` reports the best candidate; `--swap` changes it).
 
 ## Events so far
 
