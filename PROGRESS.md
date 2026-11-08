@@ -208,6 +208,10 @@ penalty keeps play closer to Pluribus but wins less on these tables.
   - The Shark reacts 2.5× to its read, capped at ±2; reacting one-for-one showed nothing in 60 hands.
 - The grid says "Hand over" instead of "no model" between hands.
 
+**Players named after their type** (08:40): Tight Aggressive (a pro), Loose Aggressive and Loose Passive (gamblers),
+Tight Passive, and the Shark (tight aggressive, reads the table). The simulations were rebuilt with the new names; their
+numbers are unchanged. The docs, screenshots and deck were updated to match.
+
 **Running now:** nothing. Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**

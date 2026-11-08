@@ -18,19 +18,20 @@ Run it: `python -m pokersim serve --port 8765`, then open http://localhost:8765/
 | Bottom middle | The model of **you**: its guess of your move (shown after you act), how often it has been right, your habit | |
 | Bottom right | Bet-size buttons and the **bluff check**: "if you raise to X with nothing: everyone folds Y%, needed to break even Z%, so a bluff wins or loses N chips" | Each player's own model, on a copy of the hand with your bet in |
 
-**The players:**
-- **Pro** plays like the human professionals of the Pluribus games (tight aggressive).
-- The other four are the four classic types, **mined from 10,213 real online regulars**. The core of each type was kept:
-  - **Shark:** tight aggressive (1,395 players);
-  - **Gambler:** loose aggressive (237);
-  - **Sticky:** loose passive (1,949);
-  - **Rock:** tight passive (350).
-- Each plays its cards through the pros' model, with its type's real habits in each of 24 situations (street, facing a bet or not, position). Fitted until their stats match:
+**The players** are named after their type:
+- **Tight Aggressive** (a pro) plays like the human professionals of the Pluribus games.
+- **Loose Aggressive** and **Loose Passive** (gamblers) and **Tight Passive** are **mined from 10,213 real online
+  regulars**: the most extreme 15% of each type (20, 738 and 55 players).
+- **Shark** is the mined tight aggressive type (385 players) and also reads the table.
+- Each plays its cards through the pros' model, with its type's real habits in each of 24 situations (street, facing a
+  bet or not, position). Fitted until their stats match:
 
-  | Bot | VPIP | PFR | AF |
+  | Player | VPIP | PFR | AF |
   |---|---|---|---|
-  | Shark | 19% (real 17%) | 16% (real 14%) | 4.2 (real 3.9) |
-  | Sticky | 34% (real 36%) | 12% (real 12%) | 1.9 (real 1.8) |
+  | Shark | 17% (real 16%) | 15% (real 13%) | 4.3 (real 4.6) |
+  | Loose Aggressive | 33% (real 36%) | 23% (real 27%) | 4.8 (real 4.8) |
+  | Loose Passive | 39% (real 42%) | 10% (real 11%) | 1.7 (real 1.6) |
+  | Tight Passive | 16% (real 15%) | 5% (real 5%) | 1.9 (real 1.4) |
 
 **The Shark reads the table.** Before each move it asks the players' models how likely they all are to fold if it bets
 about the pot, compared with people in general. If they fold more, it bluffs more; if they call more, it bluffs less.
@@ -44,7 +45,7 @@ display only. Turn it on for judges, off for real play.
 
 ## The 4-minute flow
 
-1. **Table (1 min).** Deal and play a hand with the hole-card cam on. Point at one read: "Rock: Fold 90%, and you can see
+1. **Table (1 min).** Deal and play a hand with the hole-card cam on. Point at one read: "Tight Passive: Fold 90%, and you can see
    he holds 7♣2♦."
 2. **A decision (1 min).** Click a bet size and read the bluff check aloud. If the coaches disagree, read the note.
 3. **"Watch the model learn a player" → "The Shark learns you" (1 min, about 10 s of replay).**

@@ -130,15 +130,15 @@ for i, (k, v, c) in enumerate(models):
           text(x + 0.25, y + 0.56, 3.45, 0.8, v, size=15, color=INK2)]
 s += [card(4.6, 5.05, 8.07, 1.35, fill=CARD2),
       text(4.85, 5.17, 7.6, 0.35, "The players at the table", size=17, color=GOOD, bold=True),
-      text(4.85, 5.55, 7.6, 0.8, "Pro copies the Pluribus pros. Shark, Gambler, Sticky and Rock are the four classic types, "
-           "mined from 10,213 real regulars.", size=15, color=INK2),
+      text(4.85, 5.55, 7.6, 0.8, "Named after their type: Tight Aggressive copies the Pluribus pros; Loose Aggressive, Loose "
+           "Passive, Tight Passive and the Shark are mined from 10,213 real regulars.", size=15, color=INK2),
       text(0.6, 6.62, 12.1, 0.4, "Compute: the University of Edinburgh's Eddie cluster and one RTX 5090 PC.", size=14, color=MUTED)]
 SLIDES.append({"els": s, "notes":
     "The data: 21.6 million online hands from five sites, plus the ten thousand hands Pluribus played against "
     "professionals, where every card is known, so they are the fair test for guessing hands. We split by player and keep "
     "31 real players out of everything: 30 to test the personal model, one for the replay. Four models, each answering "
     "one question. The bots at the table are the four classic player types, mined from 10,213 real regulars (the most "
-    "extreme 15% of each type) and fitted until their VPIP, PFR and AF match: Sticky plays 39% of hands and raises 10%, "
+    "extreme 15% of each type) and fitted until their VPIP, PFR and AF match: Loose Passive plays 39% of hands and raises 10%, "
     "against 42% and 11% for the real players."})
 
 # 4 · technical detail and the training / evaluation flow -------------------------------------------------------------

@@ -3,8 +3,8 @@
 Shared by every mock judge in this folder. The judge watches; the presenter drives.
 
 1. **The table (about 1 minute).** "You" plus five players, each a model of real human professionals nudged into one
-   of the four classic types: Pro and Shark (tight aggressive), Gambler (loose aggressive), Sticky (loose passive),
-   Rock (tight passive). The presenter deals and plays a hand.
+   of the four classic types and named after it: Tight Aggressive, Loose Aggressive, Loose Passive, Tight Passive,
+   and the Shark (tight aggressive, reads the table). The presenter deals and plays a hand.
    - Above each opponent: the predicted next move. A second row, "This player", appears only when the model of that
      player disagrees with people in general.
    - Right panel: the opponent's likely starting hands on a 13×13 grid. It changes as they act.

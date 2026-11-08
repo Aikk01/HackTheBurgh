@@ -34,14 +34,15 @@ import numpy as np
 
 from . import cards as C
 
-# The Poker Mirror table (served at /api/lab/table): the Pro is the next-move model of the human professionals in the
-# Pluribus games, with its own cards; the other four are the four classic types, mined from real online regulars
-# (scripts/mine_types.py) and fitted onto that model situation by situation (scripts/fit_types.py, agents.TypeAgent).
-# The Shark is the tight aggressive type that also reads the table (agents.ReaderAgent).
-MIRROR_TABLE = [("pro", "Pro"), ("type:style=lag", "Gambler"), ("type:style=lp", "Sticky"), ("type:style=tp", "Rock"),
-                ("reader:style=tag", "Shark")]
-MIRROR_TYPE = {"Pro": "tight aggressive", "Gambler": "loose aggressive", "Sticky": "loose passive", "Rock": "tight passive",
-               "Shark": "tight aggressive"}
+# The Poker Mirror table (served at /api/lab/table): each player is named after its type.  Tight Aggressive is the
+# next-move model of the human professionals in the Pluribus games, with its own cards; Loose Aggressive, Loose Passive
+# and Tight Passive are mined from real online regulars (scripts/mine_types.py) and fitted onto that model situation by
+# situation (scripts/fit_types.py, agents.TypeAgent).  The Shark is the mined tight aggressive type that also reads the
+# table (agents.ReaderAgent).
+MIRROR_TABLE = [("pro", "Tight Aggressive"), ("type:style=lag", "Loose Aggressive"), ("type:style=lp", "Loose Passive"),
+                ("type:style=tp", "Tight Passive"), ("reader:style=tag", "Shark")]
+MIRROR_TYPE = {"Tight Aggressive": "pro", "Loose Aggressive": "gambler", "Loose Passive": "gambler", "Tight Passive": "",
+               "Shark": "tight aggressive"}  # the small line under each name (the Shark's adds "reads the table")
 
 _COMBOS = np.array([[6 if r == c else 4 if r < c else 12 for c in range(13)] for r in range(13)], dtype=float)
 

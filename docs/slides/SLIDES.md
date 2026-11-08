@@ -93,8 +93,9 @@ a real edge, and it is biggest against players with a leak. So we built a mirror
 
 - **The table's players:**
   - **Pro:** the next-move model of the Pluribus pros.
-  - **Shark, Gambler, Sticky, Rock:** the four classic types, mined from 10,213 online regulars (the most extreme
-    15% of each type) and fitted until their VPIP, PFR and AF match. Sticky, for example: 39% / 10% / 1.7 vs real
+  - **Each player is named after its type:** Tight Aggressive (copies the Pluribus pros), and Loose Aggressive, Loose
+    Passive, Tight Passive and the Shark, mined from 10,213 online regulars (the most extreme 15% of each type) and
+    fitted until their VPIP, PFR and AF match. Loose Passive, for example: 39% / 10% / 1.7 vs real
     42% / 11% / 1.6.
 - **Compute:** the University of Edinburgh's Eddie cluster (32-core CPU nodes) and one RTX 5090 PC.
 

@@ -102,7 +102,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 .seat { position: absolute; transform: translate(-50%, -50%); z-index: 2; }
 .plate { display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 8px; min-width: 168px; background: var(--surface); border: 1px solid var(--line-2); border-left: 4px solid var(--pc, var(--line-2)); border-radius: 10px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); }
 .plate .who { display: flex; flex-direction: column; min-width: 0; }
-.plate .name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.plate .name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
 .plate .sub { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
 .plate .hcards { display: flex; gap: 3px; }
 .seat.acting .plate { box-shadow: 0 0 0 2px var(--amber), 0 6px 16px rgba(0, 0, 0, 0.3); }
@@ -171,7 +171,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 .seg button { background: transparent; border: 0; padding: 5px 12px; font-size: 13px; cursor: pointer; }
 .seg button[aria-checked="true"] { background: var(--amber); color: var(--amber-ink); font-weight: 600; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; font-size: 13px; cursor: pointer; max-width: 150px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; font-size: 13px; cursor: pointer; max-width: 260px; }
 .chip i { width: 10px; height: 10px; border-radius: 50%; background: var(--pc); flex: none; }
 .chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip[aria-checked="true"] { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
