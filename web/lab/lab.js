@@ -141,6 +141,7 @@
     renderTable();
     renderYou();
     renderSide();
+    if (L.zoom) renderZoom();
   }
 
   function renderBar() {
@@ -389,18 +390,70 @@
     const base = pr && pr.base ? pr.base.hands : null;
     const live = pr && pr.market ? pr.market : null;
     const over = hand() && hand().status !== "betting";
+    if (live && live.hands && base && base.shown) live.hands.shown = base.shown;  // the real hand, outlined in both
     const mini = (hands, key, cls, label, caption) => {
       const g = grid13(hands, `${p.name} (${label})`, key, null);
       g.removeAttribute("tabindex");
       Array.from(g.children).forEach((c) => { c.title = `${c.dataset.name} ${(100 * Number(c.dataset.p)).toFixed(1)}%`; });
-      return el("div", { class: "rg " + cls }, el("span", { class: "rk" }, el("i"), label), g,
+      const box = el("div", { class: "rg " + cls, role: "button", tabindex: 0, title: `Click: ${label} range for ${p.name}, large, every hand named` },
+        el("span", { class: "rk" }, el("i"), label), g,
         hands ? el("span", { class: "rc" }, ...caption) : el("span", { class: "rc nm", text: over ? "hand over" : "…" }));
+      box.addEventListener("click", () => openZoom(p.seat, cls));
+      box.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openZoom(p.seat, cls); } });
+      return box;
     };
     const top2 = (hs) => (hs && hs.top ? hs.top.slice(0, 2).map((t) => t.hand).join(" · ") : "");
     const price = live && Number.isFinite(live.price) ? el("b", { class: "win", title: "Your win probability against this range (ties count half)", text: `you win ${pct(live.price)}` }) : null;
     return el("div", { class: "rbox " + where, style: `--pc: var(${colourOf(p.seat)})`, "aria-label": `Likely hands for ${p.name}` },
       mini(base, p.seat, "base", "Base", [top2(base)]),
       mini(live && live.hands, `live${p.seat}`, "live", "Live ML", [top2(live && live.hands), price ? el("br") : null, price].filter(Boolean)));
+  }
+
+  // ------------------------------------------------------------ a range, large: every hand named with its chance
+  function openZoom(seat, kind) { L.zoom = { seat, kind }; renderZoom(); }
+  function closeZoom() { L.zoom = null; $("#zoom").hidden = true; }
+  function renderZoom() {
+    const z = L.zoom;
+    const wrap = $("#zoom");
+    if (!z) { wrap.hidden = true; return; }
+    const p = opponents().find((o) => o.seat === z.seat);
+    const pr = p && predFor(p.seat);
+    const live = z.kind === "live";
+    const hands = pr ? (live ? pr.market && pr.market.hands : pr.base && pr.base.hands) : null;
+    if (hands && !live && pr.market && pr.market.hands && hands.shown) pr.market.hands.shown = hands.shown;
+    if (live && hands && pr.base && pr.base.hands && pr.base.hands.shown) hands.shown = pr.base.hands.shown;
+    wrap.hidden = false;
+    wrap.style.setProperty("--pc", live ? "var(--live)" : "var(--base-grid)");
+    $("#zoomTitle").innerHTML = "";
+    $("#zoomTitle").append(p ? `${p.name}: ` : "", el("b", { text: live ? "Live ML range" : "Base range" }));
+    $("#zoomSub").textContent = live
+      ? "Our real-time model: starts from the player's position and preflop action, then updates all 1,326 card combinations after every move they make."
+      : "The base model: trained on 21.6 million hands, guesses one of 169 starting-hand types from the player's actions.";
+    const g = $("#zoomGrid");
+    g.innerHTML = "";
+    const grid = grid13(hands, p ? p.name : "", `zoom-${z.kind}-${z.seat}`, null);
+    Array.from(grid.children).forEach((c) => {
+      const pc = 100 * Number(c.dataset.p);
+      if (hands && pc >= 0.05) c.append(el("span", { class: "pz", text: pc >= 1 ? `${pc.toFixed(1)}%` : `${pc.toFixed(2)}%` }));
+      c.addEventListener("mouseenter", () => { $("#zoomRead").textContent = `${c.dataset.name}: ${pc.toFixed(2)}%`; });
+    });
+    g.append(grid);
+    if (!hands) g.append(el("div", { class: "grid-over" }, el("span", { class: "nm", text: p && p.folded ? `${p.name} folded` : hand() && hand().status !== "betting" ? "Hand over" : NO_MODEL })));
+    const top = $("#zoomTop");
+    top.innerHTML = "";
+    if (hands && hands.top && hands.top.length) {
+      const flat = [];
+      for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o", hands.grid[r][c]]);
+      flat.sort((a, b) => b[1] - a[1]);
+      const mx = flat[0][1] || 1;
+      top.append(el("div", { class: "zk", text: "Likeliest hands" }));
+      flat.slice(0, 6).forEach(([name, pv]) => top.append(el("div", { class: "zr" }, el("span", { text: name }),
+        el("div", { class: "zb" }, el("i", { style: `width:${Math.round(100 * pv / mx)}%` })), el("b", { text: `${(100 * pv).toFixed(1)}%` }))));
+      if (live && pr.market && Number.isFinite(pr.market.price)) top.append(el("div", { class: "zwin", title: "Your chance of winning the hand against this range (ties count half)" },
+        "Against this range you win ", el("b", { text: pct(pr.market.price) })));
+      if (hands.shown) top.append(el("div", { class: "zr" }, el("span", { text: "Real hand" }), el("span", { text: hands.shown }), el("b", { text: `#${rankOf(hands, hands.shown)}` })));
+    }
+    $("#zoomRead").textContent = "";
   }
 
   function seatBox(p) {
@@ -748,7 +801,7 @@
         const cell = el("div", { class: "c" + (a > 0.5 ? " hi" : "") + (shown ? " shown" : "") + (seen ? " cam" : ""), role: "gridcell",
           title: shown ? "their real hand" : seen ? "their real hand, hidden from the models" : "" }, f, el("span", { class: "t", text: name }));
         const k = after.push(a) - 1;
-        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700 * PACE, L.fastMs) : 700 * PACE, easing: EASE });
+        if (before && MOTION && !String(seat).startsWith("zoom") && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700 * PACE, L.fastMs) : 700 * PACE, easing: EASE });
         cell.dataset.name = name;
         cell.dataset.p = p;
         if (hands) cell.addEventListener("mouseenter", () => focusCell(r * 13 + c));
@@ -1219,6 +1272,9 @@
     $("#rpNext").addEventListener("click", () => stepReplay(1));
     $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);
+  $("#zoomClose").addEventListener("click", closeZoom);
+  $("#zoom").addEventListener("click", (e) => { if (e.target === $("#zoom")) closeZoom(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && L.zoom) closeZoom(); });
   $("#sideBtn").addEventListener("click", () => {  // the selected player's details on the right; the table shrinks to fit
     const on = $("#sideBtn").getAttribute("aria-pressed") !== "true";
     $("#sideBtn").setAttribute("aria-pressed", String(on));

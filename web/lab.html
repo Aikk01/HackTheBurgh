@@ -119,6 +119,22 @@
     <p class="side-note" title="Each cell is a type of starting hand: pairs on the diagonal, suited above it, offsuit below. Height is per card combination. Only what everyone can see goes into the guess, so it never gives a card away."> Taller = likelier. Built only from what everyone can see; at showdown the real hand is outlined.</p>
   </aside>
 </main>
+<div class="zoom" id="zoom" hidden>
+  <div class="zoom-card" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
+    <div class="zoom-head">
+      <div><h2 id="zoomTitle"></h2><p class="zoom-sub" id="zoomSub"></p></div>
+      <button class="btn ghost" id="zoomClose" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="zoom-body">
+      <div class="zoom-grid" id="zoomGrid"></div>
+      <div class="zoom-side">
+        <p class="zoom-how">Each square is a starting hand. <b>Pairs</b> run down the diagonal (AA … 22). Above it the two cards are <b>suited</b> (AKs = ace and king of the same suit); below it <b>offsuit</b> (AKo). Brighter = the model thinks it likelier. Hover a square for its exact chance.</p>
+        <div class="zoom-top" id="zoomTop"></div>
+        <p class="zoom-read" id="zoomRead" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="sr-only" id="announcer" aria-live="polite"></div>
 <script src="/lab/lab.js"></script>
 </body>
