@@ -349,7 +349,79 @@
         }
         $("#btnRaise").firstChild.textContent = lg.raise_kind === "bet" ? "Bet " : "Raise ";
       }
-    }
+      renderSizes(h, lg, canRaise && !L.replay ? you : null);
+    } else renderSizes(null);
+  }
+
+  // bet sizes as one-click presets (the sizes the models choose between), each coach's pick tagged
+  function renderSizes(h, lg, you) {
+    const box = $("#sizes");
+    box.innerHTML = "";
+    box.hidden = !you;
+    if (!you) { renderBluff(null); return; }
+    const m = me(), pot = Number(h.total_pot) || 0, toCall = Number(lg.call) || 0, mine = m ? Number(m.bet) || 0 : 0;
+    const lo = Number(lg.min_raise_to), hi = Number(lg.max_raise_to);
+    const rnd = (x) => Math.min(hi, Math.max(lo, Math.round(x)));
+    const opts = [];
+    [["Min", lo], ["½ pot", rnd(mine + toCall + 0.5 * (pot + toCall))], ["Pot", rnd(mine + toCall + pot + toCall)],
+      ["2× pot", rnd(mine + toCall + 2 * (pot + toCall))], ["All-in", hi]].forEach(([label, amt]) => {
+      const same = opts.find((o) => o.amt === amt);
+      if (same) { if (amt === hi) same.label = "All-in"; } else opts.push({ label: amt === hi ? "All-in" : label, amt });
+    });
+    // a coach's pick: its likeliest raise size, tagged only when raising is that coach's top choice
+    const pick = (pred) => {
+      if (!pred || !pred.actions || !pred.actions.length || GROUP(grouped(pred.actions)[0].action) !== 2) return null;
+      const r = pred.actions.filter((a) => GROUP(a.action) === 2).sort((x, y) => y.p - x.p)[0];
+      const amt = r && r.amount !== null && r.amount !== undefined ? Number(r.amount) : r && r.action === "all_in" ? hi : null;
+      return amt === null ? null : opts.reduce((best, o) => (Math.abs(o.amt - amt) < Math.abs(best.amt - amt) ? o : best), opts[0]);
+    };
+    const tags = new Map();
+    [["Base", you.should && you.should.base], ["RL", you.should && you.should.rl]].forEach(([name, pred]) => {
+      const o = pick(pred);
+      if (o) tags.set(o, (tags.get(o) || []).concat(name));
+    });
+    opts.forEach((o) => {
+      const b = el("button", { type: "button", class: "size" + (Number($("#raiseInput").value) === o.amt ? " on" : "") },
+        el("span", { text: `${o.label} ${fmt(o.amt)}` }), tags.has(o) ? el("i", { text: tags.get(o).join(" · ") }) : null);
+      b.addEventListener("click", () => { $("#raiseSlider").value = $("#raiseInput").value = o.amt; renderSizes(h, lg, you); askBluff(); });
+      box.append(b);
+    });
+    askBluff();
+  }
+
+  // the bluff check for the amount in the raise box (GET /api/lab/bluff)
+  let bluffTimer = null, bluffKey = "";
+  function askBluff() {
+    const h = hand();
+    const key = h ? `${h.hand_id}|${(L.st.log || []).length}|${$("#raiseInput").value}` : "";
+    if (key === bluffKey) return;
+    bluffKey = key;
+    clearTimeout(bluffTimer);
+    bluffTimer = setTimeout(async () => {
+      let b = null;
+      try { b = await api(`/api/lab/bluff?amount=${encodeURIComponent($("#raiseInput").value)}`); } catch (e) { b = null; }
+      if (key === bluffKey) renderBluff(b);
+    }, 150);
+  }
+  function renderBluff(b) {
+    const box = $("#bluff");
+    box.innerHTML = "";
+    box.hidden = !b || !b.players || !b.players.length;
+    if (box.hidden) return;
+    const h = hand(), pays = b.worth >= 0, lg = h && h.legal;
+    const word = lg && lg.raise_kind === "bet" ? "bet" : "raise to";
+    const worst = b.players.slice().sort((x, y) => x.fold - y.fold)[0];
+    const seatOf = (i) => { const p = h && h.players.find((q) => q.index === i); return p ? p.seat : null; };
+    box.append(
+      el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)}` }),
+      el("div", { class: "brow" }, el("span", { class: "bl", text: "They all fold" }),
+        el("span", { class: "track" }, el("i", { class: pays ? "ok" : "bad", style: `width:${(100 * b.all_fold).toFixed(1)}%` }),
+          el("b", { class: "need", style: `left:${(100 * b.needs).toFixed(1)}%` })),
+        el("span", { class: "bn", text: pct(b.all_fold) }), el("span", { class: "p2", text: `needs ${pct(b.needs)}` })),
+      el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `Bluffing pays: about +${fmt(Math.round(b.worth * 10) / 10)} chips, even with nothing`
+        : `Bluffing loses: about −${fmt(Math.round(-b.worth * 10) / 10)} chips with nothing` }),
+      el("div", { class: "bw" }, ...b.players.map((p) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` }, el("i"), `${p.name} ${pct(p.fold)}`)),
+        worst && worst.fold < 0.3 && b.players.length ? el("span", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null));
   }
 
   function renderSide() {
@@ -726,8 +798,8 @@
     $("#btnCall").addEventListener("click", () => act("call"));
     $("#btnRaise").addEventListener("click", () => act("raise", Number($("#raiseInput").value)));
     $("#btnNext").addEventListener("click", nextHand);
-    $("#raiseSlider").addEventListener("input", (e) => { $("#raiseInput").value = e.target.value; });
-    $("#raiseInput").addEventListener("input", (e) => { $("#raiseSlider").value = e.target.value; });
+    $("#raiseSlider").addEventListener("input", (e) => { $("#raiseInput").value = e.target.value; askBluff(); });
+    $("#raiseInput").addEventListener("input", (e) => { $("#raiseSlider").value = e.target.value; askBluff(); });
 
     $("#clearInject").addEventListener("click", () => window.Lab.clear());
     document.addEventListener("keydown", (e) => {

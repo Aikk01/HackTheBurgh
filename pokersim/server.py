@@ -997,6 +997,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/lab/predict":
             from .lab_api import predict
             return predict(APP.game)
+        if path == "/api/lab/bluff":
+            from .lab_api import bluff
+            return bluff(APP.game, float(qs.get("amount", 0) or 0))
         if path == "/api/lab/scorecard":
             from .lab_api import scorecard
             return scorecard()

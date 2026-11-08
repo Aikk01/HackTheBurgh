@@ -243,3 +243,44 @@ def scorecard() -> Dict[str, Any]:
         out["coach"] = {"policy": name, "vs_equity": row["vs_equity_bot"]["all"], "ranges": row["range_inputs_gain"].get("all"),
                         "styles": row["style_inputs_gain"]["all"], "hands": sealed["hands_per_table"]}
     return out
+
+
+def bluff(game: Any, amount: float) -> Optional[Dict[str, Any]]:
+    """If you bet or raise to ``amount`` now, how likely is everyone still in to fold, and what is that worth?
+
+    A copy of the hand takes your bet; then each opponent in turn order is asked by their own personal model
+    (public information only) how likely they are to fold, assuming everyone before them folded.  The product is
+    "they all fold".  Worth counts only the pot you take when they all fold (a pure bluff: nothing is won when
+    called), so it is what the bet is worth even with nothing.  None when it is not your turn or you cannot bet."""
+    import copy
+
+    with game.lock:
+        hand = game.hand
+        if hand is None or hand.status != "betting" or len(game.human_seats) != 1:
+            return None
+        viewer = next((p.index for p in hand.players if game._seat_of(p.index) == game.human_seats[0]), None)
+        if viewer is None or hand.actor != viewer:
+            return None
+        obs = hand.observation(viewer)
+        la = obs.get("legal_actions") or {}
+        if not la.get("raise"):
+            return None
+        amount = min(max(float(amount), float(la["min_raise_to"])), float(la["max_raise_to"]))
+        h = copy.deepcopy(hand)
+    cost = amount - float(obs["hero"]["bet"] or 0.0)
+    pot = float(obs["total_pot"])
+    h.act(viewer, la.get("raise_kind", "raise"), amount)
+    rows, all_fold, guard = [], 1.0, 0
+    while h.status == "betting" and h.actor is not None and h.actor != viewer and guard < 12:
+        guard += 1
+        j = h.actor
+        m = game.watch.model(h.players[j].name)
+        probs, _ = m.predict(h.observation(j), j)
+        f = float(probs[0])
+        hb = m.habits(top=1)
+        rows.append({"index": j, "name": h.players[j].name, "fold": round(f, 3), "habit": hb[0] if hb else None})
+        all_fold *= f
+        h.fold(j)
+    return {"amount": amount, "cost": round(cost, 2), "pot": round(pot, 2), "all_fold": round(all_fold, 3),
+            "needs": round(cost / (pot + cost), 3) if pot + cost > 0 else None,
+            "worth": round(all_fold * pot - (1.0 - all_fold) * cost, 2), "players": rows}
