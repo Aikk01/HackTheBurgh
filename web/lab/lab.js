@@ -105,6 +105,16 @@
     return noModel();
   }
 
+  // a coach's advice as one bar: fold | check-call | bet-raise, its top choice lit
+  function barSlot(pred, model) {
+    if (!pred || !pred.actions || !pred.actions.length) return yourSlot(null, model);
+    const g = grouped(pred.actions);
+    const order = [0, 1, 2].map((k) => g.find((a) => GROUP(a.action) === k)).filter(Boolean);
+    return el("div", { class: "cbar", role: "img", "aria-label": g.map((a) => `${actionText(a)} ${pct(a.p)}`).join(", ") },
+      ...order.map((a) => el("span", { class: `g${GROUP(a.action)}` + (a === g[0] ? " top" : ""), style: `flex-grow:${Math.max(a.p, 0.001)}`, title: `${actionText(a)} ${pct(a.p)}` },
+        a.p >= 0.16 ? `${actionText(a)} · ${pct(a.p)}` : "")));
+  }
+
   // ------------------------------------------------------------ cards
   const SUITS = { c: "♣", d: "♦", h: "♥", s: "♠" };
   function card(code, size) {
@@ -275,9 +285,9 @@
     should.className = "mtable two";
     should.innerHTML = "";
     should.append(el("span", { class: "k", text: "Base", title: "Learned from data: what Pluribus did in spots like this, given your cards" }),
-      yourSlot(you && you.should && you.should.base, "base", 1),
+      barSlot(you && you.should && you.should.base, "base"),
       el("span", { class: "k", text: "RL", title: "Reinforcement learning: a policy trained by self-play that reads everyone's predicted hands" }),
-      yourSlot(you && you.should && you.should.rl, "rl", 1));
+      barSlot(you && you.should && you.should.rl, "rl"));
 
     const would = $("#would");
     would.className = "mtable two";
@@ -290,12 +300,13 @@
       guess ? (L.replay ? moveSlot(guess, 1) : el("span", { class: "nm", text: "Revealed after you act" })) : yourSlot(null, "personal"),
       el("span", { class: "k", text: "Right so far" }),
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
-        el("span", { class: "p2", text: ` · usual-move guess ${acc.baseline_right}` })) : noModel());
+        el("span", { class: "p2", text: ` · people in general ${acc.people_right || 0}` })) :
+        loaded("personal", "actions") ? el("span", { class: "nm", text: L.replay ? "Starts with their first move" : "Starts with your first move" }) : noModel());
     const gaps = (you && you.coach_gaps) || [];
     if (gaps.length && !L.replay) {
       const g = gaps[0];
       would.append(el("span", { class: "k", text: "You vs coach" }), el("span", { class: "v" },
-        `${g.where[0].toUpperCase()}${g.where.slice(1)}: you ${g.you}, the coach would ${g.coach} `, el("span", { class: "p2", text: `(${g.times} of ${g.of})` })));
+        `${g.where[0].toUpperCase()}${g.where.slice(1)}: you ${g.you}, coach ${g.coach}s `, el("span", { class: "p2", text: `(${g.times} of ${g.of})` })));
     }
     if (L.lastCheck) {
       const c = L.lastCheck;
@@ -553,6 +564,32 @@
     try { onState(await api("/api/game/next", {})); } catch (e) { $("#actNote").textContent = e.message; }
   }
 
+  // ------------------------------------------------------------ how good are the guesses (GET /api/lab/scorecard)
+  const sgn = (x) => `${x >= 0 ? "+" : "−"}${Math.abs(Math.round(x))}`;
+  async function openScore() {
+    let d = null;
+    try { d = await api("/api/lab/scorecard"); } catch (e) { d = null; }
+    const rows = $("#scoreRows");
+    rows.innerHTML = "";
+    const bars = (items) => el("div", { class: "sbars" }, ...items.map(([label, v, ours]) =>
+      el("div", { class: "sb" + (ours ? " ours" : "") }, el("span", { class: "sl", text: label }),
+        el("span", { class: "st" }, el("i", { style: `width:${(100 * Math.max(0, Math.min(1, v))).toFixed(1)}%` })), el("b", { text: pct(v) }))));
+    const row = (title, body, note) => el("section", { class: "srow" }, el("h3", { text: title }), body, el("p", { class: "snote", text: note }));
+    const m = d && d.moves, h = d && d.hands, c = d && d.coach;
+    rows.append(row("Their next move", m && m.ours ? bars([["Our model of that player", m.ours, true], ["People in general", m.people], ["Their usual move", m.usual]]) : noModel(),
+      m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move; better for ${m.helped} of ${m.players}. ` : ""}` +
+        `When it says ${pct(m.says)}, it happens ${pct(m.happens)} of the time (${m.calib_n.toLocaleString()} decisions).` : ""));
+    rows.append(row("Their hand", h ? bars([["Our top 10 guesses (of 169)", h.top10, true], ["Card counting alone", h.top10_counting]]) : noModel(),
+      h ? `Share of ${h.n.toLocaleString()} unseen hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect): slightly overconfident.` : ""));
+    rows.append(row("Your best move (RL coach)",
+      c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
+        el("div", { class: "sbig muted", text: "Tested once, on sealed tables, when training ends." }),
+      c ? `On tables it never trained on or was picked on, ${c.hands.toLocaleString()} hands each, same cards for both.` +
+        (c.ranges ? ` Predicted hands add ${sgn(c.ranges[0])} ± ${Math.round(c.ranges[1])}.` : "") + ` Watching the table adds ${sgn(c.styles[0])} ± ${Math.round(c.styles[1])}.` :
+        "Opponents it never trained on and that were never used to pick it."));
+    $("#scoreCard").hidden = false;
+  }
+
   // ------------------------------------------------------------ replay of a real player no model has seen
   // Precomputed by scripts/build_replay.py with the same models as the live table (GET /api/lab/replay).
   const RP = { data: null, h: 0, f: 0 };
@@ -564,7 +601,8 @@
     const d = RP.data, s = d.summary;
     $("#replayNote").textContent = `${d.player.hands} of their real hands from many different online tables, studied in order the way a poker tracker would. ` +
       `Before each of their ${d.player.decisions} decisions every model made its guess, then we checked. Right overall: this player's model ${pct(s.personal)}, ` +
-      `people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
+      `people in general ${pct(s.people)}, their usual move ${pct(s.usual)}. This player is close to average, so our model of them stays close to people in general; ` +
+      `across 30 such unseen players it was the better guess for 28.`;
     drawCurve(d.curve);
     $("#replayCard").hidden = false;
   }
@@ -628,6 +666,8 @@
 
   function bind() {
     $("#replayBtn").addEventListener("click", openReplay);
+    $("#scoreBtn").addEventListener("click", openScore);
+    $("#scoreExit").addEventListener("click", () => { $("#scoreCard").hidden = true; });
     $("#replayStep").addEventListener("click", enterSteps);
     $("#replayExit").addEventListener("click", exitReplay);
     $("#rpPrev").addEventListener("click", () => stepReplay(-1));
@@ -646,6 +686,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.target.matches("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key.toLowerCase();
+      if (!$("#scoreCard").hidden && e.key === "Escape") { $("#scoreCard").hidden = true; return; }
       if (L.replay || !$("#replayCard").hidden) {
         if (e.key === "ArrowRight") { if (L.replay) stepReplay(1); else enterSteps(); }
         else if (e.key === "ArrowLeft") stepReplay(-1);

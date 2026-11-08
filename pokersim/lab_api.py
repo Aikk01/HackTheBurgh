@@ -26,6 +26,7 @@ predicted range ("pair+ 35%") rather than a second model.
 """
 from __future__ import annotations
 
+import json
 import os
 from typing import Any, Dict, List, Optional
 
@@ -201,4 +202,42 @@ def predict(game: Any) -> Dict[str, Any]:
         "players": rows,
     }
     game.last_lab = out
+    return out
+
+
+def scorecard() -> Dict[str, Any]:
+    """The "How good are the guesses?" card: results on data no model was trained on, each next to its baseline.
+
+    Sources: data/demo/unseen_players_eval.json (scripts/eval_unseen_players.py), data/demo/calibration.json
+    (scripts/calibration.py) and data/rl/sealed_eval.json (scripts/sealed_eval.py; absent until training ends).
+    A missing source leaves its row None."""
+    root = os.path.join(os.path.dirname(__file__), "..", "data")
+
+    def load(*parts: str) -> Any:
+        try:
+            with open(os.path.join(root, *parts), encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, ValueError):
+            return None
+
+    out: Dict[str, Any] = {"moves": None, "hands": None, "coach": None}
+    u, cal = load("demo", "unseen_players_eval.json"), load("demo", "calibration.json")
+    if u:
+        s = u["summary"]
+        out["moves"] = {"ours": s["mean_personal_top1"], "people": s["mean_people_top1"], "usual": s["mean_usual_top1"],
+                        "players": s["players"], "decisions": s["decisions"], "helped": s["players_helped"]}
+    if cal:
+        nm = cal["next_move"]["online"]
+        b = max(nm["three_way"]["bins"], key=lambda x: x["n"])  # the most common confidence level
+        out["moves"] = {**(out["moves"] or {}), "says": b["pred"], "happens": b["obs"], "calib_n": nm["n"]}
+        a = cal["hand_range"]["pluribus"]["all_streets"]
+        out["hands"] = {"top10": a["top10"], "top10_counting": a["baseline_top10"], "half": a["coverage"]["50"]["hit"],
+                        "n": a["n"]}
+    sealed, meta = load("rl", "sealed_eval.json"), load("rl", "policy.json") or {}
+    if sealed and sealed.get("policies"):
+        run = os.path.basename(str(meta.get("run_dir", "")))
+        name = run if run in sealed["policies"] else next(iter(sealed["policies"]))
+        row = sealed["policies"][name]
+        out["coach"] = {"policy": name, "vs_equity": row["vs_equity_bot"]["all"], "ranges": row["range_inputs_gain"].get("all"),
+                        "styles": row["style_inputs_gain"]["all"], "hands": sealed["hands_per_table"]}
     return out

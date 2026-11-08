@@ -16,11 +16,19 @@
   <div class="hand-meta" id="handMeta" aria-live="polite"></div>
   <ul class="models" id="models" aria-label="Model status"></ul>
   <div class="bar-actions">
+    <button class="btn" id="scoreBtn" type="button" title="Measured on data no model was trained on">How good are the guesses?</button>
     <button class="btn" id="replayBtn" type="button" title="Replay a real player no model has seen">Watch an unseen player</button>
     <button class="btn" id="newTable" type="button">New table</button>
   </div>
 </header>
 <div class="inject-banner" id="injectBanner" hidden>Showing injected test values, not model output. <button class="linkbtn" id="clearInject" type="button">Clear</button></div>
+
+<div class="replay-card score-card" id="scoreCard" hidden>
+  <h2>How good are the guesses?</h2>
+  <p>Every number here is measured on data no model was trained on, next to the simple guess it has to beat.</p>
+  <div id="scoreRows"></div>
+  <div class="replay-actions"><button class="btn ghost" id="scoreExit" type="button">Back to my table</button></div>
+</div>
 
 <div class="replay-card" id="replayCard" hidden>
   <h2>A real player no model has ever seen</h2>
