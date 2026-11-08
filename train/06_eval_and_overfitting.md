@@ -63,3 +63,14 @@ the candidates with its `export_heldout/`. It starts about two hours later than 
 
 **Added at 04:35, before any sealed result:** v3-bc-s2, a second imitation-start seed (Eddie), to tell whether v3-bc's early
 lead is the method or luck. It joins the candidates with its `export_heldout/`.
+
+**Added at 04:47, before any sealed result:**
+- **Stopped early:** v3-ranges (seed 1) and v2-eddie stopped at 04:46, and v3-noranges (seed 1) at 04:47, to free Eddie
+  slots. Their best held-out exports stay candidates.
+- **v3-bc-kl10 and v3-bc-kl30:** PPO from v3-bc's imitation start with a penalty on KL(policy ‖ imitation policy) of
+  weight 0.1 and 0.3 (`--kl-bc`), entropy coefficient 0.005. The question: does keeping the coach close to the
+  Pluribus imitation help, and how strongly?
+- **imitation-only:** the imitation network itself (v3-bc's `bc_init.pt`, no RL), exported as a candidate. It
+  measures what RL adds on top of copying Pluribus.
+- **Reading:** together with v3-bc and v3-bc-s2 (no pull) this gives a ladder: imitation only → strong pull → light
+  pull → free. The v3-bc vs v3-bc-s2 gap is the noise level.

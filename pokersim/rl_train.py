@@ -319,6 +319,14 @@ class Trainer:
         torch.manual_seed(args.seed)
         self.net = build_net(torch).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=args.lr, eps=1e-5)
+        # --kl-bc: a frozen imitation policy the learner is pulled towards (fine-tuning without forgetting it)
+        self.ref = None
+        if getattr(args, "kl_bc", 0.0) > 0:
+            if not args.kl_bc_ref:
+                raise SystemExit("--kl-bc needs --kl-bc-ref (the imitation checkpoint, e.g. bc_init.pt)")
+            self.ref = build_net(torch).to(self.device)
+            self.ref.load_state_dict(torch.load(args.kl_bc_ref, map_location=self.device, weights_only=False)["net"])
+            self.ref.eval().requires_grad_(False)
         self.update = 0
         self.steps = 0
         self.hands = 0
@@ -452,6 +460,12 @@ class Trainer:
                         p_all = logp_all.exp()
                         ent = -(p_all * logp_all.masked_fill(~M[idx], 0.0)).sum(-1).mean()
                         loss = pi_loss + a.vf_coef * v_loss - ent_coef * ent
+                        if self.ref is not None:  # KL(pi || pi_imitation) on the states visited
+                            with torch.no_grad():
+                                ref_lp = torch.log_softmax(self.ref(X[idx])[0].masked_fill(~M[idx], -1e9), -1)
+                            kl_bc = (p_all * (logp_all - ref_lp)).masked_fill(~M[idx], 0.0).sum(-1).mean()
+                            loss = loss + a.kl_bc * kl_bc
+                            stats["kl_bc"] = stats.get("kl_bc", 0.0) + kl_bc.item()
                         self.opt.zero_grad(set_to_none=True)
                         loss.backward()
                         torch.nn.utils.clip_grad_norm_(self.net.parameters(), 0.5)
@@ -473,7 +487,8 @@ class Trainer:
                 logf.flush()
                 if self.update % a.print_every == 0:
                     print(f"upd {self.update:5d} · {self.steps:,} steps · {self.hands:,} hands · {sps:,.0f} steps/s · "
-                          f"rollout {row[5]:+.1f} bb/100 · ent {row[8]:.3f} · kl {row[9]:.4f} · {elapsed / 3600:.2f} h", flush=True)
+                          f"rollout {row[5]:+.1f} bb/100 · ent {row[8]:.3f} · kl {row[9]:.4f} · {elapsed / 3600:.2f} h"
+                          + (f" · kl to imitation {stats['kl_bc'] / k:.4f}" if "kl_bc" in stats else ""), flush=True)
                 if self.update % a.snapshot_every == 0:
                     sid = self.update
                     self.snapshots[sid] = export_params(self.net)
@@ -635,6 +650,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--heldout-hands", type=int, default=10000, help="hands per held-out lineup per hero (these pick the model)")
     ap.add_argument("--mix", choices=["v3", "v2"], default="v3", help="training opponents: v3 adds pro-like bots, v2 is the old pool")
     ap.add_argument("--no-range-inputs", action="store_true", help="ablation: zero the predicted-hand inputs everywhere")
+    ap.add_argument("--kl-bc", type=float, default=0.0, help="weight of KL(policy || imitation policy); 0 = off")
+    ap.add_argument("--kl-bc-ref", default=None, help="checkpoint of the imitation policy for --kl-bc (bc_init.pt)")
     ap.add_argument("--eval-chunks", type=int, default=6)
     ap.add_argument("--ckpt-minutes", type=float, default=10.0)
     ap.add_argument("--print-every", type=int, default=1)
