@@ -2,10 +2,10 @@
  "hands": 600,
  "table": [
   "pro",
-  "pro:tilt_f=-1.5,tilt_r=1.5",
-  "pro:tilt_f=-1.5,tilt_c=1.5,tilt_r=-1.0",
-  "pro:tilt_f=1.5,tilt_r=-1.0",
-  "pro:tilt_f=0.6,tilt_r=1.0"
+  "type:style=lag",
+  "type:style=lp",
+  "type:style=tp",
+  "reader:style=tag"
  ],
  "levels": [
   0.5,
@@ -13,74 +13,74 @@
   0.9
  ],
  "widths": {
-  "Pro": 0.075,
-  "Gambler": 0.32499999999999996,
-  "Sticky": 0.37499999999999994,
-  "Rock": 0.27499999999999997,
-  "Shark": 0.12499999999999999
+  "Pro": 0.049999999999999996,
+  "Gambler": 0.12499999999999999,
+  "Sticky": 0.27499999999999997,
+  "Rock": 0.39999999999999997,
+  "Shark": 0.22499999999999998
  },
  "reference": "Pluribus test hands (humans and Pluribus): inside 50/80/90% = 0.47 / 0.78 / 0.89",
  "all": {
-  "n": 13706,
-  "inside_50": 0.451,
-  "inside_80": 0.777,
-  "inside_90": 0.885
+  "n": 13366,
+  "inside_50": 0.456,
+  "inside_80": 0.778,
+  "inside_90": 0.888
  },
  "by_player": {
   "Gambler": {
-   "n": 2954,
-   "inside_50": 0.438,
-   "inside_80": 0.79,
-   "inside_90": 0.885
+   "n": 2534,
+   "inside_50": 0.428,
+   "inside_80": 0.745,
+   "inside_90": 0.893
   },
   "Pro": {
-   "n": 2453,
-   "inside_50": 0.44,
-   "inside_80": 0.759,
-   "inside_90": 0.888
+   "n": 2463,
+   "inside_50": 0.457,
+   "inside_80": 0.76,
+   "inside_90": 0.873
   },
   "Rock": {
-   "n": 2442,
-   "inside_50": 0.474,
-   "inside_80": 0.778,
-   "inside_90": 0.872
+   "n": 2536,
+   "inside_50": 0.488,
+   "inside_80": 0.809,
+   "inside_90": 0.901
   },
   "Shark": {
-   "n": 2822,
-   "inside_50": 0.427,
-   "inside_80": 0.742,
-   "inside_90": 0.874
+   "n": 2595,
+   "inside_50": 0.432,
+   "inside_80": 0.77,
+   "inside_90": 0.879
   },
   "Sticky": {
-   "n": 3035,
-   "inside_50": 0.474,
-   "inside_80": 0.81,
-   "inside_90": 0.9
+   "n": 3238,
+   "inside_50": 0.47,
+   "inside_80": 0.799,
+   "inside_90": 0.893
   }
  },
  "by_street": {
   "preflop": {
-   "n": 10649,
-   "inside_50": 0.454,
-   "inside_80": 0.771,
+   "n": 10547,
+   "inside_50": 0.449,
+   "inside_80": 0.766,
    "inside_90": 0.877
   },
   "flop": {
    "n": 1338,
-   "inside_50": 0.451,
-   "inside_80": 0.806,
-   "inside_90": 0.916
+   "inside_50": 0.487,
+   "inside_80": 0.814,
+   "inside_90": 0.938
   },
   "turn": {
-   "n": 1009,
-   "inside_50": 0.43,
-   "inside_80": 0.781,
-   "inside_90": 0.902
+   "n": 909,
+   "inside_50": 0.501,
+   "inside_80": 0.839,
+   "inside_90": 0.934
   },
   "river": {
-   "n": 710,
-   "inside_50": 0.431,
-   "inside_80": 0.804,
+   "n": 572,
+   "inside_50": 0.439,
+   "inside_80": 0.811,
    "inside_90": 0.911
   }
  }

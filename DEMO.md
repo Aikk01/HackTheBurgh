@@ -18,8 +18,19 @@ Run it: `python -m pokersim serve --port 8765`, then open http://localhost:8765/
 | Bottom middle | The model of **you**: its guess of your move (shown after you act), how often it has been right, your habit | |
 | Bottom right | Bet-size buttons and the **bluff check**: "if you raise to X with nothing: everyone folds Y%, needed to break even Z%, so a bluff wins or loses N chips" | Each player's own model, on a copy of the hand with your bet in |
 
-**The players:** five models of real professionals, each nudged into one classic type: **Pro** and **Shark** (tight
-aggressive), **Gambler** (loose aggressive), **Sticky** (loose passive), **Rock** (tight passive).
+**The players:**
+- **Pro** plays like the human professionals of the Pluribus games (tight aggressive).
+- The other four are the four classic types, **mined from 10,213 real online regulars**. The core of each type was kept:
+  - **Shark:** tight aggressive (1,395 players);
+  - **Gambler:** loose aggressive (237);
+  - **Sticky:** loose passive (1,949);
+  - **Rock:** tight passive (350).
+- Each plays its cards through the pros' model, with its type's real habits in each of 24 situations (street, facing a bet or not, position). Fitted until their stats match:
+
+  | Bot | VPIP | PFR | AF |
+  |---|---|---|---|
+  | Shark | 19% (real 17%) | 16% (real 14%) | 4.2 (real 3.9) |
+  | Sticky | 34% (real 36%) | 12% (real 12%) | 1.9 (real 1.8) |
 
 **The Shark reads the table.** Before each move it asks the players' models how likely they all are to fold if it bets
 about the pot, compared with people in general. If they fold more, it bluffs more; if they call more, it bluffs less.

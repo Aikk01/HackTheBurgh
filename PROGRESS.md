@@ -175,7 +175,27 @@ penalty keeps play closer to Pluribus but wins less on these tables.
 - **Type pass:** four text sizes (11 / 12 / 13 / 14 px) instead of fourteen, brighter secondary text, digits that line
   up, no italic placeholders; the scorecard scrolls inside the window.
 
-**Running now:** nothing. Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+**Done 07:25–07:40: bots mined from real players.**
+- **Mined the four types** from the online hands (`scripts/mine_types.py`, `data/demo/player_types.json`):
+  - 10,213 regulars with 1,000+ hands, sorted by VPIP and an aggression score;
+  - the core 30% of each type kept: tight aggressive 1,395 players (VPIP 17%, PFR 14%, AF 3.9), loose aggressive 237
+    (30 / 23 / 3.8), loose passive 1,949 (36 / 12 / 1.8), tight passive 350 (17 / 9 / 1.7).
+- **Fitted bots** (`scripts/fit_types.py`, `agents.TypeAgent`, `data/demo/type_tilts.json`): the pros' card-aware model
+  with a tilt per situation (street × facing a bet × position), fitted by simulation until the rates match.
+  - The bots land at tight aggressive 19 / 16 / 4.2, loose aggressive 28 / 21 / 3.6, loose passive 34 / 12 / 1.9 and
+    tight passive 17 / 10 / 2.4.
+  - The online hands carry no results, so no "winners" could be picked. A skill setting was tried, but the win-rate
+    differences (−7 to +11 bb/100 over 16,000 hands) were within noise, so it was not used.
+- **The table:** Pro, Gambler (loose aggressive), Sticky (loose passive), Rock (tight passive), and the Shark (tight
+  aggressive, reads the table).
+- **Rebuilt for it:**
+  - bluff check on a fresh session: 33.9% said, 30.3% happened (each player 71% / 70%);
+  - grid: 46 / 78 / 89%;
+  - "a player like you": you 84% vs 75% for people in general.
+- **The trade-off:** our models of these realistic players guess the next move no better than people in general (69%
+  vs 70%). Real regulars differ in how often they do things, not in their single most likely move.
+
+**Running now:** the Shark simulation for the new replay (`scripts/build_sim_shark.py`). Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
 - 07:20: the sealed test, ship the best held-out policy to `data/rl/policy.npz`, rebuild the replay.

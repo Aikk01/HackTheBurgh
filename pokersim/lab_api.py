@@ -34,12 +34,12 @@ import numpy as np
 
 from . import cards as C
 
-# The Poker Mirror table (served at /api/lab/table): five players from the next-move model of the human professionals
-# in the Pluribus games, with their own cards, each nudged into one of the four classic player types by a tilt on its
-# fold / call / raise logits, strongly enough that each type is plain to see (RL training used tilts within ±0.5; the
-# sealed test uses 1.2).
-MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_f=-1.5,tilt_r=1.5", "Gambler"), ("pro:tilt_f=-1.5,tilt_c=1.5,tilt_r=-1.0", "Sticky"),
-                ("pro:tilt_f=1.5,tilt_r=-1.0", "Rock"), ("reader:tilt_f=0.6,tilt_r=1.0", "Shark")]  # the Shark reads the table
+# The Poker Mirror table (served at /api/lab/table): the Pro is the next-move model of the human professionals in the
+# Pluribus games, with its own cards; the other four are the four classic types, mined from real online regulars
+# (scripts/mine_types.py) and fitted onto that model situation by situation (scripts/fit_types.py, agents.TypeAgent).
+# The Shark is the tight aggressive type that also reads the table (agents.ReaderAgent).
+MIRROR_TABLE = [("pro", "Pro"), ("type:style=lag", "Gambler"), ("type:style=lp", "Sticky"), ("type:style=tp", "Rock"),
+                ("reader:style=tag", "Shark")]
 MIRROR_TYPE = {"Pro": "tight aggressive", "Gambler": "loose aggressive", "Sticky": "loose passive", "Rock": "tight passive",
                "Shark": "tight aggressive"}
 

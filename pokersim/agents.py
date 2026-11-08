@@ -21,7 +21,7 @@ import random
 import time
 import urllib.error
 import urllib.request
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import cards as C
 from .equity import estimate_equity, preflop_strength
@@ -462,7 +462,55 @@ class ProAgent(Agent):
         return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=self.tilt)
 
 
-class ReaderAgent(ProAgent):
+TYPE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "type_tilts.json")
+TYPE_CODES = {"tag": "tight aggressive", "lag": "loose aggressive", "lp": "loose passive", "tp": "tight passive"}
+_TYPE_TABLE: Dict[str, Any] = {}
+
+
+def type_table() -> Dict[str, Any]:
+    if "t" not in _TYPE_TABLE:
+        try:
+            with open(TYPE_FILE, encoding="utf-8") as f:
+                _TYPE_TABLE["t"] = json.load(f)
+        except (OSError, ValueError):
+            _TYPE_TABLE["t"] = {}
+    return _TYPE_TABLE["t"]
+
+
+class TypeAgent(ProAgent):
+    """A player of one classic type, mined from real regulars (scripts/mine_types.py, scripts/fit_types.py): the
+    card-aware model of the professionals, tilted situation by situation (street x facing a bet x position) so that
+    its fold / call / raise rates match its type's, played at the temperature that won most for that type."""
+
+    kind = "type"
+    label = "Regular"
+    description = "Plays like real regulars of one type (tight or loose, aggressive or passive), mined from online hands."
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.style = TYPE_CODES.get(str(params.get("style", "")).lower())
+        fit = type_table().get("types", {}).get(self.style or "", {})
+        self.table = fit.get("tilt")  # [street][facing][position] -> [fold, call, raise]
+        if self.table is not None and "temp" not in params:
+            self.temp = float(fit.get("temp", 1.0))
+
+    def tilt_for(self, obs: Observation) -> Tuple[float, float, float]:
+        if not self.table:
+            return self.tilt
+        n, i = len(obs["players"]), obs["hero"]["index"]
+        street = ["preflop", "flop", "turn", "river"].index(obs["street"]) if obs["street"] in ("preflop", "flop", "turn", "river") else 3
+        facing = 1 if float((obs.get("legal_actions") or {}).get("call") or 0) > 0 else 0
+        pos = 0 if i < 2 else 2 if i >= n - 2 else 1  # blinds / early / late; the button is the last index
+        t = self.table[street][facing][pos]
+        return (t[0] + self.tilt[0], t[1] + self.tilt[1], t[2] + self.tilt[2])
+
+    def act(self, obs: Observation) -> Action:
+        from .next_move import sample_action
+
+        return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=self.tilt_for(obs))
+
+
+class ReaderAgent(TypeAgent):
     """A Pro that reads the table (the Poker Mirror's Shark): before each move it asks the models of the players still
     in how likely they all are to fold if it bets about the pot, against how often people in general would, and raises
     more when they fold more (it bluffs them) and less when they call more.  One level only: it reads what players do,
@@ -482,7 +530,7 @@ class ReaderAgent(ProAgent):
     def act(self, obs: Observation) -> Action:
         from .next_move import sample_action
 
-        tilt = self.tilt
+        tilt = self.tilt_for(obs)
         if self.reads_provider is not None:
             try:
                 r = self.reads_provider(obs)
@@ -659,6 +707,7 @@ AGENT_TYPES: Dict[str, type] = {
     "pro": ProAgent,
     "plur": PluribusLikeAgent,
     "reader": ReaderAgent,
+    "type": TypeAgent,
     "nit": NitShoverAgent,
     "trapper": TrapperAgent,
     "minraiser": MinRaiserAgent,
