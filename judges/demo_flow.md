@@ -18,11 +18,14 @@ Shared by every mock judge in this folder. The judge watches; the presenter driv
      they disagree, a note says why.
    - Size buttons, and the **bluff check**: "if you bet X, they all fold Y% of the time, it needs Z%".
 3. **Showdown (about 20 s).** Where the real hand sat in our guess ("our #12 guess of 169").
-4. **"A player like you" (about 1 minute).** In about 10 seconds, a simulated human-like player who calls a lot plays
-   500 hands in the presenter's seat, and every model starts knowing nothing: the model of you and the models of the
-   five players. Over the last 100 hands the model of you is right 81% of the time against 70% for people in general,
-   and the models of the players 72% against 68%. "Now you play": the presenter takes the seat with all of them
-   carried over and plays like that player.
+4. **"The Shark learns you" (about 1 minute, a 10-second replay).**
+   - A player with a common leak ("fit or fold": gives up to almost any bet after the flop) sits in the presenter's
+     seat for 60 hands.
+   - The Shark reads every player's model before it bets. At first its seat says "plays its normal game"; by hand 50
+     the model of you shows the leak (folds 86% to a bet after the flop, people 52%), and its seat says "bluffs more".
+   - Measured over 100 sittings, with and without its read: it bets into you heads-up 26% → 52% (31% when not
+     reading).
+   - "Now you play": the Shark keeps its read until you change.
 5. **"How good are the guesses?" (about 30 s).** Every number next to its baseline, on data no model was trained on:
    next move, hand grid, bluff check, and the RL coach on sealed tables.
 

@@ -547,14 +547,14 @@
     const worst = b.players.slice().sort((x, y) => x.fold - y.fold)[0];
     const seatOf = (i) => { const p = h && h.players.find((q) => q.index === i); return p ? p.seat : null; };
     const chips = (x) => fmt(Math.round(x * 10) / 10);
-    box.append(
+    box.append(...[  // the browser's append would print a null as "null": the optional line is filtered out
       el("div", { class: "bh", text: `If you ${word} ${fmt(b.amount)} with nothing` }),
       el("div", { class: "brow" }, el("span", { text: "Everyone folds" }), el("b", { text: pctSoft(b.all_fold) })),
       el("div", { class: "brow" }, el("span", { text: "Needed to break even" }), el("b", { text: pct(b.needs) })),
       el("div", { class: "bv " + (pays ? "ok" : "bad"), text: pays ? `So a bluff wins about ${chips(b.worth)} chips` : `So a bluff loses about ${chips(-b.worth)} chips` }),
       el("div", { class: "bw" }, "Each folds: ", ...b.players.map((p, i) => el("span", { style: `--pc: var(${colourOf(seatOf(p.index))})` },
         el("b", { text: p.name }), ` ${pctSoft(p.fold)}${i < b.players.length - 1 ? "," : ""}`))),
-      worst && worst.fold < 0.3 ? el("div", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null);
+      worst && worst.fold < 0.3 ? el("div", { class: "tag", text: `${worst.name} ${worst.fold < 0.1 ? "almost never folds" : "rarely folds"}` }) : null].filter(Boolean));
   }
 
   function renderSide() {
@@ -964,12 +964,12 @@
       const cv = el("div", { class: "curve" });
       cv.innerHTML = curveSVG(rows, i);
       box.innerHTML = "";
-      box.append(el("p", { class: "kicker", text: `Fast-forward · simulated hand ${i > 0 ? rows[i - 1][0] : 1} of ${d.player.hands}` }),
+      box.append(...[el("p", { class: "kicker", text: `Fast-forward · simulated hand ${i > 0 ? rows[i - 1][0] : 1} of ${d.player.hands}` }),
         el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "You" }), el("span", { class: "ff-you" }, "our model ", el("b", { text: pct(acc(0)) })),
           el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(acc(1)) }))),
         ow.length ? el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "The 5 players" }), el("span", { class: "ff-you" }, "our models ", el("b", { text: pct(oacc(0)) })),
           el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(oacc(1)) }))) : null,
-        cv, legend());
+        cv, legend()].filter(Boolean));
       if (k < 1) requestAnimationFrame(frame);
       else setTimeout(() => { box.hidden = true; done(); }, 350);
     };
@@ -985,7 +985,7 @@
     go.addEventListener("click", adopt);
     box.className = "ffwd end";
     box.innerHTML = "";
-    box.append(el("p", { class: "kicker", text: `After ${d.player.hands} simulated hands · right on its last 100` }),
+    box.append(...[el("p", { class: "kicker", text: `After ${d.player.hands} simulated hands · right on its last 100` }),
       el("div", { class: "ff-big" }, el("div", { class: "ff-you" }, el("b", { text: pct(s.personal) }), el("span", { text: "Model of you" })),
         el("div", { class: "ff-ppl" }, el("b", { text: pct(s.people) }), el("span", { text: "People in general" })),
         el("div", { class: "ff-usu" }, el("b", { text: pct(s.usual) }), el("span", { text: "Your usual move" }))),
@@ -994,7 +994,7 @@
       f ? el("p", { class: "ff-note", text: `In the first 20 hands the model of you was right ${pct(f.personal)} (people in general ${pct(f.people)}): it starts as people in general and learns from there.` }) : null,
       cv, legend(),
       el("ul", { class: "habits" }, ...(d.habits || []).slice(0, 2).map((h) => el("li", { text: h.text }))),
-      el("p", { class: "ff-note", text: "Now you play: the model of you and all five player models carry over from these 500 hands." }), go);
+      el("p", { class: "ff-note", text: "Now you play: the model of you and all five player models carry over from these 500 hands." }), go].filter(Boolean));
     box.hidden = false;
     if (MOTION) box.animate([{ opacity: 0, transform: "translate(-50%, -46%)" }, { opacity: 1, transform: "translate(-50%, -50%)" }], { duration: 320, easing: "ease-out" });
   }

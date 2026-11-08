@@ -64,8 +64,9 @@ display only. Turn it on for judges, off for real play.
 4. **(Optional) "A player like you" (1 min).**
    - A simulated player who calls a lot plays 500 hands in your seat, in about 10 seconds, while every model starts
      knowing nothing.
-   - It ends on: model of you **81%** vs people in general **70%** (last 100 hands); the five players' models **72%**
-     vs **68%**.
+   - It ends on: model of you **78%** vs people in general **68%** (last 100 hands). The five players' models match
+     people in general (70% vs 70%): realistic regulars differ in how often they do things, not in their most likely
+     move.
    - Press **Now you play**: all those models carry over. Call a lot, and watch it predict you.
 5. **"How good are the guesses?" (1 min).** The strongest screen: lead with it and do not rush it. Every number sits next to its baseline,
    on data no model was trained on.
@@ -79,8 +80,8 @@ Both mock judges said the same thing: **lead with the scorecard and the bluff ch
 | Next move is calibrated | says 75% → happens 76% | 670,615 decisions by unseen online players |
 | A player's own model beats people in general | +1.3 ± 1.2 points; sharper probabilities for 28 of 30 players | 30 real players no model saw (17,400 decisions) |
 | Hand model beats card counting | real hand in our top 10: 16% vs 8% (after the flop 29% vs 5%) | 44,036 guesses on unseen Pluribus hands, every card known |
-| Hand zones are honest | likeliest 50 / 80 / 90% hold it 45 / 78 / 89% of the time | this table's players, fresh hands |
-| Bluff check is right | "they all fold" said 27%, happened 24%; each player said 66%, folded 67% | 873 bets really made at this table, a session it was not fitted on |
+| Hand zones are honest | likeliest 50 / 80 / 90% hold it 48 / 79 / 90% of the time | this table's players, fresh hands |
+| Bluff check is right | "everyone folds" said 30%, happened 28%; each player said 68%, folded 68% | 871 bets really made at this table, a session it was not fitted on |
 | RL coach wins | **+156 ± 15** bb/100 against a maths bot, same cards | sealed tables: opponents it never trained on or was picked on, 30,000 hands each |
 | RL adds to copying Pluribus | **+154 ± 14** over the same network copying Pluribus without RL | same |
 | Our hand predictions help the coach | **+82 ± 14** when switched off | same |
@@ -109,9 +110,9 @@ That is why the Shark pounces, and why the claim is about what it does, not abou
 ## Questions the judges asked, and our answers
 
 - **"Where does modelling one opponent make money?"** In the bluff check: its fold chances come from each player's own
-  model, and they are calibrated (said 66%, folded 67%). The RL coach's opponent-style inputs add nothing measurable
+  model, and they are calibrated (said 68%, folded 68%). The RL coach's opponent-style inputs add nothing measurable
   (−1 ± 14), and we say so on the scorecard.
-- **"Is 81% vs 70% from one simulated player?"** Yes, a clearly loose one, to show the mechanism. On 30 real players the
+- **"Is 78% vs 68% from one simulated player?"** Yes, a clearly loose one, to show the mechanism. On 30 real players the
   gain is small but real: +1.3 ± 1.2 points.
 - **"Does the coach notice it is being exploited?"** No. The coach is a fixed policy: it does not learn during play.
   - Passively, it randomises its moves and reads each opponent's predicted range.
