@@ -324,7 +324,7 @@ class GameSession:
         verb = result["action"]
         s = "" if name == "You" else "s"
         text = f"{name} {verb}{s}" if verb in ("fold", "check") else (
-            f"{name} call{s} {_money(result.get('amount', 0))}" if verb == "call" else
+            f"{name} {verb}{s} {_money(result.get('amount', 0))}" if verb in ("call", "bet") else
             f"{name} {verb}{s} to {_money(result.get('amount', 0))}")
         if ev and ev.get("all_in"):
             text += " (all-in)"
