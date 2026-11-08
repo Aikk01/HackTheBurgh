@@ -18,7 +18,10 @@ Shared by every mock judge in this folder. The judge watches; the presenter driv
      they disagree, a note says why.
    - Size buttons, and the **bluff check**: "if you bet X, they all fold Y% of the time, it needs Z%".
 3. **Showdown (about 20 s).** Where the real hand sat in our guess ("our #12 guess of 169").
-4. **"The Shark learns you" (about 1 minute, a 10-second replay).**
+   - If the presenter went against the RL coach, the **"If you had followed the coach"** box appears until the next
+     hand. It shows what each move would have won from that spot (same cards, 150 replays each, the coach finishing
+     the hand) and what the presenter's move cost against the coach's own mix, with ±, or "too close to call".
+4. **"The Shark learns you" (about 1 minute, a 30-second replay).**
    - A player with a common leak ("fit or fold": gives up to almost any bet after the flop) sits in the presenter's
      seat for 60 hands.
    - The Shark reads every player's model before it bets. At first its seat says "plays its normal game"; by hand 50

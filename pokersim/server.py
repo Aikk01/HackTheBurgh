@@ -4,6 +4,7 @@ Run with ``python -m pokersim serve`` and open http://127.0.0.1:8000/.
 """
 from __future__ import annotations
 
+import copy
 import json
 import mimetypes
 import os
@@ -113,6 +114,7 @@ class GameSession:
         self.watch = TableWatch()  # personal models: predicts every player's next move before it happens
         self.last_lab: Optional[Dict[str, Any]] = None
         self.adopted: Optional[Dict[str, Any]] = None  # "Now you play": the simulated model of you (adopt_you)
+        self.what_if: Optional[Dict[str, Any]] = None  # "If you had followed the coach", this hand (pokersim.what_if)
 
     # -- setup ----------------------------------------------------------------
     def new_game(self, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -174,6 +176,7 @@ class GameSession:
             self.mode = "table"
             self.scenario = None
             self.hand_counter = 0
+            self.what_if = None
             self._apply_adopted()  # "Now you play" survives a new table
             return self.next_hand()
 
@@ -398,10 +401,13 @@ class GameSession:
                 w_obs, w_pred, _ = self.watch.before(hand, actor, human=True)
             except Exception:  # noqa: BLE001 - the personal model never blocks play
                 w_obs = None
+            snap = self._coach_snap(hand, actor)
             try:
                 result = hand.act(actor, action, amount)
             except IllegalAction as exc:
                 raise ApiError(str(exc))
+            if snap is not None:
+                self._what_if_start(snap, result)
             if w_obs is not None:
                 try:
                     shown = (self.last_lab or {}).get("you") or {}
@@ -415,6 +421,82 @@ class GameSession:
             self._settle()
             self._kick_bots()
             return self.state()
+
+    # -- "If you had followed the coach" (pokersim.what_if) --------------------
+    def _coach_snap(self, hand: Hand, actor: int) -> Optional[Dict[str, Any]]:
+        """Before your move: the coach's mix and a copy of the hand, until your first move against the coach."""
+        if self.mode != "table" or len(self.human_seats) != 1:
+            return None
+        rec = self.what_if
+        if rec is None or rec["hand_id"] != hand.hand_id:
+            rec = self.what_if = {"hand_id": hand.hand_id, "viewer": actor, "decisions": 0, "status": None}
+        rec["decisions"] += 1
+        if rec["status"] is not None:  # only your first move against the coach is scored
+            return None
+        try:
+            from .rl_policy import load_policy
+            from .what_if import coach_mix
+
+            policy = load_policy()
+            if policy is None:
+                return None
+            styles = {p.index: self.styles.estimate(p.name) for p in hand.players}
+            obs = hand.observation(actor)
+            p, moves = coach_mix(obs, styles, policy)
+            return {"hand": copy.deepcopy(hand), "actor": actor, "p": p, "moves": moves, "styles": styles,
+                    "policy": policy, "street": obs["street"]}
+        except Exception:  # noqa: BLE001 - the what-if box never blocks play
+            traceback.print_exc()
+            return None
+
+    def _what_if_start(self, snap: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Your move went against the coach's top choice: play out every move from that spot, in the background."""
+        from .lab_api import reads_on
+        from .what_if import coach_pick, group_of, score_spot
+
+        pick = coach_pick(snap["p"], snap["moves"])
+        mine = group_of(result["action"])
+        if mine == group_of(pick["action"]):
+            return
+        moves = list(snap["moves"])
+        moves[mine] = {"action": result["action"], "amount": result.get("amount")}  # yours at your size
+        rec = self.what_if
+        hand = snap["hand"]
+        rec.update(status="running", street=snap["street"], you_move=_move_text(result, past=True),
+                   moves=[_move_text(m) if m else None for m in moves])
+        agents = {p.index: self.agents.get(self._seat_of(p.index)) for p in hand.players if p.index != snap["actor"]}
+        watch = self.watch
+
+        def run() -> None:
+            try:
+                res = score_spot(hand, snap["actor"], mine, snap["p"], moves, agents, snap["styles"], snap["policy"],
+                                 reads=lambda h, i: reads_on(h, i, watch), seed=int(hand.hand_id or 0))
+                rec.update(result=res, status="done")
+            except Exception:  # noqa: BLE001
+                traceback.print_exc()
+                rec["status"] = "failed"
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def what_if_report(self) -> Dict[str, Any]:
+        """GET /api/lab/whatif: once the hand is over, every move from your first move against the coach, played out,
+        and what yours cost against the coach's mix (pokersim.what_if)."""
+        with self.lock:
+            hand, rec = self.hand, self.what_if
+            if hand is None or rec is None or rec["hand_id"] != hand.hand_id:
+                return {"available": False}
+            if hand.status not in ("finished", "incomplete"):
+                return {"available": False, "reason": "hand running"}
+            p = hand.players[rec["viewer"]]
+            actual = round(p.stack - p.starting_stack, 1)
+            if rec["status"] is None:
+                return {"available": True, "ready": True, "followed": True, "decisions": rec["decisions"], "you": actual}
+            if rec["status"] != "done":
+                return {"available": rec["status"] == "running", "ready": False}
+            res = rec["result"]
+            opts = [{**o, "move": rec["moves"][o["group"]]} for o in res["options"]]
+            return {"available": True, "ready": True, "followed": False, "street": rec["street"], "you_move": rec["you_move"],
+                    "you": actual, **res, "options": opts}
 
     def _log_action(self, hand: Hand, seat: int, result: Dict[str, Any], raw: Optional[Dict[str, Any]]) -> None:
         ev = next((e for e in reversed(hand.events) if e["type"] == "action"), None)
@@ -618,6 +700,15 @@ class GameSession:
                 "scenario": {"label": self.scenario["record"].label, "step_index": self.scenario.get("step_index")}
                 if self.scenario else None,
             }
+
+
+def _move_text(a: Dict[str, Any], past: bool = False) -> str:
+    """An engine action as words: "fold", "call 8", "raise to 24" (``past``: "folded", "called 8", "raised to 24")."""
+    verb, amt = a["action"], a.get("amount")
+    word = {"fold": "folded", "check": "checked", "call": "called", "bet": "bet", "raise": "raised"}.get(verb, verb) if past else verb
+    if verb in ("fold", "check") or amt is None:
+        return word
+    return f"{word} {_money(amt)}" if verb in ("call", "bet") else f"{word} to {_money(amt)}"
 
 
 def _money(x: Any) -> str:
@@ -1062,6 +1153,8 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/lab/predict":
             from .lab_api import predict
             return predict(APP.game)
+        if path == "/api/lab/whatif":  # "If you had followed the coach" (pokersim.what_if)
+            return APP.game.what_if_report()
         if path == "/api/lab/bluff":
             from .lab_api import bluff
             return bluff(APP.game, float(qs.get("amount", 0) or 0))

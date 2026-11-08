@@ -306,19 +306,27 @@ def table_reads(game: Any, actor: int) -> Optional[Dict[str, Any]]:
     Public information only; called from the bot's own turn."""
     import copy
 
-    from .next_move import predict as nm_predict
-
     with game.lock:
         hand = game.hand
         if hand is None or hand.status != "betting" or hand.actor != actor:
             return None
-        obs = hand.observation(actor)
-        la = obs.get("legal_actions") or {}
-        if not la.get("raise"):
-            return None
-        pot, to_call, mine = float(obs["total_pot"]), float(la.get("call") or 0), float(obs["hero"]["bet"] or 0)
-        amount = min(max(mine + to_call + pot + to_call, float(la["min_raise_to"])), float(la["max_raise_to"]))
         h = copy.deepcopy(hand)
+    return reads_on(h, actor, game.watch)
+
+
+def reads_on(hand: Any, actor: int, watch: Any) -> Optional[Dict[str, Any]]:
+    """table_reads on any hand with ``actor`` to act: the live one, or a copy replayed by pokersim.what_if."""
+    import copy
+
+    from .next_move import predict as nm_predict
+
+    obs = hand.observation(actor)
+    la = obs.get("legal_actions") or {}
+    if not la.get("raise"):
+        return None
+    pot, to_call, mine = float(obs["total_pot"]), float(la.get("call") or 0), float(obs["hero"]["bet"] or 0)
+    amount = min(max(mine + to_call + pot + to_call, float(la["min_raise_to"])), float(la["max_raise_to"]))
+    h = copy.deepcopy(hand)
     h.act(actor, la.get("raise_kind", "raise"), amount)
     fit = _fold_fit()
 
@@ -334,7 +342,7 @@ def table_reads(game: Any, actor: int) -> Optional[Dict[str, Any]]:
         guard += 1
         j = h.actor
         o = h.observation(j)
-        ours *= fix(float(game.watch.model(h.players[j].name).predict(o, j)[0][0]))
+        ours *= fix(float(watch.model(h.players[j].name).predict(o, j)[0][0]))
         people *= fix(float(nm_predict(o, j, with_cards=False)[0]))
         h.fold(j)
     return {"all_fold": round(ours, 3), "people": round(people, 3), "amount": amount}

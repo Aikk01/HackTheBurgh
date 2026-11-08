@@ -249,7 +249,7 @@
   const FX = { hid: null, dealAt: 0, board: 0, boardFrom: 0, boardAt: 0, bets: {}, shown: {}, paid: null, pot: 0, xy: {} };
   function motion(h, g, order) {
     if (!MOTION) return;
-    const now = Date.now(), k = L.replay && L.fastMs ? 0.35 : 1;  // the fast-forwarded replay moves faster
+    const now = Date.now(), k = L.replay && L.fastMs && L.fastMs < 600 ? 0.35 : 1;  // a fast-forwarded replay moves faster
     const stage = $("#stage").getBoundingClientRect();
     const fx = $("#fx");
     const nb = h.board.filter(Boolean).length;
@@ -461,6 +461,7 @@
     $("#raise").hidden = over || L.replay;
     $(".act-row").hidden = over || L.replay;
     $("#replayNav").hidden = !L.replay;
+    askWhatIf(over);
     const actor = h && h.players.find((p) => p.index === h.actor);
     $("#actTitle").textContent = !h ? "Your move" : over ? "Hand over" : yourTurn ? "Your move" : `Waiting for ${actor ? actor.name : "the table"}`;
     $("#actNote").textContent = yourTurn ? "" : over ? "Press N or Enter for the next hand." : m && m.folded ? "You folded this hand." : "";
@@ -484,6 +485,59 @@
       }
       renderSizes(h, lg, canRaise && !L.replay ? you : null);
     } else renderSizes(null);
+  }
+
+  // ------------------------------------------------------------ if you had followed the coach (GET /api/lab/whatif)
+  // Shown only while a hand is over; the next hand clears it. From your first move against the RL coach's top choice,
+  // every move was played out from that spot (same cards, the coach finishing the hand, the others choosing again),
+  // and your move is priced against the coach's own mix (pokersim/what_if.py, run while the hand played on).
+  let wiKey = "", wiTimer = null;
+  function askWhatIf(over) {
+    const h = hand();
+    const key = over && h && !L.replay ? `${L.st.hand_no}|${h.hand_id}` : "";
+    if (key === wiKey) return;
+    wiKey = key;
+    clearTimeout(wiTimer);
+    renderWhatIf(null);
+    if (!key) return;
+    let tries = 0;
+    const poll = async () => {
+      let r = null;
+      try { r = await api("/api/lab/whatif"); } catch (e) { r = null; }
+      if (key !== wiKey) return;
+      if (r && r.available && !r.ready && ++tries < 40) { wiTimer = setTimeout(poll, 300); return; }
+      renderWhatIf(r && r.ready ? r : null);
+    };
+    poll();
+  }
+  function renderWhatIf(r) {
+    const box = $("#whatif");
+    box.innerHTML = "";
+    box.hidden = !r;
+    if (!r) return;
+    const ch = (x) => `${x > 0.5 ? "+" : x < -0.5 ? "−" : ""}${fmt(Math.abs(Math.round(x)))}`;
+    if (r.followed) {
+      box.append(el("div", { class: "bh", text: "You and the coach" }),
+        el("div", { class: "brow" }, el("span", { text: "You played the coach's way all hand" }), el("b", { text: ch(r.you) })));
+      return;
+    }
+    const cp = (p) => (p < 0.01 ? "<1%" : pct(p));
+    const top = r.options.slice().sort((a, b) => b.coach_p - a.coach_p)[0], mine = r.options.find((o) => o.mine);
+    const se = Math.max(1, Math.ceil(r.cost_se)), c = Math.round(r.cost), close = Math.abs(r.cost) < 2 * r.cost_se || Math.abs(c) < 1;
+    const verdict = close ? `Too close to call (${ch(-r.cost)} ± ${se} chips)` :
+      c > 0 ? `Your move cost about ${fmt(c)} chips (± ${se})` : `Your move did better: about ${fmt(-c)} chips (± ${se})`;
+    const n = Math.max(...r.options.map((o) => o.replays));
+    box.append(
+      el("div", { class: "bh", text: "If you had followed the coach" }),
+      el("div", { class: "wmove", text: `${r.street === "preflop" ? "Before the flop" : `On the ${r.street}`} you ${r.you_move}; the RL coach would mostly ${top.move} (${cp(top.coach_p)}).` }),
+      el("div", { class: "wopts" }, el("span", { class: "wk", text: "From there" }), el("span", { class: "wk", text: "Coach" }), el("span", { class: "wk", text: "Wins on average" }),
+        ...r.options.flatMap((o) => [
+          el("span", { class: o.mine ? "wmine" : "", text: `${o.move.charAt(0).toUpperCase()}${o.move.slice(1)}${o.mine ? " · you" : ""}` }),
+          el("span", { class: "wp", text: cp(o.coach_p) }),
+          el("b", { title: o.certain ? "" : `most replays ${ch(o.lo)} to ${ch(o.hi)}`, text: `${ch(o.mean)}${o.certain ? " for sure" : ""}` })])),
+      el("div", { class: "bv " + (close ? "" : c > 0 ? "bad" : "ok"), text: verdict }),
+      el("div", { class: "wnote", text: `Against the coach's own mix: your move counts for the ${cp(mine.coach_p)} of the time it would make it too. ` +
+        `Only this move is scored; each was played out ${n} times from here with the same cards, the coach finishing the hand. You really got ${ch(r.you)}. A guess, not a certainty.` }));
   }
 
   // bet sizes as one-click presets (the sizes the models choose between), each coach's pick tagged
@@ -909,12 +963,12 @@
   function drawCurve(rows) { $("#replayCurve").innerHTML = curveSVG(rows, rows.length); }
   const legend = () => el("p", { class: "curve-legend" }, el("span", { class: "lg l-you", text: "Model of you" }),
     el("span", { class: "lg l-ppl", text: "People in general" }), el("span", { class: "lg l-usu", text: "Your usual move" }));
-  // between the first hands and the last ones: the hands in between fly by while the curve grows (about 3 s)
+  // between the first hands and the last ones: the hands in between fly by (the Shark's 5 s, the curve's 3 s)
   function sharkForward(done) {
     const d = RP.data, rows = d.shark.series, box = $("#ffwd");
     box.className = "ffwd";
     box.hidden = false;
-    const t0 = performance.now(), dur = MOTION ? 3000 : 0;
+    const t0 = performance.now(), dur = MOTION ? 5000 : 0;
     const frame = (now) => {
       if (!L.replay) { box.hidden = true; return; }
       const k = dur ? Math.min(1, (now - t0) / dur) : 1, r = rows[Math.max(0, Math.round((rows.length - 1) * k))];
@@ -1004,7 +1058,7 @@
     L.liveSt = L.st;
     L.replay = true;
     L.injected = true;  // no live model calls while replaying
-    RP.h = 0; RP.f = 0;
+    RP.h = 0; RP.f = 0; RP.inFf = false;
     const mine = RP.data.player.mine;
     document.querySelectorAll("#you .kicker")[0].textContent = mine ? "What you should do" : "What they should do";
     document.querySelectorAll("#you .kicker")[1].textContent = mine ? "What you would do" : "What they will do";
@@ -1016,14 +1070,24 @@
     showFrame();
     play(true);
   }
-  // the replay plays itself like a fast-forwarded live table, all of it in about 9 s; pause, or step with the arrow keys
+  // the replay plays itself; pause, or step with the arrow keys. The Shark's sitting (two hands shown) goes at about
+  // a second a move, longer on the first and last move of each hand, so there is time to read: about 30 s with its
+  // fast-forward. The many-hand replays are fast-forwarded into about 9 s.
   function play(on) {
-    clearInterval(RP.timer);
+    clearTimeout(RP.timer);
+    RP.timer = null;
+    const slow = !!(RP.data && RP.data.player.shark);
     const total = RP.data ? RP.data.hands.reduce((a, h) => a + h.frames.length, 0) : 1;
     const budget = RP.data && RP.data.player.sim ? 6000 : 9000;  // the simulation's fast-forward takes the other 3 s
-    L.fastMs = on ? Math.max(70, Math.min(1500, Math.round(budget / total))) : 0;
-    RP.timer = on ? setInterval(() => stepReplay(1, true), L.fastMs) : null;
+    L.fastMs = on ? (slow ? 1000 : Math.max(70, Math.min(1500, Math.round(budget / total)))) : 0;
     $("#rpPlay").textContent = on ? "❚❚ Pause" : "▶ Play";
+    if (!on || RP.inFf) return;  // the fast-forward resumes play itself when it ends
+    const tick = () => {
+      const hf = RP.data.hands[RP.h].frames.length, hold = slow && (RP.f === 0 || RP.f === hf - 1) ? 2.2 : 1;
+      const id = setTimeout(() => { if (RP.timer !== id) return; stepReplay(1, true); if (RP.timer === id) tick(); }, L.fastMs * hold);
+      RP.timer = id;
+    };
+    tick();
   }
   function showFrame(forward) {
     const hnd = RP.data.hands[RP.h], fr = hnd.frames[RP.f];
@@ -1059,9 +1123,11 @@
     if (!auto) { play(false); $("#ffwd").hidden = true; }
     const hands = RP.data.hands;
     if (auto && !RP.ffDone && RP.h === RP.lateAt - 1 && RP.f === hands[RP.h].frames.length - 1) {
-      clearInterval(RP.timer);  // the middle of the simulation flies by on the curve, then the last hands play
+      clearTimeout(RP.timer);  // the middle of the simulation flies by on the curve, then the last hands play
+      RP.timer = null;
       RP.ffDone = true;
-      fastForward(() => { if (L.replay) play(true); });
+      RP.inFf = true;
+      fastForward(() => { RP.inFf = false; if (L.replay) play(true); });
       return;
     }
     if (auto && RP.h === hands.length - 1 && RP.f === hands[RP.h].frames.length - 1) {

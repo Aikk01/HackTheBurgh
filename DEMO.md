@@ -17,6 +17,7 @@ Run it: `python -m pokersim serve --port 8765`, then open http://localhost:8765/
 | Bottom left | Two coaches: **Base** copies Pluribus; **RL** was trained against players like these | |
 | Bottom middle | The model of **you**: its guess of your move (shown after you act), how often it has been right, your habit | |
 | Bottom right | Bet-size buttons and the **bluff check**: "if you raise to X with nothing: everyone folds Y%, needed to break even Z%, so a bluff wins or loses N chips" | Each player's own model, on a copy of the hand with your bet in |
+| Bottom right, once the hand is over | **If you had followed the coach**: at your first move against the RL coach, what each move would have won from there, and what yours cost against the coach's own mix ("cost about 5 chips ± 2", "did better", or "too close to call"). Gone when the next hand starts | Copies of the hand with the same cards, played out 150 times per move (below) |
 
 **The players** are named after their type:
 - **Tight Aggressive** (a pro) plays like the human professionals of the Pluribus games.
@@ -48,7 +49,8 @@ display only. Turn it on for judges, off for real play.
 1. **Table (1 min).** Deal and play a hand with the hole-card cam on. Point at one read: "Tight Passive: Fold 90%, and you can see
    he holds 7♣2♦."
 2. **A decision (1 min).** Click a bet size and read the bluff check aloud. If the coaches disagree, read the note.
-3. **"Watch the model learn a player" → "The Shark learns you" (1 min, about 10 s of replay).**
+   Go against the RL coach once; when the hand ends, read "If you had followed the coach" aloud.
+3. **"Watch the model learn a player" → "The Shark learns you" (1 min, about 30 s of replay, slow enough to read).**
    - Your seat has a common human leak: it gives up to almost any bet after the flop. Nobody is told.
    - The first hands: the Shark's seat says "plays its normal game", and its read of you is people in general.
    - The fast-forward to hand 50: the model of you learns the leak ("you fold 86% to a bet after the flop; people
@@ -102,6 +104,27 @@ leaky player above, over 100 sittings of 60 hands (`scripts/build_sim_shark.py`)
 With a milder leak, or with the Shark reacting one-for-one to the read, the difference was within noise in 60 hands.
 That is why the Shark pounces, and why the claim is about what it does, not about chips.
 
+## What your move cost (the coach's what-if)
+
+At your first move in a hand that differs from the RL coach's top choice, the hand is copied. The deck is shuffled
+once per hand, so the copy holds the cards still to come. From that spot, each of fold, check/call and bet/raise is
+played out 150 times. The coach takes your seat for the rest of the hand, and every other player is their own bot with
+their own cards, choosing again each time. That gives what each move wins on average with these cards (`pokersim/what_if.py`).
+
+It is kept balanced in three ways:
+- **One move only.** Only your first move against the coach is scored, and every option is finished the same way, by
+  the coach, so errors do not pile up from move to move.
+- **Your move gets partial credit.** The cost is measured against the coach's own mix: what the coach's moves win,
+  weighted by how often it makes each, minus what yours wins. A move the coach itself makes 40% of the time counts
+  for that 40%; it is never simply "wrong".
+- **It can come out either way.** The box says "did better" when your move won more, and "too close to call" when the
+  gap is within two standard errors of the replays.
+
+In reinforcement-learning terms: the replays estimate Q(spot, move) under the coach's policy, the mix is V(spot), and
+the cost is V − Q(your move), the negative of your move's advantage. In a test with a player who always calls (7
+scored hands), the results ranged from the call doing 19 chips better than the coach's raise to costing 5 chips; 4 of the
+7 were within the noise.
+
 ## Scenarios worth showing (pick one, about 30 s)
 
 - **The Shark reads you.** Fold to a few bets. The Shark's seat flips to "bluffs more", and your habit row shows the
@@ -120,6 +143,9 @@ That is why the Shark pounces, and why the claim is about what it does, not abou
   - Actively, *you* adapt: the mirror shows the leak and the Shark's read.
   - Training it against table-reading opponents is the next step; we kept it out to avoid two adaptive players chasing
     each other.
+- **"How sure is 'your move cost 5 chips'?"** It is a guess with an error bar. The cards are fixed as they fell, and
+  the bots stand in for the people. The ± is the replays' standard error, and we call it a tie within two of them.
+  Only one move is scored, and your move gets credit for the share of the time the coach would make it too.
 - **"Why PPO and not Pluribus's method?"** Pluribus took about 12,400 processor-hours of self-play; we had hours. PPO is
   stable on noisy rewards and learns a mixed strategy. Starting it from a copy of Pluribus and training it against
   human-like players is what made it work. Details: [train/TRAINING.md](train/TRAINING.md).
@@ -129,4 +155,5 @@ That is why the Shark pounces, and why the claim is about what it does, not abou
 - **The RL coach is tested against bots, not people.** The bots are built from real players' decisions, but they are
   still bots.
 - **The demo table is not a test.** The sealed test is.
+- **The what-if is a guess, not a verdict.** It holds the cards as they fell, and the bots play the people.
 - **No use while playing online.** Real-time assistance is banned on poker sites. This is for practice and review.

@@ -273,6 +273,11 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 .bluff .bw { display: flex; flex-wrap: wrap; gap: 2px 6px; color: var(--ink-2); font-size: 13px; }
 .bluff .bw b { color: var(--pc); font-weight: 600; }
 .bluff .tag { color: #e8836b; font-size: 13px; margin-top: 2px; }
+.whatif { margin: 0 0 8px; } .whatif .wmove { color: var(--ink); margin-bottom: 4px; }
+.whatif .wopts { display: grid; grid-template-columns: 1fr auto auto; gap: 1px 14px; color: var(--ink-2); }
+.whatif .wopts .wk { font-size: 11px; color: var(--muted); } .whatif .wopts b { color: var(--ink); font-family: var(--mono); text-align: right; }
+.whatif .wopts .wp { font-family: var(--mono); text-align: right; } .whatif .wopts .wmine { color: var(--ink); font-weight: 600; }
+.whatif .wnote { color: var(--muted); font-size: 12px; }
 
 /* learned habits */
 .top2 .row.habit .v { white-space: normal; color: var(--ink); }
