@@ -129,8 +129,8 @@ def predict(game: Any) -> Dict[str, Any]:
             if p.index == viewer:
                 continue
             shown = None
-            if over and not p.folded and p.shown and not p.mucked:  # only cards revealed at showdown, never mucked ones
-                fc = [c for c in p.shown if c is not None]
+            if over and not p.folded and hand.status == "finished":  # every hand that reached showdown is shown at this table
+                fc = [c for c in (p.shown or p.final_cards() or []) if c is not None]
                 if len(fc) == 2:
                     from . import hand_range as HR
                     shown = HR.CLASS_NAMES[HR.class_of(fc[0], fc[1])]

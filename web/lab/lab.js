@@ -41,7 +41,7 @@
     // motion: what each grid last showed, how much each guess moved and why, the ✓/✗ badges, when you last picked a chip
     drawn: {}, mem: {}, shift: {}, flash: {}, scale: {}, logLen: 0, picked: 0, shownPick: null };
   const MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const PACE = 1.5;  // the table's motion, unhurried: every deal, slide and flip takes 1.5x its base time
+  const PACE = 1.0;  // the table's motion: deals, slides and flips at their base speed
   const EASE = "cubic-bezier(.25,.75,.3,1)";  // a soft ease-out
   const GROUP = (a) => (a === "fold" ? 0 : a === "check" || a === "call" ? 1 : 2);
   const groupOfText = (t) => (/\bfold/.test(t) ? 0 : /\b(check|call)/.test(t) ? 1 : 2);
@@ -202,6 +202,7 @@
       el("div", { class: "pot" }, el("span", { class: "stack", "aria-hidden": "true" },
         ...Array.from({ length: Math.max(1, Math.min(5, 1 + Math.floor(Math.log2(Math.max(1, h.total_pot / 2))))) }, () => el("i", { class: "pchip" }))),
         "Pot ", el("b", { text: fmt(h.total_pot) })),
+      resultLine(h),
       el("div", { class: "last", text: story(h) || (last ? last.text : ""),
         title: "Where the real hand sat in our guess, likeliest first. Top guesses: the likeliest hands holding half our guess. Expected: 80% of it. Possible: 90%. Measured on fresh hands, they hold the real hand 45%, 78% and 89% of the time." }));
 
@@ -223,6 +224,9 @@
       if (p.folded) flags.push("folded");
       else if (p.all_in) flags.push("all-in");
       const won = (h.payouts && h.payouts[p.index]) || p.payout || 0;
+      const over = h.status !== "betting";
+      const showdown = over && !p.folded && h.status === "finished";
+      const lostIt = showdown && !(won > 0);
       const plate = el("div", { class: "plate", style: isMe ? "" : `--pc: var(${colourOf(p.seat)})` },
         el("div", { class: "hcards" + (cam ? " cam" : "") }, ...cards),
         cam && cards.length && !p.folded ? el("span", { class: "camtag", title: "Hole-card cam: only you see these cards. Every guess on this page is made without them." }, eyeOff(), "hidden from the models") : null,
@@ -230,13 +234,14 @@
           el("span", { class: "name", text: p.name, title: p.name }),
           !isMe && L.types[p.name] ? el("span", { class: "ptype", text: L.types[p.name] + (rd ? " · reads the table" : "") }) : null,
           el("span", { class: "sub", text: `${fmt(p.stack)} · ${p.position || ""}` }),
-          won > 0 && h.status !== "betting" ? el("span", { class: "flag win", text: `wins ${fmt(won)}` })
+          won > 0 && over ? el("span", { class: "flag win", text: `won +${fmt(won)}` + (showdown && p.hand ? ` · ${p.hand}` : "") })
+            : lostIt ? el("span", { class: "flag lost", text: "lost" + (p.hand ? ` · ${p.hand}` : "") })
             : flags.length ? el("span", { class: "flag", text: flags.join(" · ") }) : null));
       const fl = L.flash[p.seat];
       const age = fl && fl.hid === h.hand_id ? Date.now() - fl.at : Infinity;
       if (age < 2200) plate.append(el("span", { class: "verdict " + (fl.hit ? "yes" : "no"), style: `animation-delay:-${age}ms`,
         title: "Our read of this player, made before the move", text: `${fl.verb} ${fl.hit ? "✓" : "✗"}` }));
-      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (cam ? " cam" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
+      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (cam ? " cam" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : "") + (won > 0 && over ? " won" : "") + (lostIt ? " lost" : ""), style: `left:${x}px;top:${y}px` });
       // the two range grids sit beside the plate, on the outside of the table (the top seat's to its right)
       const rbox = !isMe && !p.folded ? rangeBox(p, Math.cos(ang) < -0.35 ? "left" : "right") : null;
       const box = !isMe && !p.folded ? seatBox(p) : null;
@@ -250,6 +255,22 @@
         el("i", { class: "pchip" }), fmt(p.bet)));
     });
     motion(h, g, order);
+  }
+
+  // the hand's result, in the middle of the table: who won what, and with which hand
+  function resultLine(h) {
+    if (h.status === "betting") return null;
+    const ws = h.players.filter((p) => ((h.payouts && h.payouts[p.index]) || p.payout || 0) > 0);
+    if (!ws.length) return null;
+    const mine = me();
+    const part = (p) => {
+      const won = (h.payouts && h.payouts[p.index]) || p.payout || 0;
+      const who = mine && p.index === mine.index ? "You win" : `${p.name} wins`;
+      return `${who} ${fmt(won)}` + (h.status === "finished" && !p.folded && p.hand ? ` with ${p.hand}` : "");
+    };
+    const uncontested = h.players.filter((p) => !p.folded).length <= 1;
+    return el("div", { class: "result" + (mine && ws.some((p) => p.index === mine.index) ? " me" : "") },
+      ws.map(part).join(" · ") + (uncontested ? " (everyone else folded)" : ""));
   }
 
   // ------------------------------------------------------------ table motion
@@ -927,7 +948,7 @@
     try {
       onState(await api("/api/game/new", {
         seats: [{ name: "You", agent: "human" }].concat((await tableTypes()).seats.map(({ agent, name }) => ({ agent, name }))),
-        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
+        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 450, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
       if (cam && !(L.st && L.st.reveal)) onState(await api("/api/game/reveal", { reveal: true }));  // the cam stays on at a new table

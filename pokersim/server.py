@@ -554,7 +554,7 @@ class GameSession:
                 wait = self.bot_delay
                 if wait > 0 and getattr(self, "_paced", None) != (hand.hand_id, hand.street):
                     self._paced = (hand.hand_id, hand.street)  # first bot move of a street: let the deal land first
-                    wait += 1.0 if hand.street == 0 else 0.7
+                    wait += 0.5 if hand.street == 0 else 0.35
                 if wait > elapsed:
                     time.sleep(wait - elapsed)
                 with self.lock:

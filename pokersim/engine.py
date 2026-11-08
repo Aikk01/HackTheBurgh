@@ -852,7 +852,8 @@ class Hand:
     def to_dict(self, viewer: Optional[int] = None, reveal: bool = False) -> Dict[str, Any]:
         players = []
         for p in self.players:
-            visible = reveal or (viewer is not None and p.index == viewer) or p.shown is not None
+            visible = (reveal or (viewer is not None and p.index == viewer) or p.shown is not None
+                       or (self.status == "finished" and not p.folded and p.hole and all(c is not None for c in p.hole)))
             players.append(self.player_dict(p, visible))
         legal = self.legal_actions() if self.status == "betting" and self.actor is not None else None
         return {
