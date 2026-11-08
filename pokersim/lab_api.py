@@ -266,8 +266,11 @@ def scorecard() -> Dict[str, Any]:
         run = os.path.basename(str(meta.get("run_dir", "")))
         name = run if run in sealed["policies"] else next(iter(sealed["policies"]))
         row = sealed["policies"][name]
+        hh = sealed.get("head_to_head") or {}
+        imit = hh.get(f"{name} - imitation-only") or ([-x for x in hh[f"imitation-only - {name}"][:1]] + hh[f"imitation-only - {name}"][1:]
+                                                          if f"imitation-only - {name}" in hh else None)
         out["coach"] = {"policy": name, "vs_equity": row["vs_equity_bot"]["all"], "ranges": row["range_inputs_gain"].get("all"),
-                        "styles": row["style_inputs_gain"]["all"], "hands": sealed["hands_per_table"]}
+                        "styles": row["style_inputs_gain"]["all"], "hands": sealed["hands_per_table"], "vs_imitation": imit}
     return out
 
 

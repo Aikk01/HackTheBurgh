@@ -141,6 +141,11 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
 - **Table motion:** the dealer deals, board cards turn over, chips go to the pot and the pot to the winner.
 - **Training:** v3-bc and v3-ranges-s2 stopped (drift / plateau); `judges/` holds the mock-judge criteria.
 
+**Sealed RL test (06:01, run once, 10,000 hands per table; details in train/06):** the live coach v3-bc is +149 ± 26
+bb/100 against the equity bot on opponents nothing was trained or picked on, +152 ± 24 over the same network copying
+Pluribus without RL; our predicted hands add +75 ± 24 to it. Imitation start beats training from scratch; the KL
+penalty keeps play closer to Pluribus but wins less on these tables.
+
 **Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**

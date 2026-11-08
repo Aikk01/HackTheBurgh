@@ -783,6 +783,7 @@
       c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
         el("div", { class: "sbig muted", text: "Tested once, on sealed tables, when training ends." }),
       c ? `On tables it never trained on or was picked on, ${c.hands.toLocaleString()} hands each, same cards for both.` +
+        (c.vs_imitation ? ` RL adds ${sgn(c.vs_imitation[0])} ± ${Math.round(c.vs_imitation[1])} over the same network copying Pluribus without RL.` : "") +
         (c.ranges ? ` Predicted hands add ${sgn(c.ranges[0])} ± ${Math.round(c.ranges[1])}.` : "") + ` Watching the table adds ${sgn(c.styles[0])} ± ${Math.round(c.styles[1])}.` :
         "Opponents it never trained on and that were never used to pick it."));
     $("#scoreCard").hidden = false;

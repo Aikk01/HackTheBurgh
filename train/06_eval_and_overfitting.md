@@ -106,3 +106,39 @@ are not candidates. Frozen candidates (update, held-out score):
 | v3-bc-kl30 | 100 | +86.6 | on |
 | v2-eddie | 150 | +73.5 | on |
 | imitation-only | 0 | — | on |
+
+## Sealed test results (06:01, run once; `data/rl/sealed_eval.json`)
+
+10,000 hands per table on the three sealed tables, every hero on the same deals; bb/100 against the equity bot, pooled,
+with 95% intervals over hands. Every result is reported.
+
+| Candidate | vs equity bot | − imitation-only (paired) | Range inputs worth | Style inputs worth |
+|---|---|---|---|---|
+| v3-bc-s2 (imitation start, free) | **+207 ± 30** | +210 ± 29 | +6 ± 31 | +33 ± 30 |
+| v3-bc (imitation start, free; live coach) | **+149 ± 26** | +152 ± 24 | **+75 ± 24** | −5 ± 25 |
+| v3-noranges-s2 (scratch) | +120 ± 27 | +123 ± 25 | — | −71 ± 34 |
+| v3-ranges-s2 (scratch) | +73 ± 24 | | −5 ± 25 | −10 ± 24 |
+| v3-bc-kl10 (imitation start, KL 0.1) | +69 ± 20 | +72 ± 15 | +23 ± 17 | −23 ± 17 |
+| v3-noranges (scratch) | +59 ± 27 | | — | +23 ± 30 |
+| v3-bc-kl30 (imitation start, KL 0.3) | +32 ± 19 | +35 ± 11 | **+28 ± 12** | −11 ± 11 |
+| v3-ranges (scratch) | +21 ± 28 | | −44 ± 27 | −69 ± 34 |
+| v2-eddie | +15 ± 26 | | −14 ± 23 | +1 ± 32 |
+| imitation-only (no RL) | −3 ± 18 | — | +11 ± 7 | −4 ± 6 |
+
+**Answers to the registered questions:**
+1. **Every candidate except imitation-only beats the equity bot** (v2-eddie and v3-ranges only within noise of it).
+   **RL adds a lot over copying Pluribus:** the same network after PPO is +152 ± 24 (v3-bc) and +210 ± 29 (v3-bc-s2)
+   better than the imitation alone, on the same deals.
+2. **Predicted hands:** within a policy, blanking them costs v3-bc 75 ± 24, kl30 28 ± 12 and kl10 23 ± 17; for the
+   runs trained from scratch they are worth nothing or less (v3-ranges −44 ± 27, v3-ranges-s2 −5 ± 25). Across runs from
+   scratch, the two seeds with ranges vs the two without: v3-ranges-s2 − v3-noranges +14 ± 25, v3-ranges − v3-noranges
+   −38 ± 29, v3-noranges-s2 − v3-ranges-s2 +47 ± 26; the gap between the two seeds with ranges (+52) is as large, so
+   from scratch the ranges show no reliable effect. They help the coaches that start from the Pluribus imitation.
+3. **Watching the table (style inputs):** no reliable gain; for two scratch runs blanking them helps (−71, −69).
+4. **Imitation start vs scratch:** the imitation-start runs without a penalty (+149, +207) beat every run from scratch
+   (+21 to +120). **The KL penalty** keeps the policy close to the imitation and costs win rate on these tables
+   (kl10 +69, kl30 +32; v3-bc − kl10 +80 ± 24): here, exploiting the opponents paid more than staying close to Pluribus.
+
+**Shipped model:** v3-bc update 50 stays the coach. It was live since 04:42, and at 05:13 the team decided that the
+sealed test would settle v3-bc against v3-noranges-s2 (then the held-out leader): v3-noranges-s2 − v3-bc = −29 ± 27.
+v3-bc-s2 scores highest here but is not shipped: choosing the best of ten on this test would bias its number upwards.
