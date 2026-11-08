@@ -195,7 +195,7 @@ penalty keeps play closer to Pluribus but wins less on these tables.
 - **The trade-off:** our models of these realistic players guess the next move no better than people in general (69%
   vs 70%). Real regulars differ in how often they do things, not in their single most likely move.
 
-**Done 07:40–08:05:**
+**Done 07:40–07:55:**
 - **More distinct bots:** the most extreme 15% of regulars of each type (tight aggressive 385 players: VPIP 16%, PFR 13%,
   AF 4.6; loose aggressive 20: 36 / 27 / 4.8; loose passive 738: 42 / 10 / 1.6; tight passive 55: 15 / 5 / 1.4).
   - The bots fit to 17 / 15 / 4.3, 33 / 23 / 4.8, 39 / 10 / 1.7 and 16 / 5 / 1.9.
