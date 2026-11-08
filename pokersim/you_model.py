@@ -25,7 +25,8 @@ import numpy as np
 
 from .rl_features import ACTIONS, N_ACTIONS
 
-PLAYERS_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "players")
+# test and review servers point this elsewhere so they never touch real players' histories
+PLAYERS_DIR = os.environ.get("POKERSIM_PLAYERS_DIR") or os.path.join(os.path.dirname(__file__), "..", "data", "players")
 ALPHA = 8.0
 GROUPS = ("fold", "call", "raise")
 GROUP_OF = np.array([0, 1, 2, 2, 2, 2, 2])
