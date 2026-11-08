@@ -31,14 +31,18 @@
 </div>
 
 <div class="replay-card" id="replayCard" hidden>
-  <h2>A real player, learned as they play</h2>
+  <div class="replay-who" id="replayWho" role="radiogroup" aria-label="Whose replay" hidden>
+    <button class="chip" type="button" role="radio" data-who="you">You</button>
+    <button class="chip" type="button" role="radio" data-who="unseen">An unseen player</button>
+  </div>
+  <h2 id="replayTitle">A real player, learned as they play</h2>
   <p id="replayNote"></p>
-  <p class="habits-head">What our model learned about them</p>
+  <p class="habits-head" id="habitsHead">What our model learned about them</p>
   <ul class="habits" id="replayHabits"></ul>
   <div class="curve" id="replayCurve"></div>
   <p class="curve-legend"><span class="lg l-you">This player's model</span><span class="lg l-ppl">People in general</span><span class="lg l-usu">Their usual move</span></p>
   <div class="replay-actions">
-    <button class="btn primary" id="replayStep" type="button">Step through their hands <kbd>→</kbd></button>
+    <button class="btn primary" id="replayStep" type="button">Play their hands <kbd>→</kbd></button>
     <button class="btn ghost" id="replayExit" type="button">Back to my table</button>
   </div>
 </div>
@@ -78,6 +82,7 @@
         </div>
         <button class="btn primary" id="btnNext" type="button" hidden>Next hand <kbd>N</kbd></button>
         <div class="replay-nav" id="replayNav" hidden>
+          <button class="btn" id="rpPlay" type="button">❚❚ Pause</button>
           <button class="btn" id="rpPrev" type="button">← Back</button>
           <button class="btn primary" id="rpNext" type="button">Next →</button>
           <button class="btn ghost" id="rpExit" type="button">Exit replay</button>

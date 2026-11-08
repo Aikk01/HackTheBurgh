@@ -101,7 +101,7 @@
   function yourSlot(value, model, n = 2) {
     if (value) return moveSlot(value, n);
     const you = L.pred && L.pred.you;
-    if (loaded(model, "actions") && you && !you.your_turn) return el("span", { class: "nm", text: L.replay ? "Waits for their turn" : "Waits for your turn" });
+    if (loaded(model, "actions") && you && !you.your_turn) return el("span", { class: "nm", text: theirs() ? "Waits for their turn" : "Waits for your turn" });
     return noModel();
   }
 
@@ -296,14 +296,14 @@
     // your model's guess is made before you act but shown only afterwards, so it cannot steer you (in a replay of a
     // recorded player it is shown openly: the move is already history)
     const guess = you && you.your_turn && you.would && you.would.personal;
-    would.append(el("span", { class: "k", text: L.replay ? "Their model" : "Your model" }),
+    would.append(el("span", { class: "k", text: theirs() ? "Their model" : "Your model" }),
       guess ? (L.replay ? moveSlot(guess, 1) : el("span", { class: "nm", text: "Revealed after you act" })) : yourSlot(null, "personal"),
       el("span", { class: "k", text: "Right so far" }),
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
         el("span", { class: "p2", text: ` · people in general ${acc.people_right || 0}` })) :
         loaded("personal", "actions") ? el("span", { class: "nm", text: L.replay ? "Starts with their first move" : "Starts with your first move" }) : noModel());
     const yh = you && you.habits && you.habits[0];
-    if (yh) would.append(el("span", { class: "k", text: L.replay ? "Their habit" : "Your habit" }),
+    if (yh) would.append(el("span", { class: "k", text: theirs() ? "Their habit" : "Your habit" }),
       el("span", { class: "v" }, yh.text, el("span", { class: "p2", text: ` (${yh.detail})` })));
     const gaps = (you && you.coach_gaps) || [];
     if (gaps.length && !L.replay) {
@@ -314,7 +314,7 @@
     if (L.lastCheck) {
       const c = L.lastCheck;
       would.append(el("span", { class: "k", text: "Last move" }), el("span", { class: "check" },
-        `Predicted ${c.pred.toLowerCase()}, ${L.replay ? "they" : "you"} ${c.actual} `, el("span", { class: c.hit ? "yes" : "no", text: c.hit ? "✓" : "✗" })));
+        `Predicted ${c.pred.toLowerCase()}, ${theirs() ? "they" : "you"} ${c.actual} `, el("span", { class: c.hit ? "yes" : "no", text: c.hit ? "✓" : "✗" })));
     }
 
     // your action controls
@@ -601,16 +601,29 @@
 
   // ------------------------------------------------------------ replay of a real player no model has seen
   // Precomputed by scripts/build_replay.py with the same models as the live table (GET /api/lab/replay).
-  const RP = { data: null, h: 0, f: 0 };
+  const RP = { data: null, cache: {}, who: "unseen", h: 0, f: 0, timer: null };
+  const theirs = () => L.replay && !(RP.data && RP.data.player.mine);
   const DONE = { fold: "folded", call: "called", raise: "raised" };
   async function openReplay() {
-    if (!RP.data) {
-      try { RP.data = await api("/api/lab/replay"); } catch (e) { $("#actNote").textContent = e.message; return; }
+    if (!("unseen" in RP.cache)) {
+      try { RP.cache.unseen = await api("/api/lab/replay"); } catch (e) { RP.cache.unseen = null; }
+      try { RP.cache.you = await api("/api/lab/replay?who=you"); } catch (e) { RP.cache.you = null; }
+      RP.who = RP.cache.you ? "you" : "unseen";
     }
-    const d = RP.data, s = d.summary;
-    $("#replayNote").textContent = `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
-      `We picked them out of 30 unseen players for a strong style (across all 30, our model beat people in general for 28). ` +
-      `Before each of their ${d.player.decisions.toLocaleString()} moves every model guessed: ours was right ${pct(s.personal)}, people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
+    $("#replayWho").hidden = !(RP.cache.you && RP.cache.unseen);
+    document.querySelectorAll("#replayWho .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.who === RP.who)));
+    RP.data = RP.cache[RP.who];
+    if (!RP.data) { $("#actNote").textContent = "No replay built (python scripts/build_replay.py)"; return; }
+    const d = RP.data, s = d.summary, mine = d.player.mine;
+    $("#replayTitle").textContent = mine ? "You, learned as you play" : "A real player, learned as they play";
+    $("#habitsHead").textContent = mine ? "What the model learned about you" : "What our model learned about them";
+    $("#replayStep").firstChild.textContent = mine ? "Play my hands " : "Play their hands ";
+    $("#replayNote").textContent = mine
+      ? `${d.player.hands} of your hands at this table, studied in order. Before each of your ${d.player.decisions.toLocaleString()} moves every model guessed: ` +
+        `the model of you was right ${pct(s.personal)}, people in general ${pct(s.people)}, your usual move ${pct(s.usual)}.`
+      : `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
+        `We picked them out of 30 unseen players for a strong style (across all 30, our model beat people in general for 28). ` +
+        `Before each of their ${d.player.decisions.toLocaleString()} moves every model guessed: ours was right ${pct(s.personal)}, people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
     const hl = $("#replayHabits");
     hl.innerHTML = "";
     (d.habits || []).forEach((h) => hl.append(el("li", {}, h.text, el("span", { class: "p2", text: ` (${h.detail})` }))));
@@ -641,29 +654,49 @@
     L.replay = true;
     L.injected = true;  // no live model calls while replaying
     RP.h = 0; RP.f = 0;
-    document.querySelectorAll("#you .kicker")[0].textContent = "What they should do";
-    document.querySelectorAll("#you .kicker")[1].textContent = "What they will do";
+    const mine = RP.data.player.mine;
+    document.querySelectorAll("#you .kicker")[0].textContent = mine ? "What you should do" : "What they should do";
+    document.querySelectorAll("#you .kicker")[1].textContent = mine ? "What you would do" : "What they will do";
+    L.flash = {}; L.shift = {}; L.mem = {}; L.drawn = {}; L.logLen = 0;
     showFrame();
+    play(true);
   }
-  function showFrame() {
+  // the replay plays itself like a live table; pause, or step with the arrow keys
+  function play(on) {
+    clearInterval(RP.timer);
+    RP.timer = on ? setInterval(() => stepReplay(1, true), 1500) : null;
+    $("#rpPlay").textContent = on ? "❚❚ Pause" : "▶ Play";
+  }
+  function showFrame(forward) {
     const hnd = RP.data.hands[RP.h], fr = hnd.frames[RP.f];
+    if (forward && RP.f > 0) noteActions(L.st, fr.st);  // ✓/✗ on the opponents who just moved, as at the live table
+    else L.logLen = ((fr.st && fr.st.log) || []).length;
     L.st = fr.st;
+    noteShifts(fr.pred);
     L.pred = fr.pred;
     const prev = RP.f > 0 ? hnd.frames[RP.f - 1].check : null;
+    if (prev && forward) {  // and on the replayed player
+      const m = fr.st.hand.players.find((q) => q.index === fr.st.viewer), lg = (fr.st.log || []).slice(-1)[0];
+      const word = DONE[prev.actual] || prev.actual;
+      if (m) L.flash[m.seat] = { hit: prev.hit, at: Date.now(), hid: fr.st.hand.hand_id, text: lg ? lg.text : "", expected: prev.pred, verb: word.charAt(0).toUpperCase() + word.slice(1) };
+    }
     L.lastCheck = prev ? { pred: prev.pred, actual: DONE[prev.actual] || prev.actual, hit: prev.hit } : null;
     render();
     $("#actTitle").textContent = `Replay · hand ${RP.h + 1} of ${RP.data.hands.length} · step ${RP.f + 1}/${hnd.frames.length}`;
     $("#actNote").textContent = `Their real hand no. ${hnd.hand_no} of ${RP.data.player.hands}. Their cards are from the showdown (for the coach only); the guesses never see them.`;
   }
-  function stepReplay(d) {
+  function stepReplay(d, auto) {
     if (!L.replay) return;
+    if (!auto) play(false);
     const hands = RP.data.hands;
+    if (auto && RP.h === hands.length - 1 && RP.f === hands[RP.h].frames.length - 1) { play(false); return; }
     RP.f += d;
     if (RP.f >= hands[RP.h].frames.length) { if (RP.h < hands.length - 1) { RP.h++; RP.f = 0; } else RP.f = hands[RP.h].frames.length - 1; }
     if (RP.f < 0) { if (RP.h > 0) { RP.h--; RP.f = hands[RP.h].frames.length - 1; } else RP.f = 0; }
-    showFrame();
+    showFrame(d > 0);
   }
   function exitReplay() {
+    play(false);
     $("#replayCard").hidden = true;
     if (!L.replay) return;
     L.replay = false;
@@ -683,6 +716,8 @@
     $("#replayStep").addEventListener("click", enterSteps);
     $("#replayExit").addEventListener("click", exitReplay);
     $("#rpPrev").addEventListener("click", () => stepReplay(-1));
+    $("#rpPlay").addEventListener("click", () => play(!RP.timer));
+    document.querySelectorAll("#replayWho .chip").forEach((b) => b.addEventListener("click", () => { RP.who = b.dataset.who; openReplay(); }));
     $("#rpNext").addEventListener("click", () => stepReplay(1));
     $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);
@@ -700,7 +735,8 @@
       const k = e.key.toLowerCase();
       if (!$("#scoreCard").hidden && e.key === "Escape") { $("#scoreCard").hidden = true; return; }
       if (L.replay || !$("#replayCard").hidden) {
-        if (e.key === "ArrowRight") { if (L.replay) stepReplay(1); else enterSteps(); }
+        if (e.key === " " && L.replay) { e.preventDefault(); play(!RP.timer); }
+        else if (e.key === "ArrowRight") { if (L.replay) stepReplay(1); else enterSteps(); }
         else if (e.key === "ArrowLeft") stepReplay(-1);
         else if (e.key === "Escape") exitReplay();
         return;

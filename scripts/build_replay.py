@@ -1,6 +1,7 @@
 """Precompute the Poker Mirror replay of a real unseen player (data/demo/replay.json, served at /api/lab/replay).
 
     python scripts/build_replay.py [--showcase 7] [--player data/demo/replay_player.json --hands data/demo/replay_hands.phhs]
+    python scripts/build_replay.py --me You     # your own hands at the live table -> data/demo/replay_you.json
 
 The default player is one of the 30 unseen players of scripts/eval_unseen_players.py (no model was trained on them),
 picked for a strong personal style so the personal model's adaptation is visible; data/demo/replay_player.json says
@@ -47,6 +48,7 @@ from pokersim.replay import build_hand  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "replay.json")
 HIM = "Unseen player"
+MINE = False  # replaying a player of our own live table: the bots keep their names
 
 
 class Stand:
@@ -74,6 +76,11 @@ def shown_cards(rec, k):
             cs = a.split()[2]
             if "?" not in cs and len(cs) == 4:
                 return cs
+    for a in rec.actions:  # live-table records deal every card face up
+        if a.startswith(f"d dh p{k + 1} "):
+            cs = a.split()[3] if len(a.split()) > 3 else ""
+            if "?" not in cs and len(cs) == 4:
+                return cs
     return None
 
 
@@ -82,7 +89,7 @@ def n_decisions(rec, k):
 
 
 def display(names, k_him):
-    return {i: (HIM if i == k_him else f"Seat {i + 1}") for i in range(len(names))}
+    return {i: (HIM if i == k_him else names[i] if MINE else f"Seat {i + 1}") for i in range(len(names))}
 
 
 def state_of(hand, viewer, log, hand_no, disp):
@@ -196,10 +203,23 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--showcase", type=int, default=7)
     ap.add_argument("--player", default=os.path.join(ROOT, "data", "demo", "replay_player.json"))
-    ap.add_argument("--hands", default=os.path.join(ROOT, "data", "demo", "replay_hands.phhs"))
+    ap.add_argument("--hands", default=None)
+    ap.add_argument("--me", default=None, help="a human player of the live table (their data/players/<name>/hands.phhs)")
+    ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    global HIM, MINE
+    if a.me:
+        info = {"venue": "pokersim live table", "player": a.me, "label": a.me, "mine": True,
+                "picked": "your own hands at this table"}
+        hands = a.hands or os.path.join(Y.PlayerModel(a.me)._dir(), "hands.phhs")
+        out_path = a.out or os.path.join(ROOT, "data", "demo", "replay_you.json")
+    else:
+        info = json.load(open(a.player))
+        hands = a.hands or os.path.join(ROOT, "data", "demo", "replay_hands.phhs")
+        out_path = a.out or OUT
+    a.hands = hands
+    HIM, MINE = info.get("label", HIM), bool(info.get("mine"))
     Y.PLAYERS_DIR = tempfile.mkdtemp(prefix="replay_players_")  # never touch the real player logs
-    info = json.load(open(a.player))
     name = info["player"]
     recs = phh.load_file(a.hands)
     n = len(recs)
@@ -229,14 +249,14 @@ def main():
     C_ = np.array([r[1:] for r in curve], float)
     him = stand.watch.model(name, True)
     out = {"player": {"label": HIM, "venue": info["venue"], "hands": n, "decisions": len(curve),
-                      "picked": info.get("picked", ""),
+                      "picked": info.get("picked", ""), "mine": bool(info.get("mine")),
                       "note": "real online hands from many different tables; no model was trained on this player"},
            "habits": him.habits(top=3),
            "curve": curve, "summary": {"personal": C_[:, 0].mean(), "people": C_[:, 1].mean(), "usual": C_[:, 2].mean()},
            "showcase_rule": "last half of his hands, his cards revealed at showdown, at least one move against what people in general would do, evenly spaced",
            "hands": showcase}
     s = json.dumps(out, separators=(",", ":"), default=lambda x: round(float(x), 4))
-    with open(OUT, "w") as f:
+    with open(out_path, "w") as f:
         f.write(s)
     print(f"{n} hands, {len(curve)} decisions, {len(showcase)} showcase hands, {len(s) / 1e6:.1f} MB; "
           f"accuracy personal {C_[:, 0].mean():.1%} · people {C_[:, 1].mean():.1%} · usual {C_[:, 2].mean():.1%}")
