@@ -340,3 +340,4 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .ffwd .ff-big .ff-you b { color: var(--amber); } .ffwd .ff-big .ff-ppl b { color: #8fb8ff; } .ffwd .ff-big .ff-usu b { color: var(--muted); }
 .ffwd .habits { margin: 0; padding-left: 18px; font-size: 13px; }
 .ffwd .btn { align-self: flex-start; }
+.plate .ptype { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--pc, var(--muted)); white-space: nowrap; }

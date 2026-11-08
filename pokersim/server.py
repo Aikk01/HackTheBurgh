@@ -1051,8 +1051,8 @@ class Handler(BaseHTTPRequestHandler):
             from .lab_api import bluff
             return bluff(APP.game, float(qs.get("amount", 0) or 0))
         if path == "/api/lab/table":  # the Poker Mirror opponents (lab_api.MIRROR_TABLE)
-            from .lab_api import MIRROR_TABLE
-            return {"seats": [{"agent": spec, "name": name} for spec, name in MIRROR_TABLE]}
+            from .lab_api import MIRROR_TABLE, MIRROR_TYPE
+            return {"seats": [{"agent": spec, "name": name, "type": MIRROR_TYPE.get(name)} for spec, name in MIRROR_TABLE]}
         if path == "/api/lab/scorecard":
             from .lab_api import scorecard
             return scorecard()

@@ -34,11 +34,13 @@ import numpy as np
 
 from . import cards as C
 
-# The Poker Mirror table (web/lab/lab.js newTable keeps the same list): five players from the next-move model of the
-# human professionals in the Pluribus games, with their own cards, each nudged towards one instinct by a tilt on its
+# The Poker Mirror table (served at /api/lab/table): five players from the next-move model of the human professionals
+# in the Pluribus games, with their own cards, each nudged into one of the four classic player types by a tilt on its
 # fold / call / raise logits.  (RL training used tilts within ±0.5; the sealed test uses 1.2.)
-MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_c=0.8", "Sticky"), ("pro:tilt_r=0.8", "Aggro"), ("pro:tilt_f=0.8", "Nervous"),
-                ("pro:temp=1.3,tilt_f=-0.5", "Gambler")]
+MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_f=-0.8,tilt_r=0.8", "Gambler"), ("pro:tilt_f=-0.8,tilt_c=0.8,tilt_r=-0.5", "Sticky"),
+                ("pro:tilt_f=0.8,tilt_r=-0.6", "Rock"), ("pro:tilt_f=0.4,tilt_r=0.6", "Shark")]
+MIRROR_TYPE = {"Pro": "tight aggressive", "Gambler": "loose aggressive", "Sticky": "loose passive", "Rock": "tight passive",
+               "Shark": "tight aggressive"}
 
 _COMBOS = np.array([[6 if r == c else 4 if r < c else 12 for c in range(13)] for r in range(13)], dtype=float)
 

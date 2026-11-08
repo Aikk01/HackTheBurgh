@@ -37,7 +37,7 @@
     return data;
   }
 
-  const L = { st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null,
+  const L = { types: {}, st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null,
     // motion: what each grid last showed, how much each guess moved and why, the ✓/✗ badges, when you last picked a chip
     drawn: {}, mem: {}, shift: {}, flash: {}, scale: {}, logLen: 0, picked: 0, shownPick: null };
   const MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -209,6 +209,7 @@
         el("div", { class: "hcards" }, ...cards),
         el("div", { class: "who" },
           el("span", { class: "name", text: p.name, title: p.name }),
+          !isMe && L.types[p.name] ? el("span", { class: "ptype", text: L.types[p.name] }) : null,
           el("span", { class: "sub", text: `${fmt(p.stack)} · ${p.position || ""}` }),
           won > 0 && h.status !== "betting" ? el("span", { class: "flag win", text: `wins ${fmt(won)}` })
             : flags.length ? el("span", { class: "flag", text: flags.join(" · ") }) : null));
@@ -742,11 +743,17 @@
     }
     try { onState(await api("/api/game/act", { action, amount })); } catch (e) { $("#actNote").textContent = e.message; }
   }
+  // the player type of each seat at the Mirror table (tight / loose, aggressive / passive), shown under the name
+  async function tableTypes() {
+    const t = await api("/api/lab/table");
+    L.types = Object.fromEntries(t.seats.map((x) => [x.name, x.type]));
+    return t;
+  }
   async function newTable() {
     exitReplay();  // a new game always goes back to your own table
     try {
       onState(await api("/api/game/new", {
-        seats: [{ name: "You", agent: "human" }].concat((await api("/api/lab/table")).seats),
+        seats: [{ name: "You", agent: "human" }].concat((await tableTypes()).seats.map(({ agent, name }) => ({ agent, name }))),
         small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
@@ -995,6 +1002,7 @@
   }
 
   function bind() {
+    tableTypes().then(() => L.st && renderTable()).catch(() => {});
     $("#replayBtn").addEventListener("click", openReplay);
     $("#scoreBtn").addEventListener("click", openScore);
     $("#scoreExit").addEventListener("click", () => { $("#scoreCard").hidden = true; });

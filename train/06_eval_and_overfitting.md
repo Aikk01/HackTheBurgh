@@ -147,3 +147,6 @@ v3-bc-s2 scores highest here but is not shipped: choosing the best of ten on thi
 at the registered **30,000 hands per table**, same seeds, on Eddie (`data/rl/sealed_eval_30k.json`). Each batch starts
 with the same deals as the 10,000-hand run, so this extends it rather than repeating it. Both results are reported; the
 30,000-hand one is the registered size. It picks nothing: the shipped coach stays as decided at 06:01.
+
+**06:56:** v3-bc-s2 (held-out down to −11 at update 250) and v3-noranges-s2 stopped. Training after the 05:57 freeze
+cannot change the candidates; kl10 and kl30 run to their planned end (~07:05).

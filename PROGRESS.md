@@ -146,6 +146,16 @@ bb/100 against the equity bot on opponents nothing was trained or picked on, +15
 Pluribus without RL; our predicted hands add +75 ± 24 to it. Imitation start beats training from scratch; the KL
 penalty keeps play closer to Pluribus but wins less on these tables.
 
+**Done 06:10–07:00 (after the final mock judges, both top 3):**
+- **Opponents as the four classic types:** Pro and Shark (tight aggressive), Gambler (loose aggressive), Sticky (loose
+  passive), Rock (tight passive); the type shows under each name. Rebuilt for this table: bluff check on a fresh
+  session "they all fold" 35.4% said, 30.7% happened (each player 71.9% / 71.1%); grid 45 / 78 / 89%; "a player like
+  you" 78% vs 67% for people in general over the last 100 hands.
+- **Judge fixes:** the simulation is a reveal (no result before the run, the curve grows during the fast-forward, big
+  numbers at the end); surprises say how often they happen; the scorecard shows +1.3 ± 1.2 points on 30 real players.
+- **Sealed test at the registered 30,000 hands per table** running on Eddie (same frozen candidates).
+- **Training stopped** where it could no longer matter: v3-bc-s2 (drifted to −11) and v3-noranges-s2.
+
 **Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**

@@ -2,8 +2,9 @@
 
 Shared by every mock judge in this folder. The judge watches; the presenter drives.
 
-1. **The table (about 1 minute).** "You" plus five players, each a model of real human professionals with one
-   instinct: Pro, Sticky (calls a lot), Aggro, Nervous, Gambler. The presenter deals and plays a hand.
+1. **The table (about 1 minute).** "You" plus five players, each a model of real human professionals nudged into one
+   of the four classic types: Pro and Shark (tight aggressive), Gambler (loose aggressive), Sticky (loose passive),
+   Rock (tight passive). The presenter deals and plays a hand.
    - Above each opponent: the predicted next move. A second row, "This player", appears only when the model of that
      player disagrees with people in general.
    - Right panel: the opponent's likely starting hands on a 13×13 grid. It changes as they act.
@@ -15,7 +16,7 @@ Shared by every mock judge in this folder. The judge watches; the presenter driv
 3. **Showdown (about 20 s).** Where the real hand sat in our guess ("our #12 guess of 169").
 4. **"A player like you" (about 1 minute).** In about 9 seconds, a simulated human-like player who calls a lot plays
    500 hands in the presenter's seat. At first the model of you guesses like people in general and misses. Over the
-   last 100 hands it is right 81% of the time against 67% for people in general. "Now you play": the presenter takes
+   last 100 hands it is right 78% of the time against 67% for people in general. "Now you play": the presenter takes
    the seat, plays like that player, and the model of them follows.
 5. **"How good are the guesses?" (about 30 s).** Every number next to its baseline, on data no model was trained on:
    next move, hand grid, bluff check, and the RL coach on sealed tables.
