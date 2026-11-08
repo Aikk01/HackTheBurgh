@@ -218,8 +218,92 @@
       if (box) seat.append(box);
       seat.append(plate);
       seats.append(seat);
-      if (p.bet > 0) seats.append(el("div", { class: "bet", style: `left:${x + (g.cx - x) * 0.4}px;top:${y + (g.cy - y) * 0.42}px`, text: fmt(p.bet) }));
+      const bx = x + (g.cx - x) * 0.4, by = y + (g.cy - y) * 0.42;
+      FX.xy[p.seat] = { x, y, bx, by };
+      if (p.bet > 0) seats.append(el("div", { class: "bet", "data-seat": p.seat, style: `left:${bx}px;top:${by}px`, text: fmt(p.bet) }));
     });
+    motion(h, g, order);
+  }
+
+  // ------------------------------------------------------------ table motion
+  // The dealer deals each hand round the table, board cards slide out and turn over, bets slide in front of the
+  // player and are gathered into the pot at the end of a street, and the pot goes to the winner.  The table is redrawn
+  // on every state, so each effect remembers when it started and a redraw resumes it instead of restarting it.
+  const FX = { hid: null, dealAt: 0, board: 0, boardFrom: 0, boardAt: 0, bets: {}, shown: {}, paid: null, pot: 0, xy: {} };
+  function motion(h, g, order) {
+    if (!MOTION) return;
+    const now = Date.now(), k = L.replay && L.fastMs ? 0.35 : 1;  // the fast-forwarded replay moves faster
+    const stage = $("#stage").getBoundingClientRect();
+    const fx = $("#fx");
+    const nb = h.board.filter(Boolean).length;
+    if (h.hand_id !== FX.hid) Object.assign(FX, { hid: h.hand_id, dealAt: now, board: nb, boardFrom: nb, boardAt: 0, bets: {}, shown: {}, paid: null, pot: h.total_pot });
+    const mid = (node) => { const r = node.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+    const run = (node, frames, dur, delay, since) => {  // since: when the effect started, so a redraw resumes it
+      const age = now - since;
+      if (age < delay + dur) node.animate(frames, { duration: dur, delay: delay - age, easing: "cubic-bezier(.2,.7,.2,1)", fill: "backwards" });
+    };
+    const deck = { x: stage.left + g.cx, y: stage.top + g.cy - 80 };  // the dealer: just above the board
+    // the deal: one card to each player round the table, then the second
+    const seatEls = [...document.querySelectorAll("#seats .seat")];
+    seatEls.forEach((se, i) => se.querySelectorAll(".hcards .lc").forEach((c, j) => {
+      const m = mid(c);
+      run(c, [{ transform: `translate(${deck.x - m.x}px, ${deck.y - m.y}px) rotate(-30deg) scale(.6)`, opacity: 0 }, { opacity: 1, offset: 0.2 }, { transform: "none", opacity: 1 }],
+        320 * k, (j * seatEls.length + i) * 70 * k, FX.dealAt);
+    }));
+    // the board: new cards slide out face down and turn over, the flop one after another
+    if (nb > FX.board) Object.assign(FX, { boardFrom: FX.board, board: nb, boardAt: now });
+    document.querySelectorAll("#center .board .lc").forEach((c, i) => {
+      if (i < FX.boardFrom || i >= FX.board) return;
+      const m = mid(c);
+      run(c, [{ transform: `translate(${deck.x - m.x}px, ${deck.y - m.y}px) scaleX(.06)`, opacity: 0 }, { transform: "scaleX(.06)", opacity: 1, offset: 0.55 }, { transform: "none", opacity: 1 }],
+        460 * k, (i - FX.boardFrom) * 140 * k, FX.boardAt);
+    });
+    // bets slide out from the player; at the end of a street they are gathered into the pot
+    const potEl = $("#center .pot"), pot = potEl ? mid(potEl) : deck;
+    const ghost = (x, y, text, to, dur, delay, cls) => {
+      const gEl = el("div", { class: "bet ghost " + (cls || ""), style: `left:${x}px;top:${y}px`, text });
+      fx.append(gEl);
+      const a = gEl.animate([{ transform: "translate(-50%, -50%)", opacity: 1 }, { transform: `translate(calc(-50% + ${to.x - stage.left - x}px), calc(-50% + ${to.y - stage.top - y}px)) scale(.8)`, opacity: 0.9 }],
+        { duration: dur, delay, easing: "cubic-bezier(.5,0,.2,1)", fill: "forwards" });
+      a.onfinish = () => gEl.remove();
+    };
+    h.players.forEach((p) => {
+      const was = FX.bets[p.seat], xy = FX.xy[p.seat];
+      if (p.bet > 0 && (!was || p.bet > was.amt)) FX.bets[p.seat] = { amt: p.bet, at: now, bx: xy && xy.bx, by: xy && xy.by };
+      else if (p.bet <= 0 && was) {  // gathered into the pot
+        delete FX.bets[p.seat];
+        if (was.bx !== undefined) ghost(was.bx, was.by, fmt(was.amt), pot, 420 * k, 0);
+      }
+    });
+    document.querySelectorAll("#seats .bet").forEach((b) => {
+      const seat = Number(b.dataset.seat), xy = FX.xy[seat], st = FX.bets[seat];
+      if (!xy || !st) return;
+      run(b, [{ transform: `translate(calc(-50% + ${xy.x - xy.bx}px), calc(-50% + ${xy.y - xy.by}px)) scale(.6)`, opacity: 0 }, { transform: "translate(-50%, -50%)", opacity: 1 }], 300 * k, 0, st.at);
+    });
+    if (potEl && h.total_pot > FX.pot) { potEl.animate([{ transform: "scale(1.18)" }, { transform: "none" }], { duration: 300 * k }); }
+    FX.pot = h.total_pot;
+    // showdown: hidden cards turn over
+    order.forEach((p, i) => {
+      if (FX.shown[p.seat] || !p.cards.some((c) => c && c !== "XX") || (me() && p.index === me().index)) return;
+      FX.shown[p.seat] = now;
+      if (now - FX.dealAt < 1500) return;  // dealt face up (replay or spectating): nothing to turn over
+      seatEls[i] && seatEls[i].querySelectorAll(".hcards .lc").forEach((c, j) => c.animate([{ transform: "scaleX(.06)" }, { transform: "none" }], { duration: 320 * k, delay: j * 90 * k, fill: "backwards" }));
+    });
+    // the pot goes to the winner
+    if (h.status !== "betting" && FX.paid !== h.hand_id) {
+      const paid = h.players.filter((p) => ((h.payouts && h.payouts[p.index]) || p.payout || 0) > 0);
+      if (paid.length) {
+        FX.paid = h.hand_id;
+        paid.forEach((p) => {
+          const i = order.findIndex((q) => q.index === p.index), se = seatEls[i];
+          if (!se) return;
+          const amt = (h.payouts && h.payouts[p.index]) || p.payout;
+          ghost(pot.x - stage.left, pot.y - stage.top, `+${fmt(amt)}`, mid(se.querySelector(".plate")), 700 * k, 250 * k, "win");
+          const fl = se.querySelector(".flag.win");
+          if (fl) fl.animate([{ transform: "scale(.4)", opacity: 0 }, { transform: "scale(1.25)", opacity: 1, offset: 0.7 }, { transform: "none" }], { duration: 500 * k, delay: 850 * k, fill: "backwards" });
+        });
+      }
+    }
   }
 
   const pretty = (cs) => cs.map((c) => (c[0] === "T" ? "10" : c[0]) + (SUITS[c[1]] || "")).join("");

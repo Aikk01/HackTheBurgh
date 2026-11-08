@@ -78,3 +78,7 @@ lead is the method or luck. It joins the candidates with its `export_heldout/`.
 **Added at 05:25, before any sealed result:** `scripts/sealed_eval.py` gained a `--seed0` option, used only for a
 pipeline smoke test on other deals (seed 900,000, 500 hands per table, v3-bc and imitation-only); its numbers were not
 read. The registered test keeps the default seeds (700,000). Speed: about 220 hands/s on 6 busy cores.
+
+**Added at 06:00, before any sealed result:** v3-bc (held-out +150 → +138 → +68 → +38: it drifts away from the
+imitation start) and v3-ranges-s2 (flat at about +90 since update 100) stopped early to free Eddie. Their best held-out
+exports stay candidates.
