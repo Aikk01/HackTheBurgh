@@ -439,42 +439,51 @@
     if (!z) { wrap.hidden = true; return; }
     const p = opponents().find((o) => o.seat === z.seat);
     const pr = p && predFor(p.seat);
-    const live = z.kind === "live";
-    const hands = pr ? (live ? pr.market && pr.market.hands : pr.base && pr.base.hands) : null;
-    if (hands && !live && pr.market && pr.market.hands && hands.shown) pr.market.hands.shown = hands.shown;
-    if (live && hands && pr.base && pr.base.hands && pr.base.hands.shown) hands.shown = pr.base.hands.shown;
+    const base = pr && pr.base ? pr.base.hands : null;
+    const live = pr && pr.market ? pr.market.hands : null;
+    const shown = base && base.shown;
+    if (live && shown) live.shown = shown;
     wrap.hidden = false;
-    wrap.style.setProperty("--pc", live ? "var(--live)" : "var(--base-grid)");
-    $("#zoomTitle").innerHTML = "";
-    $("#zoomTitle").append(p ? `${p.name}: ` : "", el("b", { text: live ? "Live ML range" : "Base range" }));
-    $("#zoomSub").textContent = live
-      ? "Our real-time model: starts from the player's position and preflop action, then updates all 1,326 card combinations after every move they make."
-      : "The base model: trained on 21.6 million hands, guesses one of 169 starting-hand types from the player's actions.";
-    const g = $("#zoomGrid");
-    g.innerHTML = "";
-    const grid = grid13(hands, p ? p.name : "", `zoom-${z.kind}-${z.seat}`, null);
-    Array.from(grid.children).forEach((c) => {
-      const pc = 100 * Number(c.dataset.p);
-      if (hands && pc >= 0.05) c.append(el("span", { class: "pz", text: pc >= 1 ? `${pc.toFixed(1)}%` : `${pc.toFixed(2)}%` }));
-      c.addEventListener("mouseenter", () => { $("#zoomRead").textContent = `${c.dataset.name}: ${pc.toFixed(2)}%`; });
-    });
-    g.append(grid);
-    if (!hands) g.append(el("div", { class: "grid-over" }, el("span", { class: "nm", text: p && p.folded ? `${p.name} folded` : hand() && hand().status !== "betting" ? "Hand over" : NO_MODEL })));
-    const top = $("#zoomTop");
-    top.innerHTML = "";
-    if (hands && hands.top && hands.top.length) {
+    $("#zoomTitle").textContent = p ? `${p.name}: what hands might they hold?` : "Likely hands";
+    const name = (r, c) => (r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o");
+    const chance = (hs, n) => { if (!hs) return null; for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) if (name(r, c) === n) return hs.grid[r][c]; return null; };
+    const fmtP = (v) => (v == null ? "–" : v >= 0.01 ? `${(100 * v).toFixed(1)}%` : `${(100 * v).toFixed(2)}%`);
+    const why = p && p.folded ? `${p.name} folded` : hand() && hand().status !== "betting" && !shown ? "Hand over" : NO_MODEL;
+    const draw = (hands, gridId, topId, kind) => {
+      const g = $(gridId);
+      g.innerHTML = "";
+      g.style.setProperty("--pc", kind === "live" ? "var(--live)" : "var(--base-grid)");
+      const grid = grid13(hands, p ? p.name : "", `zoom-${kind}-${z.seat}`, null);
+      Array.from(grid.children).forEach((c) => {
+        const v = Number(c.dataset.p);
+        if (hands && v >= 0.0005) c.append(el("span", { class: "pz", text: fmtP(v) }));
+        c.addEventListener("mouseenter", () => {
+          const n = c.dataset.name;
+          $("#zoomRead").textContent = `${n}:  Base ${fmtP(chance(base, n))}  ·  Live ML ${fmtP(chance(live, n))}`;
+          document.querySelectorAll("#zoom .g13 .c.cursor").forEach((x) => x.classList.remove("cursor"));
+          document.querySelectorAll(`#zoom .g13 .c[data-name="${n}"]`).forEach((x) => x.classList.add("cursor"));
+        });
+      });
+      g.append(grid);
+      if (!hands) g.append(el("div", { class: "grid-over" }, el("span", { class: "nm", text: why })));
+      const top = $(topId);
+      top.innerHTML = "";
+      top.style.setProperty("--pc", kind === "live" ? "var(--live)" : "var(--base-grid)");
+      if (!hands) return;
       const flat = [];
-      for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o", hands.grid[r][c]]);
-      flat.sort((a, b) => b[1] - a[1]);
+      for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) flat.push([name(r, c), hands.grid[r][c]]);
+      flat.sort((x, y) => y[1] - x[1]);
       const mx = flat[0][1] || 1;
       top.append(el("div", { class: "zk", text: "Likeliest hands" }));
-      flat.slice(0, 6).forEach(([name, pv]) => top.append(el("div", { class: "zr" }, el("span", { text: name }),
-        el("div", { class: "zb" }, el("i", { style: `width:${Math.round(100 * pv / mx)}%` })), el("b", { text: `${(100 * pv).toFixed(1)}%` }))));
-      if (live && pr.market && Number.isFinite(pr.market.price)) top.append(el("div", { class: "zwin", title: "Your chance of winning the hand against this range (ties count half)" },
+      flat.slice(0, 6).forEach(([n, v]) => top.append(el("div", { class: "zr" }, el("span", { text: n }),
+        el("div", { class: "zb" }, el("i", { style: `width:${Math.round(100 * v / mx)}%` })), el("b", { text: fmtP(v) }))));
+      if (kind === "live" && pr.market && Number.isFinite(pr.market.price)) top.append(el("div", { class: "zwin", title: "Your chance of winning against this range (ties count half)" },
         "Against this range you win ", el("b", { text: pct(pr.market.price) })));
-      if (hands.shown) top.append(el("div", { class: "zr" }, el("span", { text: "Real hand" }), el("span", { text: hands.shown }), el("b", { text: `#${rankOf(hands, hands.shown)}` })));
-    }
-    $("#zoomRead").textContent = "";
+      if (shown) top.append(el("div", { class: "zr real" }, el("span", { text: "Real hand" }), el("span", { text: shown }), el("b", { text: `#${rankOf(hands, shown)} of 169` })));
+    };
+    draw(base, "#zoomGridBase", "#zoomTopBase", "base");
+    draw(live, "#zoomGridLive", "#zoomTopLive", "live");
+    document.querySelectorAll("#zoom .zoom-col").forEach((c) => c.classList.toggle("picked", c.classList.contains(z.kind === "live" ? "zlive" : "zbase")));
   }
 
   function seatBox(p) {

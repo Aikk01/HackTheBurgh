@@ -122,17 +122,15 @@
 <div class="zoom" id="zoom" hidden>
   <div class="zoom-card" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
     <div class="zoom-head">
-      <div><h2 id="zoomTitle"></h2><p class="zoom-sub" id="zoomSub"></p></div>
+      <div><h2 id="zoomTitle"></h2></div>
       <button class="btn ghost" id="zoomClose" type="button" aria-label="Close">✕</button>
     </div>
+    <p class="zoom-how">Each square is a starting hand. <b>Pairs</b> run down the diagonal (AA … 22). Above it the two cards are <b>suited</b> (AKs = ace and king of the same suit); below it <b>offsuit</b> (AKo). Brighter = likelier. Same hand, same square in both grids, so you can compare them directly.</p>
     <div class="zoom-body">
-      <div class="zoom-grid" id="zoomGrid"></div>
-      <div class="zoom-side">
-        <p class="zoom-how">Each square is a starting hand. <b>Pairs</b> run down the diagonal (AA … 22). Above it the two cards are <b>suited</b> (AKs = ace and king of the same suit); below it <b>offsuit</b> (AKo). Brighter = the model thinks it likelier. Hover a square for its exact chance.</p>
-        <div class="zoom-top" id="zoomTop"></div>
-        <p class="zoom-read" id="zoomRead" aria-live="polite"></p>
-      </div>
+      <section class="zoom-col zbase"><h3>Base model</h3><p class="zoom-sub">Trained on 21.6 million hands; guesses one of 169 hand types from the player's actions.</p><div class="zoom-grid" id="zoomGridBase"></div><div class="zoom-top" id="zoomTopBase"></div></section>
+      <section class="zoom-col zlive"><h3>Live ML</h3><p class="zoom-sub">Our real-time model: all 1,326 card combinations, updated after every move the player makes.</p><div class="zoom-grid" id="zoomGridLive"></div><div class="zoom-top" id="zoomTopLive"></div></section>
     </div>
+    <p class="zoom-read" id="zoomRead" aria-live="polite">Hover a square for its exact chance in both models.</p>
   </div>
 </div>
 <div class="sr-only" id="announcer" aria-live="polite"></div>
