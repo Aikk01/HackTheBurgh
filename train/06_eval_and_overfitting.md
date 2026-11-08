@@ -16,3 +16,39 @@
   policy found their weaknesses.
 - "How much the policy relies on the hand inputs" comes from zeroing them. "Whether predicting hands helps" comes
   from the matched v3-ranges / v3-noranges comparison at equal updates.
+
+## Sealed final test (registered at 03:20 on 2026-11-08, before any result)
+
+**Why:** each run picks its model on the held-out tables, so its held-out score is biased upwards. Fresh deals don't
+remove that. The sealed test uses opponents that no run trained against and no run was picked on. It runs once,
+after training ends, with `scripts/sealed_eval.py`.
+
+**Tables:**
+
+| Table | Opponents | Why they are new |
+|---|---|---|
+| `sealed_styles` | Next-move bots at tilt +1.2 towards calling, raising or folding, and at temperatures 0.6 and 1.5 | Training used tilts within ±0.5 and temperatures 0.8–1.2; selection used Pluribus clones at 0.9–1.2 |
+| `sealed_rules` | Three rule bots written for this test: `overbettor`, `limper`, `checkraiser` | Never used anywhere before |
+| `sealed_mix` | Both kinds | — |
+
+**Candidates:** `export_heldout/` of v3-ranges, v3-ranges-s2, v3-noranges and v2-eddie as they stand when training
+ends (~07:20). Each policy plays greedily.
+
+**Set-up:**
+- 30,000 hands per table and hero; seeds start at 700,000 (in-training evaluations use 10,000 and final ones 50,000).
+- Every hero plays the same deals, so all comparisons are paired per hand, with 95% intervals over hands.
+
+**Questions, decided now:**
+1. Does each candidate beat the equity bot on the sealed tables pooled?
+2. Are the predicted hands worth anything?
+   - Within each policy that uses them: the policy against itself with range inputs blanked.
+   - Across runs: v3-ranges and v3-ranges-s2 head to head against v3-noranges. The gap between the two seeds with
+     ranges is reported as the noise level.
+3. Is watching the table worth anything? Each policy against itself with the opponent-style inputs blanked.
+
+**Rules:**
+- The shipped model is still picked on the held-out tables, as before. The sealed test picks nothing.
+- Every result is reported, whatever it shows.
+
+**Before this was written:** one pipeline check with 200 hands per table on the 03:1x exports. At that size the
+intervals are ±150–450 bb/100, so those numbers carry no information and are not used.

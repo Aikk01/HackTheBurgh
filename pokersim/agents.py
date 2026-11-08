@@ -556,6 +556,68 @@ class PotOddsAgent(_RuleAgent):
         return passive(obs) if eq >= to_call / (pot + to_call) else self._fold_or_check(obs)
 
 
+# The three bots below are for the sealed final test only (scripts/sealed_eval.py): written after training started,
+# never RL training opponents and never used to pick a model.
+class OverbettorAgent(_RuleAgent):
+    kind = "overbettor"
+    label = "Bully"
+    description = "Bets twice the pot with strong hands and with some bluffs; folds the middle."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        s = self._strength(obs) if obs["street"] == "preflop" else self._equity(obs)
+        strong, weak = (0.6, 0.25) if obs["street"] == "preflop" else (0.7, 0.3)
+        if la["raise"] and (s >= strong or (s < weak and self.rng.random() < 0.2)):
+            return sized_raise(obs, 2.0, la)
+        to_call = la["call"]
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if s >= to_call / (float(obs["total_pot"]) + to_call) + 0.1 else self._fold_or_check(obs)
+
+
+class LimperAgent(_RuleAgent):
+    kind = "limper"
+    label = "Tourist"
+    description = "Limps in with many hands, leads out small with any piece, rarely raises."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        to_call = la["call"]
+        if obs["street"] == "preflop":
+            s = self._strength(obs)
+            if s >= 0.75 and la["raise"]:
+                return {"action": la["kind"], "amount": round_to_unit(la["min_to"], obs, la)}
+            cheap = to_call <= float(obs["min_bet"]) * 1.01
+            return passive(obs) if (s >= 0.3 and cheap) or s >= 0.5 or to_call <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if to_call <= 0:
+            return sized_raise(obs, 0.5, la) if eq > 0.45 and la["raise"] else {"action": "check"}
+        if eq > 0.85 and la["raise"]:
+            return sized_raise(obs, 1.0, la)
+        return passive(obs) if eq >= 0.35 else self._fold_or_check(obs)
+
+
+class CheckRaiserAgent(_RuleAgent):
+    kind = "checkraiser"
+    label = "Ambusher"
+    description = "Checks after the flop, then raises when bet into with a strong hand."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        to_call = la["call"]
+        if obs["street"] == "preflop":
+            s = self._strength(obs)
+            if s >= 0.6 and la["raise"]:
+                return sized_raise(obs, 0.75, la)
+            return passive(obs) if s >= 0.4 or to_call <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if to_call <= 0:
+            return sized_raise(obs, 1.0, la) if obs["street"] == "river" and eq > 0.8 and la["raise"] else {"action": "check"}
+        if eq > 0.65 and la["raise"]:
+            return sized_raise(obs, 1.0, la)
+        return passive(obs) if eq >= to_call / (float(obs["total_pot"]) + to_call) else self._fold_or_check(obs)
+
+
 AGENT_TYPES: Dict[str, type] = {
     "rl": RLAgent,
     "pro": ProAgent,
@@ -564,6 +626,9 @@ AGENT_TYPES: Dict[str, type] = {
     "trapper": TrapperAgent,
     "minraiser": MinRaiserAgent,
     "potodds": PotOddsAgent,
+    "overbettor": OverbettorAgent,
+    "limper": LimperAgent,
+    "checkraiser": CheckRaiserAgent,
     "random": RandomAgent,
     "station": CallingStationAgent,
     "maniac": ManiacAgent,
