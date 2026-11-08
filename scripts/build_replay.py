@@ -1,6 +1,11 @@
-"""Precompute the Poker Mirror replay of the reserved unseen player (data/demo/replay.json, served at /api/lab/replay).
+"""Precompute the Poker Mirror replay of a real unseen player (data/demo/replay.json, served at /api/lab/replay).
 
-    python scripts/build_replay.py [--showcase 10]
+    python scripts/build_replay.py [--showcase 7] [--player data/demo/replay_player.json --hands data/demo/replay_hands.phhs]
+
+The default player is one of the 30 unseen players of scripts/eval_unseen_players.py (no model was trained on them),
+picked for a strong personal style so the personal model's adaptation is visible; data/demo/replay_player.json says
+so, and the page says it too.  ``--player data/demo/reserved_player.json --hands data/demo/reserved_hands.phhs`` replays
+the reserved player instead.
 
 All of the player's recorded hands are replayed in time order through the same engine and the same model code as the
 live table (pokersim.lab_api.predict on a stand-in game).  The personal models ("This player") learn him, and any
@@ -10,8 +15,10 @@ Output:
 * ``curve``: for every one of his decisions, whether each model's prediction (made before the move) was right:
   his personal model, people in general (next-move model), and "his usual move" — for the learning-curve chart.
 * ``hands``: full frames (table state + every model value, exactly the /api/lab/predict shape) for the showcase
-  hands, chosen by a fixed rule before looking at any prediction: hands from the last half (after he has been
-  studied), where his cards were revealed at showdown and he made at least 2 decisions, evenly spaced.  His cards
+  hands, chosen by a fixed rule: hands from the last half (after he has been studied), where his cards were revealed
+  at showdown and at least one of his moves went against what people in general would do (the next-move model's top
+  guess), evenly spaced.  Whether his own model caught those moves is shown, right or wrong.
+* ``habits``: what his model learned about him by the end, in plain words.  His cards
   are taken from that showdown and shown from the start, so the coach (RL) can advise; the personal model never sees
   cards (public information only).
 """
@@ -99,7 +106,7 @@ def money(x):
     return f"{x:g}" if isinstance(x, (int, float)) else str(x)
 
 
-def run_hand(rec, stand, name, hand_no, frames_on):
+def run_hand(rec, stand, name, hand_no, frames_on, against=None):
     k = his_index(rec, name)
     sc = shown_cards(rec, k)
     actions = list(rec.actions)
@@ -162,6 +169,8 @@ def run_hand(rec, stand, name, hand_no, frames_on):
             log.append({"text": f"{disp[p]} {txt}", "player": p})
             if p == k:
                 g = Y.group_of_action(res)
+                if against is not None and prior is not None and int(Y.GROUP_OF[int(np.argmax(prior))]) != g:
+                    against.add(hand_no)
                 hit = int(Y.GROUP_OF[int(np.argmax(pred))]) == g
                 curve.append([int(hit), int(int(Y.GROUP_OF[int(np.argmax(prior))]) == g) if prior is not None else 0,
                               int(usual == g)])
@@ -185,15 +194,26 @@ def run_hand(rec, stand, name, hand_no, frames_on):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--showcase", type=int, default=10)
+    ap.add_argument("--showcase", type=int, default=7)
+    ap.add_argument("--player", default=os.path.join(ROOT, "data", "demo", "replay_player.json"))
+    ap.add_argument("--hands", default=os.path.join(ROOT, "data", "demo", "replay_hands.phhs"))
     a = ap.parse_args()
     Y.PLAYERS_DIR = tempfile.mkdtemp(prefix="replay_players_")  # never touch the real player logs
-    info = json.load(open(os.path.join(ROOT, "data", "demo", "reserved_player.json")))
+    info = json.load(open(a.player))
     name = info["player"]
-    recs = phh.load_file(os.path.join(ROOT, "data", "demo", "reserved_hands.phhs"))
+    recs = phh.load_file(a.hands)
     n = len(recs)
-    pool = [i for i in range(n // 2, n) if shown_cards(recs[i], his_index(recs[i], name)) and n_decisions(recs[i], his_index(recs[i], name)) >= 2]
+    # pass 1 (no frames): which of his hands had a move against what people in general would do
+    against: set = set()
+    probe = Stand()
+    for i, rec in enumerate(phh.load_file(a.hands)):
+        try:
+            run_hand(rec, probe, name, i + 1, False, against)
+        except Exception:  # noqa: BLE001
+            continue
+    pool = [i for i in range(n // 2, n) if (i + 1) in against and shown_cards(recs[i], his_index(recs[i], name))]
     pick = set(pool[j] for j in np.linspace(0, len(pool) - 1, min(a.showcase, len(pool))).round().astype(int)) if pool else set()
+    Y.PLAYERS_DIR = tempfile.mkdtemp(prefix="replay_players_")  # the real pass starts knowing nothing about him
     stand = Stand()
     curve, showcase = [], []
     for i, rec in enumerate(recs):
@@ -207,10 +227,13 @@ def main():
         if i in pick:
             showcase.append({"hand_no": i + 1, "frames": frames})
     C_ = np.array([r[1:] for r in curve], float)
+    him = stand.watch.model(name, True)
     out = {"player": {"label": HIM, "venue": info["venue"], "hands": n, "decisions": len(curve),
-                      "note": "real online hands from many different tables; no model was trained or evaluated on this player"},
+                      "picked": info.get("picked", ""),
+                      "note": "real online hands from many different tables; no model was trained on this player"},
+           "habits": him.habits(top=3),
            "curve": curve, "summary": {"personal": C_[:, 0].mean(), "people": C_[:, 1].mean(), "usual": C_[:, 2].mean()},
-           "showcase_rule": "last half of his hands, his cards revealed at showdown, >= 2 decisions by him, evenly spaced",
+           "showcase_rule": "last half of his hands, his cards revealed at showdown, at least one move against what people in general would do, evenly spaced",
            "hands": showcase}
     s = json.dumps(out, separators=(",", ":"), default=lambda x: round(float(x), 4))
     with open(OUT, "w") as f:

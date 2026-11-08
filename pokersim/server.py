@@ -154,6 +154,7 @@ class GameSession:
             except (EngineError, UnsupportedVariant) as exc:
                 raise ApiError(str(exc))
             self.bot_delay = max(0.0, float(cfg.get("bot_delay_ms", 700)) / 1000.0)
+            self.rebuy = bool(cfg.get("rebuy", False))  # the Lab table keeps all six players: anyone broke buys back in
             self.reveal = bool(cfg.get("spectate", False)) or not self.human_seats
             self.log = []
             self.records = []
@@ -173,12 +174,20 @@ class GameSession:
             if self.hand is not None and self.hand.status not in ("finished", "incomplete"):
                 raise ApiError("the current hand is still running", 409)
             self._settle()
+            back = []
+            if getattr(self, "rebuy", False):
+                for seat in self.table.seats:
+                    if seat.buy_in > 0 and seat.stack < self.table.big_blind:
+                        seat.stack = seat.buy_in
+                        back.append(seat.name)
             try:
                 self.hand = self.table.new_hand()
             except EngineError as exc:
                 raise ApiError(str(exc), 409)
             self.hand_counter += 1
             self.log = [{"t": time.time(), "text": f"Hand #{self.table.hand_no} - dealing"}]
+            if back:
+                self.log.append({"t": time.time(), "text": f"{', '.join(back)} {'buy' if len(back) > 1 or back[0] == 'You' else 'buys'} back in"})
             self._kick_bots()
             return self.state()
 

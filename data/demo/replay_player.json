@@ -1,0 +1,8 @@
+{
+ "venue": "Absolute Poker",
+ "player": "NX+SmeQ+96PcDBG5fFPKZw",
+ "hands_written": 643,
+ "touched_by_training": 0,
+ "picked": "picked from the 30 unseen players of the evaluation for a strong personal style (across all 30, our model of the player beat people in general for 28)",
+ "rule": "one of the 30 online players with no hand available to the hand-model or next-move extraction (scripts/eval_unseen_players.py); hands from scripts/extract_player_hands.py"
+}

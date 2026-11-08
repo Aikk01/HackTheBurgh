@@ -302,6 +302,9 @@
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
         el("span", { class: "p2", text: ` · people in general ${acc.people_right || 0}` })) :
         loaded("personal", "actions") ? el("span", { class: "nm", text: L.replay ? "Starts with their first move" : "Starts with your first move" }) : noModel());
+    const yh = you && you.habits && you.habits[0];
+    if (yh) would.append(el("span", { class: "k", text: L.replay ? "Their habit" : "Your habit" }),
+      el("span", { class: "v" }, yh.text, el("span", { class: "p2", text: ` (${yh.detail})` })));
     const gaps = (you && you.coach_gaps) || [];
     if (gaps.length && !L.replay) {
       const g = gaps[0];
@@ -404,11 +407,17 @@
         el("span", { class: "v" }, el("b", { text: `right ${acc.right} of ${acc.total}` }),
           el("span", { class: "p2", text: ` · people in general ${acc.people_right}` }))));
     }
+    const hb = pr && pr.this_player && pr.this_player.habits && pr.this_player.habits[0];
+    if (hb) top.append(habitRow("Habit", hb));
     const ramp = $("#ramp");
     ramp.innerHTML = "";
     ramp.style.setProperty("--pc", `var(${pc})`);
     ramp.append(el("span", { text: "less likely" }), el("span", { class: "bar" }), el("span", { text: "more likely" }));
   }
+
+  // a learned pattern in plain words, with the counts behind it
+  const habitRow = (label, h) => el("div", { class: "row habit" }, el("span", { class: "k", text: label }),
+    el("span", { class: "v" }, h.text, el("span", { class: "p2", text: ` (${h.detail})` })));
 
   function grid13(hands, who, seat) {
     const g = el("div", { class: "g13" + (hands ? "" : " empty"), role: "grid", tabindex: hands ? 0 : -1, "aria-label": hands ? `Likely hands for ${who}. Arrow keys read cells.` : `Likely hands for ${who}: ${NO_MODEL}` });
@@ -553,7 +562,7 @@
     try {
       onState(await api("/api/game/new", {
         seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "station" }],
-        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true,
+        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
     } catch (e) { $("#actNote").textContent = e.message; }
@@ -599,16 +608,19 @@
       try { RP.data = await api("/api/lab/replay"); } catch (e) { $("#actNote").textContent = e.message; return; }
     }
     const d = RP.data, s = d.summary;
-    $("#replayNote").textContent = `${d.player.hands} of their real hands from many different online tables, studied in order the way a poker tracker would. ` +
-      `Before each of their ${d.player.decisions} decisions every model made its guess, then we checked. Right overall: this player's model ${pct(s.personal)}, ` +
-      `people in general ${pct(s.people)}, their usual move ${pct(s.usual)}. This player is close to average, so our model of them stays close to people in general; ` +
-      `across 30 such unseen players it was the better guess for 28.`;
+    $("#replayNote").textContent = `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
+      `We picked them out of 30 unseen players for a strong style (across all 30, our model beat people in general for 28). ` +
+      `Before each of their ${d.player.decisions.toLocaleString()} moves every model guessed: ours was right ${pct(s.personal)}, people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
+    const hl = $("#replayHabits");
+    hl.innerHTML = "";
+    (d.habits || []).forEach((h) => hl.append(el("li", {}, h.text, el("span", { class: "p2", text: ` (${h.detail})` }))));
+    hl.hidden = !(d.habits || []).length;
     drawCurve(d.curve);
     $("#replayCard").hidden = false;
   }
   function drawCurve(rows) {
     // share right over the last 100 decisions, for each model, as the hands go by
-    const W = 560, H = 150, win = 100, lo = 0.5, hi = 1.0;
+    const W = 560, H = 150, win = 100, lo = 0.3, hi = 0.85;
     const pts = [[], [], []];
     for (let i = win; i <= rows.length; i++) {
       const w = rows.slice(i - win, i);
@@ -617,7 +629,7 @@
     const X = (i) => 30 + ((W - 40) * (i - win)) / Math.max(1, rows.length - win);
     const Yv = (v) => 10 + (H - 30) * (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo));
     const line = (p) => p.map(([i, v], k) => `${k ? "L" : "M"}${X(i).toFixed(1)},${Yv(v).toFixed(1)}`).join("");
-    const ticks = [0.5, 0.75, 1].map((v) => `<line x1="30" x2="${W - 10}" y1="${Yv(v)}" y2="${Yv(v)}" class="gl"/><text x="2" y="${Yv(v) + 4}">${Math.round(v * 100)}%</text>`).join("");
+    const ticks = [0.4, 0.6, 0.8].map((v) => `<line x1="30" x2="${W - 10}" y1="${Yv(v)}" y2="${Yv(v)}" class="gl"/><text x="2" y="${Yv(v) + 4}">${Math.round(v * 100)}%</text>`).join("");
     $("#replayCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last 100 decisions">${ticks}` +
       `<path d="${line(pts[2])}" class="ln usu"/><path d="${line(pts[1])}" class="ln ppl"/><path d="${line(pts[0])}" class="ln you"/>` +
       `<text x="${W - 10}" y="${H - 4}" text-anchor="end">decisions studied →</text></svg>`;

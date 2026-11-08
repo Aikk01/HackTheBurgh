@@ -15,6 +15,7 @@ so far).  Human players' counts and decision logs persist in ``data/players/<nam
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import threading
@@ -169,6 +170,35 @@ class PlayerModel:
             out.append({"where": where, "you": word(you), "coach": word(coach), "times": c, "of": self.gap_totals.get(b, c)})
         out.sort(key=lambda g: (-g["times"], -g["times"] / max(g["of"], 1)))
         return out[:top]
+
+    def habits(self, top: int = 2, min_seen: int = 8) -> List[Dict[str, Any]]:
+        """Where this player differs most from people in general: per situation, a move made how many times as often
+        (the model's own tilt, shrunk by ALPHA), with the counts behind it, in plain words."""
+        out = []
+        for b, c in self.counts.items():
+            n, e = c[:3], (c[3:6] if len(c) >= 6 else [0.0] * 3)
+            seen = sum(n)
+            if seen < min_seen:
+                continue
+            street, facing = b.split("|")
+            where = ("Preflop" if street == "preflop" else f"On the {street}") + (", facing a bet" if facing == "bet" else ", when they can check")
+            for g in range(3):
+                ratio = (n[g] + ALPHA) / (e[g] + ALPHA)
+                if abs(math.log(ratio)) < math.log(1.3):
+                    continue
+                move = ("check" if g == 1 else "bet") if facing == "free" and g > 0 else GROUPS[g]
+                often = f"{ratio:.1f}× as often" if ratio >= 1 else f"only {round(100 * ratio)}% as often"
+                out.append({"where": where, "move": move, "ratio": round(ratio, 2), "did": int(n[g]), "seen": int(seen),
+                            "people": round(e[g], 1), "text": f"{where}: {move}s {often} as most people",
+                            "detail": f"{int(n[g])} of {int(seen)} times; most people about {round(e[g])}",
+                            "_rank": abs(math.log(ratio)) * math.sqrt(seen)})
+        out.sort(key=lambda h: -h["_rank"])
+        best, seen_where = [], set()
+        for h in out:  # the strongest habit of each situation, so the list says different things
+            if h["where"] not in seen_where:
+                seen_where.add(h["where"])
+                best.append({k: v for k, v in h.items() if k != "_rank"})
+        return best[:top]
 
     def score(self) -> Dict[str, int]:
         return {"right": self.right, "total": self.total, "baseline_right": self.baseline_right,

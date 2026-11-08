@@ -252,6 +252,12 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .snote { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
 @media (max-width: 640px) { .sb { grid-template-columns: 1fr 44px; } .sb .st { grid-column: 1 / -1; grid-row: 2; } }
 
+/* learned habits */
+.top2 .row.habit .v { white-space: normal; color: var(--ink); }
+.top2 .row.habit .p2, .habits .p2 { color: var(--muted); font-size: 0.92em; }
+.habits-head { margin: 4px 0 4px !important; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.habits { margin: 0 0 12px; padding-left: 18px; font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+
 /* slim opponent box: two rows, next move only */
 .mbox.slim .mtable.two { grid-template-columns: auto 1fr; }
 .mbox.slim { min-width: 0; padding: 3px 8px 4px; }

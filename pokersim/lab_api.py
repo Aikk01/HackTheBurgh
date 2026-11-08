@@ -159,7 +159,8 @@ def predict(game: Any) -> Dict[str, Any]:
         rows.append({"index": j, "seat": p["seat"], "name": p["name"], "folded": p["folded"],
                      "base": {"action": base_act, "hands": hands},
                      "this_player": {"action": this_act, "hands": _summary(ranges[j], board) if j in ranges else None,
-                                     "seen": m.total if m else 0, "accuracy": m.score() if m else None}})
+                                     "seen": m.total if m else 0, "accuracy": m.score() if m else None,
+                                     "habits": m.habits(top=1) if m else []}})
 
     should_base = should_rl = rl_value = would = None
     if your_turn and obs is not None:
@@ -198,6 +199,7 @@ def predict(game: Any) -> Dict[str, Any]:
             "would": {"personal": would},
             "accuracy": you_model.score() if you_model is not None and you_model.total else None,
             "coach_gaps": you_model.gap_summary() if you_model is not None else [],
+            "habits": you_model.habits(top=2) if you_model is not None else [],
         },
         "players": rows,
     }
