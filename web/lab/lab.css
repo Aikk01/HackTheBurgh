@@ -237,7 +237,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid currentColor;
 /* a coach's advice: one bar, fold | check-call | bet-raise */
 .cbar { display: flex; height: 24px; border-radius: 6px; overflow: hidden; background: var(--page-deep); min-width: 0; width: 100%; }
 .cbar span { display: flex; align-items: center; justify-content: center; flex-basis: 0; font-size: 12px; white-space: nowrap; overflow: hidden;
-  color: var(--ink-2); border-right: 1px solid var(--page-deep); transition: flex-grow 0.5s ease; }
+  color: var(--ink-2); border-right: 1px solid var(--page-deep); transition: flex-grow 0.75s ease; }
 .cbar span:last-child { border-right: 0; }
 .cbar .g0 { background: rgba(255, 255, 255, 0.06); } .cbar .g1 { background: rgba(255, 255, 255, 0.11); } .cbar .g2 { background: rgba(255, 255, 255, 0.17); }
 .cbar span.top { background: var(--amber); color: var(--page-deep); font-weight: 600; }

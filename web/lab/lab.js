@@ -41,6 +41,8 @@
     // motion: what each grid last showed, how much each guess moved and why, the ✓/✗ badges, when you last picked a chip
     drawn: {}, mem: {}, shift: {}, flash: {}, scale: {}, logLen: 0, picked: 0, shownPick: null };
   const MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PACE = 1.5;  // the table's motion, unhurried: every deal, slide and flip takes 1.5x its base time
+  const EASE = "cubic-bezier(.25,.75,.3,1)";  // a soft ease-out
   const GROUP = (a) => (a === "fold" ? 0 : a === "check" || a === "call" ? 1 : 2);
   const groupOfText = (t) => (/\bfold/.test(t) ? 0 : /\b(check|call)/.test(t) ? 1 : 2);
   const SEAT_COLOURS = ["--p1", "--p2", "--p3", "--p4", "--p5", "--p1", "--p2", "--p3", "--p4"];
@@ -249,7 +251,7 @@
   const FX = { hid: null, dealAt: 0, board: 0, boardFrom: 0, boardAt: 0, bets: {}, shown: {}, paid: null, pot: 0, xy: {} };
   function motion(h, g, order) {
     if (!MOTION) return;
-    const now = Date.now(), k = L.replay && L.fastMs && L.fastMs < 600 ? 0.35 : 1;  // a fast-forwarded replay moves faster
+    const now = Date.now(), k = PACE * (L.replay && L.fastMs && L.fastMs < 600 ? 0.35 : 1);  // a fast-forwarded replay moves faster
     const stage = $("#stage").getBoundingClientRect();
     const fx = $("#fx");
     const nb = h.board.filter(Boolean).length;
@@ -257,7 +259,7 @@
     const mid = (node) => { const r = node.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
     const run = (node, frames, dur, delay, since) => {  // since: when the effect started, so a redraw resumes it
       const age = now - since;
-      if (age < delay + dur) node.animate(frames, { duration: dur, delay: delay - age, easing: "cubic-bezier(.2,.7,.2,1)", fill: "backwards" });
+      if (age < delay + dur) node.animate(frames, { duration: dur, delay: delay - age, easing: EASE, fill: "backwards" });
     };
     const deck = { x: stage.left + g.cx, y: stage.top + g.cy - 80 };  // the dealer: just above the board
     // the deal: one card to each player round the table, then the second
@@ -281,7 +283,7 @@
       const gEl = el("div", { class: "bet ghost " + (cls || ""), style: `left:${x}px;top:${y}px` }, el("i", { class: "pchip" }), text);
       fx.append(gEl);
       const a = gEl.animate([{ transform: "translate(-50%, -50%)", opacity: 1 }, { transform: `translate(calc(-50% + ${to.x - stage.left - x}px), calc(-50% + ${to.y - stage.top - y}px)) scale(.8)`, opacity: 0.9 }],
-        { duration: dur, delay, easing: "cubic-bezier(.5,0,.2,1)", fill: "forwards" });
+        { duration: dur, delay, easing: "cubic-bezier(.45,.05,.25,1)", fill: "forwards" });
       a.onfinish = () => gEl.remove();
     };
     h.players.forEach((p) => {
@@ -297,14 +299,14 @@
       if (!xy || !st) return;
       run(b, [{ transform: `translate(calc(-50% + ${xy.x - xy.bx}px), calc(-50% + ${xy.y - xy.by}px)) scale(.6)`, opacity: 0 }, { transform: "translate(-50%, -50%)", opacity: 1 }], 300 * k, 0, st.at);
     });
-    if (potEl && h.total_pot > FX.pot) { potEl.animate([{ transform: "scale(1.18)" }, { transform: "none" }], { duration: 300 * k }); }
+    if (potEl && h.total_pot > FX.pot) { potEl.animate([{ transform: "scale(1.18)" }, { transform: "none" }], { duration: 300 * k, easing: EASE }); }
     FX.pot = h.total_pot;
     // showdown: hidden cards turn over
     order.forEach((p, i) => {
       if (FX.shown[p.seat] || camSees(p) || !p.cards.some((c) => c && c !== "XX") || (me() && p.index === me().index)) return;
       FX.shown[p.seat] = now;
       if (now - FX.dealAt < 1500) return;  // dealt face up (replay or spectating): nothing to turn over
-      seatEls[i] && seatEls[i].querySelectorAll(".hcards .lc").forEach((c, j) => c.animate([{ transform: "scaleX(.06)" }, { transform: "none" }], { duration: 320 * k, delay: j * 90 * k, fill: "backwards" }));
+      seatEls[i] && seatEls[i].querySelectorAll(".hcards .lc").forEach((c, j) => c.animate([{ transform: "scaleX(.06)" }, { transform: "none" }], { duration: 320 * k, delay: j * 90 * k, easing: EASE, fill: "backwards" }));
     });
     // the pot goes to the winner
     if (h.status !== "betting" && FX.paid !== h.hand_id) {
@@ -719,7 +721,7 @@
         const cell = el("div", { class: "c" + (a > 0.5 ? " hi" : "") + (shown ? " shown" : "") + (seen ? " cam" : ""), role: "gridcell",
           title: shown ? "their real hand" : seen ? "their real hand, hidden from the models" : "" }, f, el("span", { class: "t", text: name }));
         const k = after.push(a) - 1;
-        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700, L.fastMs) : 700, easing: "cubic-bezier(.2,.7,.2,1)" });
+        if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700 * PACE, L.fastMs) : 700 * PACE, easing: EASE });
         cell.dataset.name = name;
         cell.dataset.p = p;
         if (hands) cell.addEventListener("mouseenter", () => focusCell(r * 13 + c));
