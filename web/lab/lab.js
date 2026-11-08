@@ -198,7 +198,8 @@
       const isMe = mine && p.index === mine.index;
       const acting = h.status === "betting" && h.actor === p.index;
       const visible = isMe || p.cards.some((c) => c && c !== "XX");
-      const cards = p.has_cards && !(p.folded && !visible) ? p.cards.map((c) => card(c, isMe ? null : "sm")) : [];
+      const reveal = !isMe && visible && h.status !== "betting";  // shown down: full-size cards, not tucked away
+      const cards = p.has_cards && !(p.folded && !visible) ? p.cards.map((c) => card(c, isMe || reveal ? null : "sm")) : [];
       const flags = [];
       if (p.is_button) flags.push("dealer");
       if (p.folded) flags.push("folded");
@@ -215,7 +216,7 @@
       const age = fl && fl.hid === h.hand_id ? Date.now() - fl.at : Infinity;
       if (age < 2200) plate.append(el("span", { class: "verdict " + (fl.hit ? "yes" : "no"), style: `animation-delay:-${age}ms`,
         title: "Our read of this player, made before the move", text: `${fl.verb} ${fl.hit ? "✓" : "✗"}` }));
-      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
+      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
       const box = !isMe && !p.folded ? seatBox(p) : null;
       if (box) seat.append(box);
       seat.append(plate);
@@ -325,7 +326,7 @@
     flat.sort((x, y) => y[1] - x[1]);
     let cum = 0;
     for (const [n, q] of flat) { cum += q; if (n === name) break; }
-    return cum <= 0.5 + 1e-9 ? "inside our 50% zone" : cum <= 0.8 + 1e-9 ? "inside our 80% zone" : cum <= 0.9 + 1e-9 ? "inside our 90% zone" : "outside our 90% zone: a surprise";
+    return cum <= 0.5 + 1e-9 ? "inside our 50% zone" : cum <= 0.8 + 1e-9 ? "inside our 80% zone" : cum <= 0.9 + 1e-9 ? "inside our 90% zone" : "outside our 90% zone: a surprise, as about 1 hand in 9 is";
   }
   // the one sentence in the middle of the table: the last move, whether we read it, how much it moved our guess;
   // at the end, who won and where their cards were in our guess
@@ -770,7 +771,8 @@
     const row = (title, body, note) => el("section", { class: "srow" }, el("h3", { text: title }), body, el("p", { class: "snote", text: note }));
     const m = d && d.moves, h = d && d.hands, c = d && d.coach, b = d && d.bluff;
     rows.append(row("Their next move", m && m.ours ? bars([["Our model of that player", m.ours, true], ["People in general", m.people], ["Their usual move", m.usual]]) : noModel(),
-      m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move; better for ${m.helped} of ${m.players}. ` : ""}` +
+      m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move. Ours beats people in general by ` +
+        `${(100 * m.gain[0]).toFixed(1)} ± ${(100 * m.gain[1]).toFixed(1)} points (95% interval over players); its probabilities were sharper for ${m.helped} of ${m.players} once it had watched them. ` : ""}` +
         `When it says ${pct(m.says)}, it happens ${pct(m.happens)} of the time (${m.calib_n.toLocaleString()} decisions).` : ""));
     rows.append(row("Their hand", h ? bars([["Our top 10 guesses (of 169)", h.top10, true], ["Card counting alone", h.top10_counting]].concat(
       h.post ? [["After the flop: our top 10", h.post, true], ["After the flop: card counting", h.post_counting]] : [])) : noModel(),
@@ -778,7 +780,7 @@
         (h.bots ? `. On this table's bots, after learning how wide each one plays: ${pct(h.bots[0])} / ${pct(h.bots[1])} / ${pct(h.bots[2])} inside our likeliest 50 / 80 / 90% (fresh hands).` : ".") : ""));
     if (b) rows.append(row("Bluff check: will they all fold?", bars([["Bluff check said", b.said, true], ["They really all folded", b.happened]]),
       `${b.n.toLocaleString()} bets really made at this table, at the size buttons, with a stand-in in your seat, on a session other than the one its fold-chance correction was fitted on. ` +
-      `Each player's own fold chance: said ${pct(b.each_said)}, folded ${pct(b.each_happened)} (${b.each_n.toLocaleString()} answers).`));
+      `Each player's own fold chance: said ${pct(b.each_said)}, folded ${pct(b.each_happened)} (${b.each_n.toLocaleString()} answers). You can trust it to within about 2 points.`));
     rows.append(row("Your best move (RL coach)",
       c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
         el("div", { class: "sbig muted", text: "Tested once, on sealed tables, when training ends." }),
@@ -809,39 +811,84 @@
     $("#replayTitle").textContent = sim ? "A player like you, simulated" : "A real player, learned as they play";
     $("#habitsHead").textContent = sim ? "What the model of you learned" : "What our model learned about them";
     $("#replayStep").firstChild.textContent = sim ? `Simulate ${d.player.hands} hands ` : "Play their hands ";
-    const last = s.last100, face = s.facing_last100;
     $("#replayNote").textContent = sim
       ? `A human-like player who ${d.player.style_text} sits in your seat for ${d.player.hands} hands; no model is told the style. ` +
-        `At first the model of you guesses like people in general. Over the last 100 hands it was right ${pct(last.personal)} of the time, ` +
-        `people in general ${pct(last.people)}${face ? ` (facing a bet: ${pct(face.personal)} vs ${pct(face.people)})` : ""}. Then you take the seat and play like that.`
+        `Watch the model of you start as people in general, miss, and then pull away. Then you take the seat and play like that.`
       : `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
-        `We picked them out of 30 unseen players for a strong style (across all 30, our model beat people in general for 28). ` +
+        `We picked them out of 30 unseen players for a strong style (across all 30, its probabilities were sharper than people in general for 28). ` +
         `Before each of their ${d.player.decisions.toLocaleString()} moves every model guessed: ours was right ${pct(s.personal)}, people in general ${pct(s.people)}, their usual move ${pct(s.usual)}.`;
     const hl = $("#replayHabits");
     hl.innerHTML = "";
     (d.habits || []).forEach((h) => hl.append(el("li", {}, h.text, el("span", { class: "p2", text: ` (${h.detail})` }))));
-    hl.hidden = !(d.habits || []).length;
+    hl.hidden = sim || !(d.habits || []).length;
     $("#habitsHead").hidden = hl.hidden;
+    $("#replayCurve").hidden = sim;
+    document.querySelector(".curve-legend").hidden = sim;
     document.querySelector(".curve-legend .l-you").textContent = mine ? "Model of you" : "This player's model";
     document.querySelector(".curve-legend .l-usu").textContent = mine ? "Your usual move" : "Their usual move";
     drawCurve(d.curve);
     $("#replayCard").hidden = false;
   }
-  function drawCurve(rows) {
-    // share right over the last 100 decisions (fewer for a short replay), for each model, as the hands go by
-    const W = 560, H = 150, win = Math.min(100, Math.max(10, Math.floor(rows.length / 3))), lo = 0.3, hi = 0.85;
+  // the learning curve: share right over the last 100 decisions (fewer for a short replay), for each model, drawn up
+  // to decision `upto` on a fixed axis, so it can grow while the simulation fast-forwards
+  function curveSVG(rows, upto) {
+    const W = 560, H = 150, win = Math.min(100, Math.max(10, Math.floor(rows.length / 3))), lo = 0.3, hi = 0.95;
+    const cum = [[0], [0], [0]];
+    rows.forEach((r) => { for (let m = 0; m < 3; m++) cum[m].push(cum[m][cum[m].length - 1] + r[1 + m]); });
     const pts = [[], [], []];
-    for (let i = win; i <= rows.length; i++) {
-      const w = rows.slice(i - win, i);
-      for (let m = 0; m < 3; m++) pts[m].push([i, w.reduce((a, r) => a + r[1 + m], 0) / win]);
-    }
+    for (let i = win; i <= Math.min(upto, rows.length); i++) for (let m = 0; m < 3; m++) pts[m].push([i, (cum[m][i] - cum[m][i - win]) / win]);
     const X = (i) => 30 + ((W - 40) * (i - win)) / Math.max(1, rows.length - win);
     const Yv = (v) => 10 + (H - 30) * (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo));
     const line = (p) => p.map(([i, v], k) => `${k ? "L" : "M"}${X(i).toFixed(1)},${Yv(v).toFixed(1)}`).join("");
     const ticks = [0.4, 0.6, 0.8].map((v) => `<line x1="30" x2="${W - 10}" y1="${Yv(v)}" y2="${Yv(v)}" class="gl"/><text x="2" y="${Yv(v) + 4}">${Math.round(v * 100)}%</text>`).join("");
-    $("#replayCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last ${win} decisions">${ticks}` +
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last ${win} decisions">${ticks}` +
       `<path d="${line(pts[2])}" class="ln usu"/><path d="${line(pts[1])}" class="ln ppl"/><path d="${line(pts[0])}" class="ln you"/>` +
       `<text x="${W - 10}" y="${H - 4}" text-anchor="end">decisions studied →</text></svg>`;
+  }
+  function drawCurve(rows) { $("#replayCurve").innerHTML = curveSVG(rows, rows.length); }
+  const legend = () => el("p", { class: "curve-legend" }, el("span", { class: "lg l-you", text: "Model of you" }),
+    el("span", { class: "lg l-ppl", text: "People in general" }), el("span", { class: "lg l-usu", text: "Your usual move" }));
+  // between the first hands and the last ones: the hands in between fly by while the curve grows (about 3 s)
+  function fastForward(done) {
+    const d = RP.data, rows = d.curve, box = $("#ffwd");
+    const fromHand = d.hands[RP.lateAt - 1].hand_no, toHand = d.hands[RP.lateAt].hand_no;
+    const a = Math.max(0, rows.findIndex((r) => r[0] > fromHand)), b0 = rows.findIndex((r) => r[0] >= toHand), b = b0 < 0 ? rows.length : b0;
+    box.className = "ffwd";
+    box.hidden = false;
+    const t0 = performance.now(), dur = MOTION ? 3000 : 0;
+    const frame = (now) => {
+      if (!L.replay) { box.hidden = true; return; }
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1, i = Math.round(a + (b - a) * k);
+      const w = rows.slice(Math.max(0, i - 100), i), acc = (m) => (w.length ? w.reduce((x, r) => x + r[1 + m], 0) / w.length : 0);
+      const cv = el("div", { class: "curve" });
+      cv.innerHTML = curveSVG(rows, i);
+      box.innerHTML = "";
+      box.append(el("p", { class: "kicker", text: `Fast-forward · simulated hand ${i > 0 ? rows[i - 1][0] : 1} of ${d.player.hands}` }),
+        el("div", { class: "ff-now" }, el("span", { class: "ff-you" }, "Model of you ", el("b", { text: pct(acc(0)) })),
+          el("span", { class: "ff-ppl" }, "People in general ", el("b", { text: pct(acc(1)) })), el("span", { class: "p2", text: "right, last 100 moves" })),
+        cv, legend());
+      if (k < 1) requestAnimationFrame(frame);
+      else setTimeout(() => { box.hidden = true; done(); }, 350);
+    };
+    requestAnimationFrame(frame);
+  }
+  // the reveal, at the end: its last 100 hands, large, with the whole curve and what it learned
+  function showSimEnd() {
+    const d = RP.data, s = d.summary.last100, box = $("#ffwd");
+    const cv = el("div", { class: "curve" });
+    cv.innerHTML = curveSVG(d.curve, d.curve.length);
+    const go = el("button", { class: "btn primary", type: "button", text: "Now you play ▸" });
+    go.addEventListener("click", adopt);
+    box.className = "ffwd end";
+    box.innerHTML = "";
+    box.append(el("p", { class: "kicker", text: `After ${d.player.hands} simulated hands · right on its last 100` }),
+      el("div", { class: "ff-big" }, el("div", { class: "ff-you" }, el("b", { text: pct(s.personal) }), el("span", { text: "Model of you" })),
+        el("div", { class: "ff-ppl" }, el("b", { text: pct(s.people) }), el("span", { text: "People in general" })),
+        el("div", { class: "ff-usu" }, el("b", { text: pct(s.usual) }), el("span", { text: "Your usual move" }))),
+      cv, legend(),
+      el("ul", { class: "habits" }, ...(d.habits || []).slice(0, 2).map((h) => el("li", { text: h.text }))), go);
+    box.hidden = false;
+    if (MOTION) box.animate([{ opacity: 0, transform: "translate(-50%, -46%)" }, { opacity: 1, transform: "translate(-50%, -50%)" }], { duration: 320, easing: "ease-out" });
   }
   function enterSteps() {
     if (!RP.data || !RP.data.hands.length) return;
@@ -855,6 +902,9 @@
     document.querySelectorAll("#you .kicker")[1].textContent = mine ? "What you would do" : "What they will do";
     L.flash = {}; L.shift = {}; L.mem = {}; L.drawn = {}; L.logLen = 0;
     $("#rpAdopt").hidden = !RP.data.player.sim;
+    RP.lateAt = RP.data.hands.findIndex((x) => x.phase === "late");
+    RP.ffDone = !RP.data.player.sim || RP.lateAt < 1;
+    $("#ffwd").hidden = true;
     showFrame();
     play(true);
   }
@@ -862,7 +912,8 @@
   function play(on) {
     clearInterval(RP.timer);
     const total = RP.data ? RP.data.hands.reduce((a, h) => a + h.frames.length, 0) : 1;
-    L.fastMs = on ? Math.max(80, Math.min(1500, Math.round(9000 / total))) : 0;
+    const budget = RP.data && RP.data.player.sim ? 6000 : 9000;  // the simulation's fast-forward takes the other 3 s
+    L.fastMs = on ? Math.max(70, Math.min(1500, Math.round(budget / total))) : 0;
     RP.timer = on ? setInterval(() => stepReplay(1, true), L.fastMs) : null;
     $("#rpPlay").textContent = on ? "❚❚ Pause" : "▶ Play";
   }
@@ -892,15 +943,21 @@
   }
   function stepReplay(d, auto) {
     if (!L.replay) return;
-    if (!auto) play(false);
+    if (!auto) { play(false); $("#ffwd").hidden = true; }
     const hands = RP.data.hands;
+    if (auto && !RP.ffDone && RP.h === RP.lateAt - 1 && RP.f === hands[RP.h].frames.length - 1) {
+      clearInterval(RP.timer);  // the middle of the simulation flies by on the curve, then the last hands play
+      RP.ffDone = true;
+      fastForward(() => { if (L.replay) play(true); });
+      return;
+    }
     if (auto && RP.h === hands.length - 1 && RP.f === hands[RP.h].frames.length - 1) {
       play(false);
       const s = RP.data.summary, mine = RP.data.player.mine;
       if (RP.data.player.sim) {
         $("#actTitle").textContent = `Simulation done · ${RP.data.player.hands} hands`;
-        $("#actNote").textContent = `Last 100 hands: the model of you was right ${pct(s.last100.personal)}, people in general ${pct(s.last100.people)}. ` +
-          `Your turn: press "Now you play" and play like a player who ${RP.data.player.style_text}.`;
+        $("#actNote").textContent = `Your turn: press "Now you play" and play like a player who ${RP.data.player.style_text}.`;
+        showSimEnd();
         return;
       }
       $("#actTitle").textContent = `Replay done · ${hands.length} hands`;
@@ -924,6 +981,7 @@
   function exitReplay() {
     play(false);
     $("#rpAdopt").hidden = true;
+    $("#ffwd").hidden = true;
     $("#replayCard").hidden = true;
     if (!L.replay) return;
     L.replay = false;

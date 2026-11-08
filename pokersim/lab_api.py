@@ -245,8 +245,10 @@ def scorecard() -> Dict[str, Any]:
     u, cal = load("demo", "unseen_players_eval.json"), load("demo", "calibration.json")
     if u:
         s = u["summary"]
+        g = np.array([p["personal_top1"] - p["people_top1"] for p in u["per_player"]])  # the gain, player by player
         out["moves"] = {"ours": s["mean_personal_top1"], "people": s["mean_people_top1"], "usual": s["mean_usual_top1"],
-                        "players": s["players"], "decisions": s["decisions"], "helped": s["players_helped"]}
+                        "players": s["players"], "decisions": s["decisions"], "helped": s["players_helped"],
+                        "gain": [float(g.mean()), float(2.045 * g.std(ddof=1) / np.sqrt(len(g)))]}  # t interval, 30 players
     if cal:
         nm = cal["next_move"]["online"]
         b = max(nm["three_way"]["bins"], key=lambda x: x["n"])  # the most common confidence level
