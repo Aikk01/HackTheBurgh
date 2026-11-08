@@ -50,6 +50,6 @@ At every decision the screen shows what people do, what wins against these oppon
 |---|---|---|
 | Hand model | Trained. Unbiased Pluribus test: +0.31 nats over card counting | `data/rl/hand_range.npz` |
 | Next-move model | Trained (3.24M decisions, 3 seeds). Test gain over frequency baselines: +0.12 nats (online, public), +0.40 nats (Pluribus logs, with cards; top-1 81%) | `data/rl/next_move.npz` |
-| RL v2 (old opponents) | Stopped at update 56; update-50 export frozen in `data/rl/v2_u50/` | — |
+| RL v2 (old opponents) | Stopped at update 56; update-50 export frozen in `data/rl/coaches/v2-upd50/` | — |
 | RL v3 with / without predicted hands | Ready to start (07) | `data/rl/runs/v3-*` |
 | Screen, decision log, personal model | To build (04) | — |

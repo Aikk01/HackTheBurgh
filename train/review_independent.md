@@ -59,7 +59,7 @@ Checked locally, using quick reads only and no training:
   - Eddie and 2080 copies do the same in their trees, and an rsync back clobbers again.
   - Promotion is by in-distribution mean; the planned held-out selection does not exist yet.
 - *Fix, now:*
-  - `cp data/rl/policy.{npz,json} data/rl/v2_u50/`, then commit and push these 2 MB so the Mac integrates the real model
+  - `cp data/rl/policy.{npz,json} data/rl/coaches/v2-upd50/`, then commit and push these 2 MB so the Mac integrates the real model
     tonight.
   - Add `--export-dir` (default: the run dir) and promote by hand.
   - Give every remote run a unique `--run-dir runs/<machine>-<name>`.
@@ -337,10 +337,10 @@ Checked locally, using quick reads only and no training:
 
 | Time | K (5090) | Mac team |
 |---|---|---|
-| 01:50–02:05 | Back up and push `v2_u50` policy (C3). Fix `.gitignore` and redact train/ (H7). Resume v2 on the **5090**: `--resume …/latest.pt --run-dir data/rl/runs/v2resume --hours 4.5 --eval-every 15`. It only exports above 1181.5. | Pull. Decision log (4.1) with `you_pred` computed in `human_act` (L4). |
+| 01:50–02:05 | Back up and push `coaches/v2-upd50` policy (C3). Fix `.gitignore` and redact train/ (H7). Resume v2 on the **5090**: `--resume …/latest.pt --run-dir data/rl/runs/v2resume --hours 4.5 --eval-every 15`. It only exports above 1181.5. | Pull. Decision log (4.1) with `you_pred` computed in `human_act` (L4). |
 | 02:05–04:00 | `train_next_move.py`, one seed, no A/B (details below). | You-model with the Dirichlet scheme (H6) on the population prior. Score on the 3 groups. |
 | 04:00–05:00 | `opponent_next_move` per C1, the same hypothetical state for Base, leak test, push. | Screen: opponent boxes, grid (per-combo colour, M1), your panel. |
-| 05:00–05:45 | `rl-eval` script (H2): paired, 20k hands, old lineups plus 3 new rule personas, fresh seeds. Choose between v2_u50 and the v2resume best on it. | Screen continued. RL grid = "No model loaded" (M3). |
+| 05:00–05:45 | `rl-eval` script (H2): paired, 20k hands, old lineups plus 3 new rule personas, fresh seeds. Choose between coaches/v2-upd50 and the v2resume best on it. | Screen continued. RL grid = "No model loaded" (M3). |
 | 06:00 | **Freeze models.** Commit `policy.npz`, `next_move.npz` and the eval JSONs. Then integration help. | Switch the you-prior to the pros head. Warm up bot styles with `observe()`. |
 | 06:30–07:30 | Bug-fix only. | Rehearsal hands under the **demo player's** `player_id`. Wi-Fi-off run. |
 

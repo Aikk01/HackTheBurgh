@@ -72,7 +72,7 @@ not their value; the comparison with v3-noranges at equal updates answers that.
 |---|---|---|
 | Hand model | +0.31 nats over card counting on the unbiased Pluribus test | `data/rl/hand_range.npz` |
 | Next-move model | +0.12 nats over frequency baselines (online, public); +0.40 (with cards, top-1 81%) | `data/rl/next_move.npz` |
-| Fallback RL policy | v2 update 50: beat the equity bot on all 5 old test tables | `data/rl/v2_u50/` |
+| Fallback RL policy | v2 update 50: beat the equity bot on all 5 old test tables | `data/rl/coaches/v2-upd50/` |
 
 ## Reserved demo player
 

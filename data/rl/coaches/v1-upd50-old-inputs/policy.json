@@ -1,0 +1,114 @@
+{
+ "trained_at": "2026-11-07T23:27:40",
+ "updates": 50,
+ "steps": 3277381,
+ "hands": 1543763,
+ "seconds": 1471,
+ "device": "cuda (NVIDIA GeForce RTX 5090)",
+ "obs_dim": 146,
+ "hidden": [
+  512,
+  512,
+  256
+ ],
+ "actions": [
+  "fold",
+  "call",
+  "raise_min",
+  "raise_half",
+  "raise_pot",
+  "raise_2pot",
+  "all_in"
+ ],
+ "eval": {
+  "update": 50,
+  "hands_per_lineup": 3000,
+  "lineups": {
+   "tight_passive": {
+    "rl": {
+     "bb100": 332.3,
+     "ci95": 96.68
+    },
+    "rl_nostyle": {
+     "bb100": 329.17,
+     "ci95": 105.37
+    },
+    "baseline_equity_bot": {
+     "bb100": -51.72,
+     "ci95": 61.22
+    },
+    "rl_minus_baseline": 384.02,
+    "style_inputs_gain": 3.13
+   },
+   "loose_passive": {
+    "rl": {
+     "bb100": 1491.02,
+     "ci95": 250.76
+    },
+    "rl_nostyle": {
+     "bb100": 3130.37,
+     "ci95": 372.32
+    },
+    "baseline_equity_bot": {
+     "bb100": 447.2,
+     "ci95": 129.25
+    },
+    "rl_minus_baseline": 1043.82,
+    "style_inputs_gain": -1639.35
+   },
+   "loose_aggressive": {
+    "rl": {
+     "bb100": 1191.73,
+     "ci95": 329.62
+    },
+    "rl_nostyle": {
+     "bb100": 393.98,
+     "ci95": 183.49
+    },
+    "baseline_equity_bot": {
+     "bb100": 149.43,
+     "ci95": 110.81
+    },
+    "rl_minus_baseline": 1042.3,
+    "style_inputs_gain": 797.75
+   },
+   "tight_aggressive": {
+    "rl": {
+     "bb100": 176.13,
+     "ci95": 93.21
+    },
+    "rl_nostyle": {
+     "bb100": 201.13,
+     "ci95": 113.3
+    },
+    "baseline_equity_bot": {
+     "bb100": -57.07,
+     "ci95": 72.37
+    },
+    "rl_minus_baseline": 233.2,
+    "style_inputs_gain": -25.0
+   },
+   "mixed": {
+    "rl": {
+     "bb100": 1565.93,
+     "ci95": 202.59
+    },
+    "rl_nostyle": {
+     "bb100": 1511.75,
+     "ci95": 202.76
+    },
+    "baseline_equity_bot": {
+     "bb100": 355.5,
+     "ci95": 102.67
+    },
+    "rl_minus_baseline": 1210.43,
+    "style_inputs_gain": 54.18
+   }
+  },
+  "mean_rl_bb100": 951.42,
+  "generated": "2026-11-07T23:27:40"
+ },
+ "run_dir": "data/rl/runs/20261107-230309",
+ "algorithm": "PPO (clipped), GAE; self-play workers vs a style-diverse opponent pool + league snapshots",
+ "reward": "net big blinds per hand / 10"
+}
