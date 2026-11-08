@@ -30,8 +30,8 @@ it a little, so a few moves change little and a few hundred change a lot.
 
 **What it does:** suggests your move: fold, call, or raise by one of five sizes (min, ½ pot, pot, 2× pot, all-in).
 
-**What it sees:** 193 numbers: your cards, the board, the pot and bets, positions, **each opponent's likely hand from
-the hand model**, and a summary of each opponent's style.
+**What it sees:** 193 numbers about your cards, the board, the pot and bets, positions, **each opponent's predicted
+hand range from the hand model**, and each opponent's style (full list below).
 
 **The network:** a small neural network (three layers of 512, 512 and 256 units).
 
@@ -61,6 +61,76 @@ just play itself.
 
 **Where it ran:** the University of Edinburgh's Eddie cluster (32-processor nodes) and one PC with an RTX 5090, for 1
 to 3.5 hours per run.
+
+## The RL policy in detail
+
+**The shipped coach** is run `v3-bc` at update 50 (`data/rl/policy.npz` and `policy.json`).
+- **Training:** it started from the Pluribus copy, then trained by PPO for 20 minutes: 1.5 million hands, 3.3 million
+  decisions.
+- **At the table:** it runs as plain numpy on the laptop, no GPU, in well under a second per move.
+
+**Its 193 inputs:**
+
+| Group | Numbers | What they say |
+|---|---|---|
+| Your hand | 4 | Strength of your two cards, suited, a pair, the top card |
+| Street and position | 10 | Preflop / flop / turn / river; your seat counted from the button |
+| The board | 11 | The best hand you have made so far, and flush and straight draws |
+| Your chances | 5 | Chance of winning against random hands, and **against the hands the hand model predicts** |
+| Money and betting | 23 | Pot, stacks, the price to call, raises so far, pot odds, players still to act |
+| Each of the 5 opponents | 28 each | Stack, bet and status; their style as watched at the table; **a 9-number summary of their predicted range** |
+
+**Its outputs:**
+- **A probability for each of 7 moves:** fold, check/call, and raise min, ½ pot, pot, 2× pot or all-in.
+  - On screen, these are the RL coach's fold/call/raise bar.
+  - Its likeliest raise size is tagged on the size buttons.
+- **An estimate of how many chips the spot is worth**, used only in training.
+
+**Its reward:** the big blinds won or lost in each hand.
+
+**Training settings** (PPO with GAE):
+
+| Setting | Value |
+|---|---|
+| Decisions per update | 65,536 |
+| Passes over each batch | 4 |
+| Minibatch size | 8,192 |
+| PPO clip | 0.2 |
+| GAE λ | 0.95 |
+| Learning rate | 3e-4, lowered over the run |
+| Exploration bonus (entropy) | 0.02, lowered over the run (0.005 for the leashed runs) |
+| Copies of itself | One saved every 25 updates; they take 25% of opponent seats |
+
+**Every run, and how each did:**
+
+| Run | Start | Predicted hands | Leash | Kept version | Held-out | Sealed test |
+|---|---|---|---|---|---|---|
+| **v3-bc (shipped)** | Pluribus copy | on | — | update 50 | +150 | **+149 ± 26** |
+| v3-bc-s2 | Pluribus copy | on | — | update 100 | +121 | +207 ± 30 |
+| v3-bc-kl10 | Pluribus copy | on | 0.1 | update 100 | +123 | +69 ± 20 |
+| v3-bc-kl30 | Pluribus copy | on | 0.3 | update 100 | +87 | +32 ± 19 |
+| v3-noranges-s2 | scratch | off | — | update 150 | +186 | +120 ± 27 |
+| v3-ranges-s2 | scratch | on | — | update 100 | +110 | +73 ± 24 |
+| v3-noranges | scratch | off | — | update 300 | +96 | +59 ± 27 |
+| v3-ranges | scratch | on | — | update 150 | +94 | +21 ± 28 |
+| v2-eddie | scratch; rule-based opponents only | on | — | update 150 | +73 | +15 ± 26 |
+| imitation-only | Pluribus copy, no RL | on | — | — | — | −3 ± 18 |
+
+v2-eddie, the one run that never met human-like opponents in training, did worst of the RL runs on the sealed tables.
+With a single run that is a hint, not a proof.
+
+**How to run it again:**
+```
+# Pluribus copy (scripts/bc_init.py: 300,000 decisions), then PPO from it, on Eddie;
+# add --kl-bc 0.1 --kl-bc-ref <run>/bc_init.pt for a leash
+qsub eddie/rl_bc.sh data/rl/runs/<name> <end HH:MM> [seed] [trainer flags]
+
+# PPO from scratch
+python scripts/rl_supervise.py --run-dir data/rl/runs/<name> --hours 3 -- --mix v3 --seed 2
+
+# the sealed test
+python scripts/sealed_eval.py --policy <name>=<run>/export_heldout ... --hands 10000
+```
 
 ## How we tested it
 
