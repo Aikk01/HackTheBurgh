@@ -172,6 +172,8 @@ penalty keeps play closer to Pluribus but wins less on these tables.
 - **Sealed test at 30,000 hands:** coach +156 ± 15, +154 ± 14 over the Pluribus copy, predicted hands +82 ± 14.
 - **All training finished** (kl10 best +136, kl30 +104 held-out; after the freeze, so not candidates).
 - **Docs:** [DEMO.md](DEMO.md) for the presenter; README now opens with Poker Mirror.
+- **Type pass:** four text sizes (11 / 12 / 13 / 14 px) instead of fourteen, brighter secondary text, digits that line
+  up, no italic placeholders; the scorecard scrolls inside the window.
 
 **Running now:** nothing. Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 

@@ -17,6 +17,7 @@
   <ul class="models" id="models" aria-label="Model status"></ul>
   <div class="bar-actions">
     <button class="btn" id="scoreBtn" type="button" title="Measured on data no model was trained on">How good are the guesses?</button>
+    <button class="btn toggle" id="camBtn" type="button" aria-pressed="false" title="Like TV poker: turns every player's cards face up for you only. No model ever sees them.">Hole-card cam</button>
     <button class="btn" id="replayBtn" type="button" title="A simulated player like you, or a real player no model has seen">Watch the model learn a player</button>
     <button class="btn" id="newTable" type="button">New table</button>
   </div>
@@ -110,6 +111,7 @@
     <div class="grid-wrap" id="gridWrap"></div>
     <div class="top2" id="top2"></div>
     <div class="ramp" id="ramp"></div>
+    <p class="cam-note" id="camNote" hidden><span class="eyeoff" aria-hidden="true"></span>Hole-card cam: only you see these cards; no model does.</p>
     <p class="side-note" title="Each cell is a type of starting hand: pairs on the diagonal, suited above it, offsuit below. Height is per card combination. Only what everyone can see goes into the guess, so it never gives a card away."> Taller = likelier. Built only from what everyone can see; at showdown the real hand is outlined.</p>
   </aside>
 </main>

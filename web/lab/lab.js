@@ -71,6 +71,12 @@
     return i < 0 ? "--line-2" : SEAT_COLOURS[i % SEAT_COLOURS.length];
   }
   const predFor = (seat) => (L.pred && L.pred.players ? L.pred.players.find((p) => p.seat === seat) : null) || null;
+  // the hole-card cam (POST /api/game/reveal): opponents' cards face up for the audience only, never for a model, until
+  // really shown down; it does nothing in a replay
+  const liveSt = () => (L.replay ? L.liveSt : L.st);
+  const camOn = () => !L.replay && !!(L.st && L.st.reveal);
+  const camSees = (p) => camOn() && !p.shown && !(me() && p.index === me().index) && p.cards.some((c) => c && c !== "XX");
+  const eyeOff = () => el("span", { class: "eyeoff", "aria-hidden": "true" });
 
   // ------------------------------------------------------------ slots (model values or NO_MODEL)
   // fold / check-call / bet-raise, with every raise size and all-in summed, so all models answer the same three choices
@@ -138,6 +144,8 @@
   function renderBar() {
     const h = hand();
     const t = L.st && L.st.table;
+    const ls = liveSt();
+    $("#camBtn").setAttribute("aria-pressed", String(!!(ls && ls.reveal)));
     $("#handMeta").textContent = h ? `Hand ${L.st.hand_no} · blinds ${fmt(t && t.small_blind)}/${fmt(t && t.big_blind)} · ${h.status === "betting" ? h.street : "hand over"}` : "";
     const ul = $("#models");
     ul.innerHTML = "";
@@ -198,18 +206,21 @@
       const isMe = mine && p.index === mine.index;
       const acting = h.status === "betting" && h.actor === p.index;
       const visible = isMe || p.cards.some((c) => c && c !== "XX");
-      const reveal = !isMe && visible && h.status !== "betting";  // shown down: full-size cards, not tucked away
+      const cam = camSees(p);
+      const reveal = !isMe && visible && h.status !== "betting" && !cam;  // shown down: full-size cards, not tucked away
       const cards = p.has_cards && !(p.folded && !visible) ? p.cards.map((c) => card(c, isMe || reveal ? null : "sm")) : [];
+      const rd = !isMe && predFor(p.seat) && predFor(p.seat).reads;
       const flags = [];
       if (p.is_button) flags.push("dealer");
       if (p.folded) flags.push("folded");
       else if (p.all_in) flags.push("all-in");
       const won = (h.payouts && h.payouts[p.index]) || p.payout || 0;
       const plate = el("div", { class: "plate", style: isMe ? "" : `--pc: var(${colourOf(p.seat)})` },
-        el("div", { class: "hcards" }, ...cards),
+        el("div", { class: "hcards" + (cam ? " cam" : "") }, ...cards),
+        cam && cards.length && !p.folded ? el("span", { class: "camtag", title: "Hole-card cam: only you see these cards. Every guess on this page is made without them." }, eyeOff(), "hidden from the models") : null,
         el("div", { class: "who" },
           el("span", { class: "name", text: p.name, title: p.name }),
-          !isMe && L.types[p.name] ? el("span", { class: "ptype", text: L.types[p.name] }) : null,
+          !isMe && L.types[p.name] ? el("span", { class: "ptype", text: L.types[p.name] + (rd ? " · reads the table" : "") }) : null,
           el("span", { class: "sub", text: `${fmt(p.stack)} · ${p.position || ""}` }),
           won > 0 && h.status !== "betting" ? el("span", { class: "flag win", text: `wins ${fmt(won)}` })
             : flags.length ? el("span", { class: "flag", text: flags.join(" · ") }) : null));
@@ -217,7 +228,7 @@
       const age = fl && fl.hid === h.hand_id ? Date.now() - fl.at : Infinity;
       if (age < 2200) plate.append(el("span", { class: "verdict " + (fl.hit ? "yes" : "no"), style: `animation-delay:-${age}ms`,
         title: "Our read of this player, made before the move", text: `${fl.verb} ${fl.hit ? "✓" : "✗"}` }));
-      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
+      const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (reveal ? " reveal" : "") + (cam ? " cam" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
       const box = !isMe && !p.folded ? seatBox(p) : null;
       if (box) seat.append(box);
       seat.append(plate);
@@ -289,7 +300,7 @@
     FX.pot = h.total_pot;
     // showdown: hidden cards turn over
     order.forEach((p, i) => {
-      if (FX.shown[p.seat] || !p.cards.some((c) => c && c !== "XX") || (me() && p.index === me().index)) return;
+      if (FX.shown[p.seat] || camSees(p) || !p.cards.some((c) => c && c !== "XX") || (me() && p.index === me().index)) return;
       FX.shown[p.seat] = now;
       if (now - FX.dealAt < 1500) return;  // dealt face up (replay or spectating): nothing to turn over
       seatEls[i] && seatEls[i].querySelectorAll(".hcards .lc").forEach((c, j) => c.animate([{ transform: "scaleX(.06)" }, { transform: "none" }], { duration: 320 * k, delay: j * 90 * k, fill: "backwards" }));
@@ -312,6 +323,11 @@
   }
 
   const pretty = (cs) => cs.map((c) => (c[0] === "T" ? "10" : c[0]) + (SUITS[c[1]] || "")).join("");
+  // two cards as a hand type named as in the grid: higher rank first, then s (suited) or o (offsuit); "77" for a pair
+  function typeOf(cs) {
+    const [a, b] = cs.map((c) => RANKS.indexOf(c[0])).sort((x, y) => x - y);
+    return a === b ? RANKS[a] + RANKS[b] : RANKS[a] + RANKS[b] + (cs[0][1] === cs[1][1] ? "s" : "o");
+  }
   // where a hand type sat in our guess: #1 = the likeliest of the 169
   function rankOf(hands, name) {
     const flat = [];
@@ -340,7 +356,7 @@
       const w = won[0], amt = fmt((h.payouts && h.payouts[w.index]) || w.payout);
       const m = me();
       if (m && w.index === m.index) return `You win ${amt}`;
-      const cs = w.cards.filter((c) => c && c !== "XX");
+      const cs = camSees(w) ? [] : w.cards.filter((c) => c && c !== "XX");
       const hs = predFor(w.seat) && predFor(w.seat).base && predFor(w.seat).base.hands;
       const zn = cs.length === 2 && hs && hs.shown ? zoneOf(hs, hs.shown) : null;
       return `${w.name} wins ${amt}` + (cs.length === 2 ? ` with ${pretty(cs)}` : "") + (zn ? ` · ${zn}` : "");
@@ -369,6 +385,12 @@
     const box = el("div", { class: "mbox slim sbox", style: `--pc: var(${colourOf(p.seat)})`, "aria-label": `Next move for ${p.name}` });
     if (ga && gt && GROUP(ga.action) === GROUP(gt.action) && Math.abs(ga.p - gt.p) < 0.1) box.append(miniBar(t.action, null, true));
     else box.append(miniBar(b && b.action, "People", false), miniBar(t && t.action, "This player", true));
+    // a player that reads the table (the Shark): how often its models of the players still in fold to a pot-sized bet
+    const rd = pr && pr.reads;
+    if (rd && Number.isFinite(rd.all_fold)) box.append(el("div", { class: "reads",
+      title: `If ${p.name} bets about the pot, its models of the players still in say they all fold ${pct(rd.all_fold)} of the time` +
+        (Number.isFinite(rd.people) ? `; people in general would fold ${pct(rd.people)}` : "") + (Number.isFinite(rd.delta) ? `, so it shifts its raising by ${rd.delta >= 0 ? "+" : "−"}${fmt(Math.abs(rd.delta))}` : "") },
+      "Reads the table: they fold ", el("b", { text: pct(rd.all_fold) }), Number.isFinite(rd.people) ? ` (people ${pct(rd.people)})` : "", rd.action ? ` → ${rd.action}` : ""));
     return box;
   }
   // one small fold / call / raise bar, in the same order as the coaches' bars, the likeliest move written beside it;
@@ -538,7 +560,7 @@
     // guesses exist only for players still in the hand: follow a live opponent when the selected one folds
     const h = hand();
     if (h && h.status !== "betting" && L.shownPick !== h.hand_id) {  // at showdown, look at a hand that was shown
-      const shown = opps.find((p) => !p.folded && p.cards.some((c) => c && c !== "XX"));
+      const shown = opps.find((p) => !p.folded && !camSees(p) && p.cards.some((c) => c && c !== "XX"));
       if (shown) { L.sel = shown.seat; L.shownPick = h.hand_id; }
     }
     if (L.sel === null || !opps.some((p) => p.seat === L.sel && !p.folded)) {
@@ -561,7 +583,9 @@
     const wrap = $("#gridWrap");
     wrap.innerHTML = "";
     wrap.style.setProperty("--pc", `var(${pc})`);
-    wrap.append(grid13(hands, sel ? sel.name : "", sel ? sel.seat : null));
+    const camCs = sel && camSees(sel) ? sel.cards.filter((c) => c && c !== "XX").sort((x, y) => RANKS.indexOf(x[0]) - RANKS.indexOf(y[0])) : [];
+    const camName = camCs.length === 2 && hands && !hands.shown ? typeOf(camCs) : null;  // a hand shown down is outlined already
+    wrap.append(grid13(hands, sel ? sel.name : "", sel ? sel.seat : null, camName));
     const sh = sel && L.shift[sel.seat];
     const shiftEl = $("#shift");
     shiftEl.textContent = sh && h && sh.hid === h.hand_id ? `After “${sh.cause}”: ${Math.round(100 * sh.tv)}% of our guess moved` : "";
@@ -580,6 +604,12 @@
         el("span", { class: "k", text: "Real hand" }),
         el("span", { class: "v" }, el("b", { text: hands.shown }), ` · ${zoneOf(hands, hands.shown)}`, el("span", { class: "p2", text: ` (#${rankOf(hands, hands.shown)} of 169)` }))));
     }
+    if (camName) {  // the cam's view of the same thing, mid-hand: the guess above never saw these cards
+      top.append(el("div", { class: "row real cam", title: `Their cards make ${camName}. Only you can see them; the guess was built without them.` },
+        el("span", { class: "k" }, eyeOff(), "Real hand (hidden from the models)"),
+        el("span", { class: "v" }, el("b", { text: pretty(camCs) }), ` · our #${rankOf(hands, camName)} guess of 169 · ${zoneOf(hands, camName)}`)));
+    }
+    $("#camNote").hidden = !camOn() || !hand();
     // how good the "This player" read has been at this table, scored before each of their moves
     const acc = pr && pr.this_player && pr.this_player.accuracy;
     if (acc && acc.total) {
@@ -603,7 +633,7 @@
   const habitRow = (label, h) => el("div", { class: "row habit" }, el("span", { class: "k", text: label }),
     el("span", { class: "v" }, h.text, el("span", { class: "p2", text: ` (${h.detail})` })));
 
-  function grid13(hands, who, seat) {
+  function grid13(hands, who, seat, cam) {
     const g = el("div", { class: "g13" + (hands ? "" : " empty"), role: "grid", tabindex: hands ? 0 : -1, "aria-label": hands ? `Likely hands for ${who}. Arrow keys read cells.` : `Likely hands for ${who}: ${NO_MODEL}` });
     // shade by probability per combination: offsuit cells hold 12 combinations, suited 4, pairs 6, so shading by the
     // cell total would make offsuit hands look about 3x likelier than they are
@@ -627,7 +657,9 @@
         const a = d > 0 && max > 0 && d / max >= 0.04 ? Math.sqrt(d / max) : 0;
         const shown = hands && hands.shown === name;
         const f = el("span", { class: "f", style: `--a:${a.toFixed(3)}` });
-        const cell = el("div", { class: "c" + (a > 0.5 ? " hi" : "") + (shown ? " shown" : ""), role: "gridcell", title: shown ? "their real hand" : "" }, f, el("span", { class: "t", text: name }));
+        const seen = !shown && cam === name;
+        const cell = el("div", { class: "c" + (a > 0.5 ? " hi" : "") + (shown ? " shown" : "") + (seen ? " cam" : ""), role: "gridcell",
+          title: shown ? "their real hand" : seen ? "their real hand, hidden from the models" : "" }, f, el("span", { class: "t", text: name }));
         const k = after.push(a) - 1;
         if (before && MOTION && Math.abs(before[k] - a) > 0.02) f.animate([{ transform: `scaleY(${before[k]})` }, { transform: `scaleY(${a})` }], { duration: L.replay && L.fastMs ? Math.min(700, L.fastMs) : 700, easing: "cubic-bezier(.2,.7,.2,1)" });
         cell.dataset.name = name;
@@ -750,6 +782,7 @@
     return t;
   }
   async function newTable() {
+    const cam = !!(liveSt() && liveSt().reveal);
     exitReplay();  // a new game always goes back to your own table
     try {
       onState(await api("/api/game/new", {
@@ -757,6 +790,18 @@
         small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
+      if (cam && !(L.st && L.st.reveal)) onState(await api("/api/game/reveal", { reveal: true }));  // the cam stays on at a new table
+    } catch (e) { $("#actNote").textContent = e.message; }
+  }
+  // the hole-card cam: display only, the server keeps it across hands
+  async function toggleCam() {
+    const ls = liveSt();
+    if (!ls || !ls.active) { $("#actNote").textContent = "Deal first: the cam shows the cards of a hand being played."; return; }
+    try {
+      const st = await api("/api/game/reveal", { reveal: !ls.reveal });
+      onState(st);
+      if (L.replay) renderBar();  // the live table changed in the background: only the button shows it
+      announce(st.reveal ? "Hole-card cam on: only you see the other players' cards; no model does." : "Hole-card cam off");
     } catch (e) { $("#actNote").textContent = e.message; }
   }
   async function nextHand() {
@@ -1013,6 +1058,7 @@
     tableTypes().then(() => L.st && renderTable()).catch(() => {});
     $("#replayBtn").addEventListener("click", openReplay);
     $("#scoreBtn").addEventListener("click", openScore);
+    $("#camBtn").addEventListener("click", toggleCam);
     $("#scoreExit").addEventListener("click", () => { $("#scoreCard").hidden = true; });
     $("#replayStep").addEventListener("click", enterSteps);
     $("#replayExit").addEventListener("click", exitReplay);
