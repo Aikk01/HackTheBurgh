@@ -201,9 +201,33 @@ class GameSession:
             self.styles.add_hand(hand)
         except Exception:  # noqa: BLE001
             traceback.print_exc()
-        self.records.append(hand_to_record(hand, extra_meta={"venue": "pokersim live table"}))
+        rec = hand_to_record(hand, extra_meta={"venue": "pokersim live table"})
+        self.records.append(rec)
+        self._keep_hand(rec)
         if self.table is not None and self.table.current is hand:
             self.table.finish_hand()
+
+    def _keep_hand(self, rec: Any) -> None:
+        """Append a finished hand to each human player's history (data/players/<name>/hands.phhs), so
+        scripts/build_replay.py can replay how the models learned them."""
+        from .you_model import PlayerModel
+
+        for seat_no in self.human_seats:
+            seat = next((s for s in (self.table.seats if self.table else []) if s.seat_no == seat_no), None)
+            if seat is None:
+                continue
+            try:
+                d = PlayerModel(seat.name)._dir()
+                os.makedirs(d, exist_ok=True)
+                path = os.path.join(d, "hands.phhs")
+                n = 0
+                if os.path.exists(path):
+                    with open(path, encoding="utf-8") as f:
+                        n = sum(1 for line in f if line.startswith("[") and line.rstrip().endswith("]"))
+                with open(path, "a", encoding="utf-8") as f:
+                    f.write(f"{chr(10) if n else ''}[{n + 1}]\n{phh.dump_hand(rec)}")
+            except Exception:  # noqa: BLE001 - keeping history must never break the table
+                traceback.print_exc()
 
     # -- scenario (fork a recorded hand) --------------------------------------
     def start_scenario(self, sc: Dict[str, Any]) -> Dict[str, Any]:
