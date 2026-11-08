@@ -440,8 +440,130 @@ class RLAgent(Agent):
         return rl_act(obs, styles, policy, self.rng, greedy=self.greedy)
 
 
+class ProAgent(Agent):
+    """Plays like the players of the Pluribus logs: the next-move model (data/rl/next_move.npz) with its own cards.
+
+    ``temp`` scales the randomness, ``tilt_f`` / ``tilt_c`` / ``tilt_r`` shift the logits of fold / call / raise."""
+
+    kind = "pro"
+    label = "Pro-like bot"
+    description = "Behaviour cloned from the 13 professionals of the Pluribus logs (next-move model with cards)."
+    pluribus = False
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.temp = float(params.get("temp", 1.0))
+        self.tilt = (float(params.get("tilt_f", 0.0)), float(params.get("tilt_c", 0.0)), float(params.get("tilt_r", 0.0)))
+
+    def act(self, obs: Observation) -> Action:
+        from .next_move import sample_action
+
+        return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=self.tilt)
+
+
+class PluribusLikeAgent(ProAgent):
+    kind = "plur"
+    label = "Pluribus-like bot"
+    description = "Behaviour cloned from Pluribus's own decisions; held out from RL training."
+    pluribus = True
+
+
+class _RuleAgent(Agent):
+    """Shared helpers for the held-out rule bots (never used as RL training opponents)."""
+
+    def _strength(self, obs: Observation) -> float:
+        hole = [c for c in hero_cards(obs) if c is not None]
+        return preflop_strength(hole) if len(hole) == 2 else 0.0
+
+    def _equity(self, obs: Observation) -> float:
+        hole = [c for c in hero_cards(obs) if c is not None]
+        n_opp = max(1, sum(1 for p in obs["players"] if not p["folded"] and not p["is_hero"]))
+        return float(estimate_equity(hole, board_cards(obs), n_opp, iterations=60, rng=self.rng)["equity"])
+
+    def _fold_or_check(self, obs: Observation) -> Action:
+        la = legal(obs)
+        return {"action": "check"} if la["check"] else {"action": "fold"} if la["fold"] else passive(obs)
+
+
+class NitShoverAgent(_RuleAgent):
+    kind = "nit"
+    label = "Nit (push/fold)"
+    description = "Held-out rule bot: plays only premium hands and moves all-in with them."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        if obs["street"] == "preflop":
+            if self._strength(obs) >= 0.62:
+                return {"action": "all_in"} if la["raise"] else passive(obs)
+            return self._fold_or_check(obs) if la["call"] > 0 else passive(obs)
+        eq = self._equity(obs)
+        if eq > 0.7 and la["raise"]:
+            return {"action": "all_in"}
+        return passive(obs) if (la["call"] <= 0 or eq > 0.5) else self._fold_or_check(obs)
+
+
+class TrapperAgent(_RuleAgent):
+    kind = "trapper"
+    label = "Trapper"
+    description = "Held-out rule bot: slow-plays strong hands (check-call) and raises big on the river."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        if obs["street"] == "preflop":
+            return passive(obs) if self._strength(obs) >= 0.38 or la["call"] <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if eq > 0.75:
+            if obs["street"] == "river" and la["raise"]:
+                return sized_raise(obs, 1.0, la)
+            return passive(obs)
+        pot = float(obs["total_pot"])
+        to_call = la["call"]
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if eq >= to_call / (pot + to_call) + 0.05 else self._fold_or_check(obs)
+
+
+class MinRaiserAgent(_RuleAgent):
+    kind = "minraiser"
+    label = "Min-raiser"
+    description = "Held-out rule bot: min-raises often with medium hands, folds to resistance."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        s = self._strength(obs) if obs["street"] == "preflop" else self._equity(obs)
+        facing = la["call"] > float(obs["min_bet"]) * 1.01
+        if la["raise"] and s >= (0.45 if obs["street"] == "preflop" else 0.5) and not (facing and s < 0.7):
+            return {"action": la["kind"], "amount": round_to_unit(la["min_to"], obs, la)}
+        if facing and s < 0.6:
+            return self._fold_or_check(obs)
+        return passive(obs)
+
+
+class PotOddsAgent(_RuleAgent):
+    kind = "potodds"
+    label = "Pot-odds caller"
+    description = "Held-out rule bot: calls exactly when equity beats the price, value-bets half pot, never bluffs."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        eq = self._strength(obs) * 0.9 if obs["street"] == "preflop" else self._equity(obs)
+        pot = float(obs["total_pot"])
+        to_call = la["call"]
+        if la["raise"] and eq > 0.68:
+            return sized_raise(obs, 0.5, la)
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if eq >= to_call / (pot + to_call) else self._fold_or_check(obs)
+
+
 AGENT_TYPES: Dict[str, type] = {
     "rl": RLAgent,
+    "pro": ProAgent,
+    "plur": PluribusLikeAgent,
+    "nit": NitShoverAgent,
+    "trapper": TrapperAgent,
+    "minraiser": MinRaiserAgent,
+    "potodds": PotOddsAgent,
     "random": RandomAgent,
     "station": CallingStationAgent,
     "maniac": ManiacAgent,

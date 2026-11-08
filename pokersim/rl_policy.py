@@ -84,7 +84,7 @@ def recommend(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], policy: Op
     if policy is None:
         return {"available": False, "reason_ja": "RLモデルがまだ学習・配置されていません（data/rl/policy.npz）。"}
     rng = random.Random(f"{obs.get('hand_id')}|{obs['street']}|{len(obs.get('history') or [])}|{seed}")
-    x = encode(obs, styles, rng=rng)
+    x = encode(obs, styles, rng=rng, use_ranges=policy.meta.get("use_ranges", True))
     mask, targets = action_targets(obs)
     pr, value = policy.probs(x, mask)
     order = [int(i) for i in np.argsort(-pr) if mask[i]]
@@ -111,7 +111,7 @@ def recommend(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], policy: Op
 
 def act(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], policy: NumpyPolicy, rng: random.Random,
         greedy: bool = False) -> Dict[str, Any]:
-    x = encode(obs, styles, rng=rng)
+    x = encode(obs, styles, rng=rng, use_ranges=policy.meta.get("use_ranges", True))
     mask, targets = action_targets(obs)
     pr, _ = policy.probs(x, mask)
     i = int(np.argmax(pr)) if greedy else int(rng.choices(range(len(pr)), weights=pr)[0])

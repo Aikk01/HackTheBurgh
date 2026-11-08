@@ -7,6 +7,7 @@ against a tight folder than against a loose caller.
 """
 from __future__ import annotations
 
+import os
 import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -28,6 +29,9 @@ STREETS = ["preflop", "flop", "turn", "river"]
 N_TYPES = len(TYPES["names"])
 
 RANGE_ITERS = 48
+# POKERSIM_NO_RANGES=1 zeroes the range inputs everywhere (training rollouts, league snapshots, evaluation): the
+# "without predicted hands" ablation run.  rl-train --no-range-inputs sets it before the workers start.
+USE_RANGES_DEFAULT = os.environ.get("POKERSIM_NO_RANGES") != "1"
 # + equity against the predicted hands of the opponents, and that equity minus the price
 HERO_DIM = 4 + 4 + 6 + 9 + 2 + 3 + 4 + 6 + 9 + 4 + 2  # cards, street, position, made hand, draws, equity, money, betting, helpers, behind, range equity
 # + summary of the opponent's predicted 169-class range (pokersim.hand_range)
@@ -126,9 +130,11 @@ def _bb(x: Any, bb: float) -> float:
 
 
 def encode(obs: Dict[str, Any], styles: Dict[int, Dict[str, Any]], rng: Optional[random.Random] = None,
-           eq_iters: int = EQ_ITERS, use_ranges: bool = True) -> np.ndarray:
+           eq_iters: int = EQ_ITERS, use_ranges: Optional[bool] = None) -> np.ndarray:
     """Feature vector for the player whose observation ``obs`` is.  ``styles`` maps player index -> style estimate."""
     rng = rng or random.Random()
+    if use_ranges is None:
+        use_ranges = USE_RANGES_DEFAULT
     bb = float(obs.get("min_bet") or 1.0) or 1.0
     hero = obs["hero"]
     n = len(obs["players"])

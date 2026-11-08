@@ -1,0 +1,139 @@
+{
+ "trained_at": "2026-11-08T00:52:57",
+ "updates": 50,
+ "steps": 3277259,
+ "hands": 1709925,
+ "seconds": 3379,
+ "device": "cuda (NVIDIA GeForce RTX 5090)",
+ "obs_dim": 193,
+ "hidden": [
+  512,
+  512,
+  256
+ ],
+ "actions": [
+  "fold",
+  "call",
+  "raise_min",
+  "raise_half",
+  "raise_pot",
+  "raise_2pot",
+  "all_in"
+ ],
+ "eval": {
+  "update": 50,
+  "hands_per_lineup": 3000,
+  "lineups": {
+   "tight_passive": {
+    "rl": {
+     "bb100": 69.32,
+     "ci95": 54.02
+    },
+    "rl_nostyle": {
+     "bb100": 49.67,
+     "ci95": 68.7
+    },
+    "rl_norange": {
+     "bb100": 52.5,
+     "ci95": 42.31
+    },
+    "baseline_equity_bot": {
+     "bb100": -51.72,
+     "ci95": 61.22
+    },
+    "rl_minus_baseline": 121.04,
+    "style_inputs_gain": 19.65,
+    "range_inputs_gain": 16.82
+   },
+   "loose_passive": {
+    "rl": {
+     "bb100": 3687.22,
+     "ci95": 400.26
+    },
+    "rl_nostyle": {
+     "bb100": 2757.8,
+     "ci95": 435.74
+    },
+    "rl_norange": {
+     "bb100": 1078.32,
+     "ci95": 219.13
+    },
+    "baseline_equity_bot": {
+     "bb100": 447.2,
+     "ci95": 129.25
+    },
+    "rl_minus_baseline": 3240.02,
+    "style_inputs_gain": 929.42,
+    "range_inputs_gain": 2608.9
+   },
+   "loose_aggressive": {
+    "rl": {
+     "bb100": 828.17,
+     "ci95": 309.95
+    },
+    "rl_nostyle": {
+     "bb100": 545.98,
+     "ci95": 225.48
+    },
+    "rl_norange": {
+     "bb100": 546.55,
+     "ci95": 214.51
+    },
+    "baseline_equity_bot": {
+     "bb100": 149.43,
+     "ci95": 110.81
+    },
+    "rl_minus_baseline": 678.74,
+    "style_inputs_gain": 282.19,
+    "range_inputs_gain": 281.62
+   },
+   "tight_aggressive": {
+    "rl": {
+     "bb100": 176.03,
+     "ci95": 75.96
+    },
+    "rl_nostyle": {
+     "bb100": 98.05,
+     "ci95": 98.02
+    },
+    "rl_norange": {
+     "bb100": 71.38,
+     "ci95": 52.4
+    },
+    "baseline_equity_bot": {
+     "bb100": -57.07,
+     "ci95": 72.37
+    },
+    "rl_minus_baseline": 233.1,
+    "style_inputs_gain": 77.98,
+    "range_inputs_gain": 104.65
+   },
+   "mixed": {
+    "rl": {
+     "bb100": 1146.85,
+     "ci95": 191.15
+    },
+    "rl_nostyle": {
+     "bb100": 1094.38,
+     "ci95": 225.29
+    },
+    "rl_norange": {
+     "bb100": 752.52,
+     "ci95": 149.56
+    },
+    "baseline_equity_bot": {
+     "bb100": 355.5,
+     "ci95": 102.67
+    },
+    "rl_minus_baseline": 791.35,
+    "style_inputs_gain": 52.47,
+    "range_inputs_gain": 394.33
+   }
+  },
+  "mean_rl_bb100": 1181.52,
+  "generated": "2026-11-08T00:52:57"
+ },
+ "run_dir": "data/rl/runs/20261107-235638",
+ "algorithm": "PPO (clipped), GAE; self-play workers vs a style-diverse opponent pool + league snapshots",
+ "reward": "net big blinds per hand / 10"
+}

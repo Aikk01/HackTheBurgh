@@ -53,8 +53,20 @@ EVAL_LINEUPS: Dict[str, List[str]] = {
 }
 
 
+# Held out: never used as training opponents.  Model selection uses these tables only.
+HELDOUT_LINEUPS: Dict[str, List[str]] = {
+    "heldout_pluribus": ["plur:temp=0.9", "plur:temp=1.0", "plur:temp=1.1", "plur:temp=1.0", "plur:temp=0.9"],
+    "heldout_rules": ["nit", "trapper", "minraiser", "potodds", "trapper"],
+    "heldout_mix": ["plur:temp=1.0", "nit", "potodds", "plur:temp=1.2", "minraiser"],
+}
+ALL_LINEUPS: Dict[str, List[str]] = {**EVAL_LINEUPS, **HELDOUT_LINEUPS}
+
+
 # ============================================================ opponents
-def sample_opponent(rng: random.Random) -> str:
+def sample_opponent(rng: random.Random, mix: str = "v3") -> str:
+    if mix == "v3" and rng.random() < 0.4:  # behaviour cloned from the Pluribus-log professionals, varied in style
+        return (f"pro:temp={rng.uniform(0.8, 1.2):.2f},tilt_f={rng.uniform(-0.5, 0.5):.2f},"
+                f"tilt_c={rng.uniform(-0.5, 0.5):.2f},tilt_r={rng.uniform(-0.5, 0.5):.2f}")
     u = rng.random()
     if u < 0.62:
         return f"equity:tightness={rng.random():.2f},aggression={rng.random():.2f},iterations=40"
@@ -74,7 +86,7 @@ class Session:
     """Hero in seat 1 against five opponents for ``hands_left`` hands; stacks reset every hand."""
 
     def __init__(self, rng: random.Random, p_self: float, snapshot_ids: Sequence[int], lineup: Optional[List[str]] = None,
-                 hands: Optional[int] = None):
+                 hands: Optional[int] = None, mix: str = "v3"):
         self.rng = rng
         self.hands_left = hands if hands is not None else rng.randint(50, 300)
         self.opp: Dict[int, Any] = {}
@@ -86,7 +98,7 @@ class Session:
             elif snapshot_ids and rng.random() < p_self:
                 spec = f"snapshot:{rng.choice(list(snapshot_ids))}"
             else:
-                spec = sample_opponent(rng)
+                spec = sample_opponent(rng, mix)
             name = f"p{seat_no}"
             if spec.startswith("snapshot:"):
                 self.opp[seat_no] = ("snapshot", int(spec.split(":")[1]))
@@ -106,6 +118,7 @@ def play_hand(sess: Session, hero_fn, snapshot_policies: Dict[int, NumpyPolicy],
     t = sess.table
     for s in t.seats:
         s.stack = (rng.uniform(50, 150) if deep_random else 100.0) * BB
+    btn = t.button_seat
     hand = t.new_hand()
     hero_idx = next(i for i, s in enumerate(t.current_order) if s.seat_no == 1)
     start = hand.players[hero_idx].stack
@@ -143,6 +156,9 @@ def play_hand(sess: Session, hero_fn, snapshot_policies: Dict[int, NumpyPolicy],
         hand.finalize()
     net_bb = (hand.players[hero_idx].stack - start) / BB
     t.finish_hand()
+    # stacks are refilled every hand, so rotate the button by seat number; the engine would skip busted seats, which
+    # depends on how the hero played and would break the per-hand pairing of the evaluation
+    t.button_seat = btn % 6 + 1
     sess.tracker.add_hand(hand)
     sess.hands_left -= 1
     return net_bb, steps
@@ -153,7 +169,7 @@ def _sampling_hero(policy: NumpyPolicy, rng: random.Random, blank_styles: bool =
     def fn(obs, styles):
         if blank_styles:
             styles = {}
-        x = encode(obs, styles, rng=rng, use_ranges=not blank_ranges)
+        x = encode(obs, styles, rng=rng, use_ranges=False if blank_ranges else None)
         mask, targets = action_targets(obs)
         logits, value = policy.forward(x[None, :])
         logits = np.where(mask, logits[0], -1e9)
@@ -195,7 +211,7 @@ def worker_main(wid: int, seed: int, cmd_q, out_q) -> None:
                 hands, net_total = 0, 0.0
                 while len(xs) < msg["steps"]:
                     if sess is None or sess.hands_left <= 0:
-                        sess = Session(rng, msg["p_self"], list(snapshots))
+                        sess = Session(rng, msg["p_self"], list(snapshots), mix=msg.get("mix", "v3"))
                     net_bb, steps = play_hand(sess, hero, snapshots, rng)
                     hands += 1
                     net_total += net_bb
@@ -226,13 +242,14 @@ def worker_main(wid: int, seed: int, cmd_q, out_q) -> None:
                     hero = _sampling_hero(policy, erng, greedy=True, blank_ranges=True)
                 else:
                     hero = _bot_hero(msg["hero"], erng)
-                s = Session(random.Random(msg["seed"]), 0.0, [], lineup=EVAL_LINEUPS[msg["lineup"]], hands=msg["hands"])
+                s = Session(random.Random(msg["seed"]), 0.0, [], lineup=ALL_LINEUPS[msg["lineup"]], hands=msg["hands"])
                 nets = []
                 drng = random.Random(msg["seed"] + 1)
                 while s.hands_left > 0:
                     net_bb, _ = play_hand(s, hero, {}, drng, deep_random=False)
                     nets.append(net_bb)
-                out_q.put({"kind": "eval", "wid": wid, "lineup": msg["lineup"], "hero": msg["hero"], "nets": nets})
+                out_q.put({"kind": "eval", "wid": wid, "lineup": msg["lineup"], "hero": msg["hero"], "chunk": msg.get("chunk", 0),
+                           "nets": nets})
         except Exception as exc:  # noqa: BLE001
             import traceback
             out_q.put({"kind": "error", "wid": wid, "error": f"{type(exc).__name__}: {exc}", "trace": traceback.format_exc()})
@@ -308,6 +325,8 @@ class Trainer:
         self.seconds_before = 0.0
         self.snapshots: Dict[int, Dict[str, np.ndarray]] = {}
         self.best_score = -1e9
+        self.best_heldout = -1e9
+        self.stop = False
         self.history: List[Dict[str, Any]] = []
         stamp = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
         self.run_dir = args.run_dir or os.path.join(RL_DIR, "runs", stamp)
@@ -315,15 +334,20 @@ class Trainer:
             self._load(args.resume)
             self.run_dir = args.run_dir or os.path.dirname(os.path.abspath(args.resume))
         os.makedirs(self.run_dir, exist_ok=True)
-        # the smoke test never replaces the model the Play tab uses
-        self.export_dir = self.run_dir if args.smoke else RL_DIR
+        from .next_move import model as next_move_model
+        if next_move_model() is None:  # pro / plur bots would silently become callers
+            raise SystemExit("data/rl/next_move.npz is missing: the pro training bots and the held-out Pluribus bots need it")
+        # never write data/rl/policy.npz directly: each run exports into its own folder and a person copies the chosen one
+        self.export_dir = os.path.join(self.run_dir, "export")
+        self.export_heldout_dir = os.path.join(self.run_dir, "export_heldout")
 
     # ---------------------------------------------------------------- checkpoints
     def _save(self, name: str) -> str:
         path = os.path.join(self.run_dir, name)
         self.torch.save({"net": self.net.state_dict(), "opt": self.opt.state_dict(), "update": self.update, "steps": self.steps,
                          "hands": self.hands, "seconds": self.seconds_before + (time.time() - self.t0),
-                         "snapshots": self.snapshots, "best_score": self.best_score, "history": self.history,
+                         "snapshots": self.snapshots, "best_score": self.best_score, "best_heldout": self.best_heldout,
+                         "history": self.history,
                          "args": vars(self.args), "obs_dim": OBS_DIM, "hidden": list(HIDDEN)}, path)
         return path
 
@@ -337,6 +361,7 @@ class Trainer:
         self.seconds_before = ck.get("seconds", 0.0)
         self.snapshots = ck.get("snapshots", {})
         self.best_score = ck.get("best_score", -1e9)
+        self.best_heldout = ck.get("best_heldout", -1e9)
         self.history = ck.get("history", [])
         print(f"resumed from {path}: update {self.update}, {self.steps:,} steps, {self.hands:,} hands")
 
@@ -349,7 +374,8 @@ class Trainer:
                 "obs_dim": OBS_DIM, "hidden": list(HIDDEN), "actions": ACTIONS, "eval": eval_result,
                 "run_dir": os.path.relpath(self.run_dir, os.path.join(RL_DIR, "..", "..")).replace(os.sep, "/"),
                 "algorithm": "PPO (clipped), GAE; self-play workers vs a style-diverse opponent pool + league snapshots",
-                "reward": "net big blinds per hand / 10"}
+                "reward": "net big blinds per hand / 10", "use_ranges": not self.args.no_range_inputs,
+                "opponent_mix": self.args.mix}
         with open(os.path.join(out_dir, "policy.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)
 
@@ -362,6 +388,11 @@ class Trainer:
         # worker (load ~3x the core count, half the speed).  Spawned workers read this before importing NumPy.
         for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
             os.environ.setdefault(var, "1")
+        if a.no_range_inputs:
+            os.environ["POKERSIM_NO_RANGES"] = "1"
+        import signal
+        # SIGTERM (e.g. from scripts/rl_supervise.py): finish the current update, save latest.pt, exit without final eval
+        signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stop", True))
         cmd_qs = [ctx.Queue() for _ in range(a.workers)]
         out_q = ctx.Queue()
         procs = [ctx.Process(target=worker_main, args=(w, a.seed, cmd_qs[w], out_q), daemon=True) for w in range(a.workers)]
@@ -381,7 +412,7 @@ class Trainer:
         added: Dict[int, Dict[str, np.ndarray]] = dict(self.snapshots)  # resend snapshots to fresh workers
         last_ckpt = time.time()
         try:
-            while time.time() < deadline and (a.max_updates <= 0 or self.update < a.max_updates):
+            while time.time() < deadline and (a.max_updates <= 0 or self.update < a.max_updates) and not self.stop:
                 frac = min(1.0, (time.time() - self.t0) / max(1.0, deadline - self.t0))
                 lr = a.lr * (1.0 - 0.9 * frac)
                 ent_coef = a.ent_coef * (1.0 - 0.8 * frac)
@@ -391,7 +422,7 @@ class Trainer:
                 params = export_params(self.net)
                 per = max(64, a.steps_per_update // a.workers)
                 for q in cmd_qs:
-                    q.put({"kind": "rollout", "params": params, "steps": per, "p_self": a.p_self, "lam": a.lam,
+                    q.put({"kind": "rollout", "params": params, "steps": per, "p_self": a.p_self, "lam": a.lam, "mix": a.mix,
                            "add_snapshots": added, "keep_snapshots": list(self.snapshots)})
                 added = {}
                 batch = self._gather(out_q, a.workers, "rollout")
@@ -454,6 +485,10 @@ class Trainer:
                 if time.time() - last_ckpt > a.ckpt_minutes * 60:
                     self._save("latest.pt")
                     last_ckpt = time.time()
+            if self.stop:
+                print("stopped by SIGTERM: saving latest.pt", flush=True)
+                self._save("latest.pt")
+                return
             print("time budget reached" if time.time() >= deadline else "max updates reached", flush=True)
             self._evaluate(cmd_qs, out_q, final=True)
             self._save("latest.pt")
@@ -479,19 +514,29 @@ class Trainer:
         return got
 
     def _evaluate(self, cmd_qs, out_q, final: bool = False) -> Dict[str, Any]:
+        """Paired evaluation: every hero plays the same deals (same session seeds), so differences are per hand.
+
+        In-distribution tables (opponent types seen in training) are reported; the held-out tables pick the model.
+        The final evaluation uses different deals from the ones used for picking."""
         a = self.args
         params = export_params(self.net)
-        heroes = ["rl", "rl_nostyle", "rl_norange", "equity:iterations=40"]
+        base = "equity:iterations=40"
+        ranges = not a.no_range_inputs
+        heroes_in = ["rl", "rl_nostyle"] + (["rl_norange"] if ranges else []) + [base]
+        heroes_out = ["rl"] + (["rl_norange"] if ranges else []) + [base]
+        seed0 = 50_000 if final else 10_000
+        plan = [(l, heroes_in, a.eval_hands, False) for l in EVAL_LINEUPS] + \
+               [(l, heroes_out, a.heldout_hands, True) for l in HELDOUT_LINEUPS]
         jobs = []
-        chunk = max(50, a.eval_hands // max(1, a.eval_chunks))
-        for li, lineup in enumerate(EVAL_LINEUPS):
-            for c in range(max(1, a.eval_hands // chunk)):
+        for li, (lineup, heroes, hands, _) in enumerate(plan):
+            n_chunks = max(1, a.eval_chunks)
+            chunk = max(50, hands // n_chunks)
+            for c in range(n_chunks):
                 for h in heroes:
                     jobs.append({"kind": "eval", "params": params if h.startswith("rl") else None, "lineup": lineup, "hero": h,
-                                 "hands": chunk, "seed": 10_000 + 97 * c + 1009 * li})
-        nets: Dict[Tuple[str, str], List[float]] = {}
-        sent = 0
-        pending = 0
+                                 "hands": chunk, "seed": seed0 + 97 * c + 1009 * li, "chunk": c})
+        got: Dict[Tuple[str, str], Dict[int, List[float]]] = {}
+        sent = pending = 0
         while sent < len(jobs) or pending:
             while sent < len(jobs) and pending < len(cmd_qs):
                 cmd_qs[sent % len(cmd_qs)].put(jobs[sent])
@@ -499,32 +544,65 @@ class Trainer:
                 pending += 1
             m = self._gather(out_q, 1, "eval")[0]
             pending -= 1
-            nets.setdefault((m["lineup"], m["hero"]), []).extend(m["nets"])
-        res: Dict[str, Any] = {"update": self.update, "hands_per_lineup": a.eval_hands, "lineups": {}}
-        score = []
-        for lineup in EVAL_LINEUPS:
-            row = {}
+            if sent < len(jobs):  # refill the worker that just finished
+                cmd_qs[m["wid"]].put(jobs[sent])
+                sent += 1
+                pending += 1
+            got.setdefault((m["lineup"], m["hero"]), {})[m.get("chunk", 0)] = m["nets"]
+
+        def series(lineup, hero):
+            d = got.get((lineup, hero), {})
+            return [x for c in sorted(d) for x in d[c]]
+
+        def paired(lineup, h1, h2):
+            x, y = series(lineup, h1), series(lineup, h2)
+            k = min(len(x), len(y))
+            return _ci([x[i] - y[i] for i in range(k)])
+
+        res: Dict[str, Any] = {"update": self.update, "final": final, "hands_per_lineup": a.eval_hands,
+                               "heldout_hands_per_lineup": a.heldout_hands, "lineups": {}}
+        in_scores, out_diffs = [], []
+        for lineup, heroes, _, held in plan:
+            row: Dict[str, Any] = {"heldout": held}
             for h in heroes:
-                m, ci = _ci(nets.get((lineup, h), []))
+                m, ci = _ci(series(lineup, h))
                 row["baseline_equity_bot" if h.startswith("equity") else h] = {"bb100": round(m, 2), "ci95": round(ci, 2)}
-            row["rl_minus_baseline"] = round(row["rl"]["bb100"] - row["baseline_equity_bot"]["bb100"], 2)
-            row["style_inputs_gain"] = round(row["rl"]["bb100"] - row["rl_nostyle"]["bb100"], 2)
-            row["range_inputs_gain"] = round(row["rl"]["bb100"] - row["rl_norange"]["bb100"], 2)
+            d, dci = paired(lineup, "rl", base)
+            row["rl_minus_baseline"], row["rl_minus_baseline_ci95"] = round(d, 2), round(dci, 2)
+            if "rl_nostyle" in heroes:
+                g, gci = paired(lineup, "rl", "rl_nostyle")
+                row["style_inputs_gain"], row["style_inputs_gain_ci95"] = round(g, 2), round(gci, 2)
+            if "rl_norange" in heroes:
+                g, gci = paired(lineup, "rl", "rl_norange")
+                row["range_inputs_gain"], row["range_inputs_gain_ci95"] = round(g, 2), round(gci, 2)
             res["lineups"][lineup] = row
-            score.append(row["rl"]["bb100"])
-        res["mean_rl_bb100"] = round(sum(score) / len(score), 2)
+            (out_diffs if held else in_scores).append(d if held else row["rl"]["bb100"])
+        res["mean_rl_bb100"] = round(sum(in_scores) / len(in_scores), 2)
+        res["heldout_score"] = round(sum(out_diffs) / len(out_diffs), 2)
+        res["heldout_min"] = round(min(out_diffs), 2)
         res["generated"] = _dt.datetime.now().isoformat(timespec="seconds")
         self.history.append(res)
-        with open(os.path.join(self.run_dir, "eval.json"), "w", encoding="utf-8") as f:
-            json.dump(self.history, f, indent=1)
-        line = " · ".join(f"{k} {v['rl']['bb100']:+.1f} (base {v['baseline_equity_bot']['bb100']:+.1f}, no-style {v['rl_nostyle']['bb100']:+.1f}, no-range {v['rl_norange']['bb100']:+.1f})"
-                          for k, v in res["lineups"].items())
-        print(f"EVAL upd {self.update}: mean {res['mean_rl_bb100']:+.1f} bb/100 · {line}", flush=True)
-        if res["mean_rl_bb100"] > self.best_score or final and self.best_score == -1e9:
+        with open(os.path.join(self.run_dir, "final_eval.json" if final else "eval.json"), "w", encoding="utf-8") as f:
+            json.dump(res if final else self.history, f, indent=1)
+        held = " · ".join(f"{k} {v['rl_minus_baseline']:+.1f}±{v['rl_minus_baseline_ci95']:.0f}"
+                          for k, v in res["lineups"].items() if v["heldout"])
+        print(f"EVAL upd {self.update}{' FINAL' if final else ''}: held-out vs equity bot (paired) {res['heldout_score']:+.1f} "
+              f"[{held}] · in-distribution mean {res['mean_rl_bb100']:+.1f}", flush=True)
+        if not final and res["mean_rl_bb100"] > self.best_score:
             self.best_score = res["mean_rl_bb100"]
             self._save("best.pt")
             self._export(res, self.export_dir)
-            print(f"  new best -> exported {os.path.relpath(os.path.join(self.export_dir, 'policy.npz'))}", flush=True)
+        if not final and res["heldout_score"] > self.best_heldout:
+            self.best_heldout = res["heldout_score"]
+            self._save("best_heldout.pt")
+            self._export(res, self.export_heldout_dir)
+            keep = os.path.join(self.run_dir, "best_heldout_history")
+            os.makedirs(keep, exist_ok=True)
+            np.savez(os.path.join(keep, f"policy_upd{self.update:05d}.npz"), **export_params(self.net))
+            with open(os.path.join(keep, f"policy_upd{self.update:05d}.json"), "w", encoding="utf-8") as f:
+                json.dump({"updates": self.update, "use_ranges": not a.no_range_inputs, "opponent_mix": a.mix,
+                           "heldout_score": res["heldout_score"], "obs_dim": OBS_DIM, "hidden": list(HIDDEN)}, f, indent=1)
+            print(f"  new best held-out -> {os.path.relpath(self.export_heldout_dir)}", flush=True)
         if final:
             self._export_dir_copy(res)
         return res
@@ -553,7 +631,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--snapshot-every", type=int, default=25)
     ap.add_argument("--max-snapshots", type=int, default=8)
     ap.add_argument("--eval-every", type=int, default=50)
-    ap.add_argument("--eval-hands", type=int, default=3000, help="hands per lineup per hero at each evaluation")
+    ap.add_argument("--eval-hands", type=int, default=3000, help="hands per in-distribution lineup per hero at each evaluation")
+    ap.add_argument("--heldout-hands", type=int, default=10000, help="hands per held-out lineup per hero (these pick the model)")
+    ap.add_argument("--mix", choices=["v3", "v2"], default="v3", help="training opponents: v3 adds pro-like bots, v2 is the old pool")
+    ap.add_argument("--no-range-inputs", action="store_true", help="ablation: zero the predicted-hand inputs everywhere")
     ap.add_argument("--eval-chunks", type=int, default=6)
     ap.add_argument("--ckpt-minutes", type=float, default=10.0)
     ap.add_argument("--print-every", type=int, default=1)
@@ -568,7 +649,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         args.workers = min(args.workers, 2)
         args.steps_per_update, args.minibatch, args.epochs = 512, 256, 2
         args.max_updates, args.eval_every, args.snapshot_every = 3, 3, 2
-        args.eval_hands, args.eval_chunks, args.hours = 60, 1, 0.5
+        args.eval_hands, args.heldout_hands, args.eval_chunks, args.hours = 60, 60, 1, 0.5
         args.run_dir = args.run_dir or os.path.join(RL_DIR, "runs", "smoke")
     try:
         import torch  # noqa: F401
