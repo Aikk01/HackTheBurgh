@@ -1,6 +1,6 @@
-"""Crude sanity checks for web/app.js without Node: bracket balance (ignoring
+"""Crude sanity checks for web/app.js and web/lab/lab.js without Node: bracket balance (ignoring
 strings, template literals and comments) and element ids referenced from JS that
-do not exist in index.html."""
+do not exist in the page's HTML."""
 from __future__ import annotations
 
 import os
@@ -84,12 +84,18 @@ def id_check(js: str, html: str) -> int:
     return len(missing)
 
 
+PAGES = [("app.js", "index.html"), (os.path.join("lab", "lab.js"), "lab.html")]
+
+
 def main() -> int:
-    js = open(os.path.join(ROOT, "web", "app.js"), encoding="utf-8").read()
-    html = open(os.path.join(ROOT, "web", "index.html"), encoding="utf-8").read()
-    errors = bracket_check(js) + id_check(js, html)
-    print("check_js:", "OK" if not errors else f"{errors} problem(s)", f"({js.count(chr(10))} lines)")
-    return 1 if errors else 0
+    total = 0
+    for js_name, html_name in PAGES:
+        js = open(os.path.join(ROOT, "web", js_name), encoding="utf-8").read()
+        html = open(os.path.join(ROOT, "web", html_name), encoding="utf-8").read()
+        errors = bracket_check(js) + id_check(js, html)
+        print(f"check_js {js_name}:", "OK" if not errors else f"{errors} problem(s)", f"({js.count(chr(10))} lines)")
+        total += errors
+    return 1 if total else 0
 
 
 if __name__ == "__main__":

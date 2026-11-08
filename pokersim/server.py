@@ -4,11 +4,13 @@ Run with ``python -m pokersim serve`` and open http://127.0.0.1:8000/.
 """
 from __future__ import annotations
 
+import copy
 import json
 import mimetypes
 import os
 import queue
 import random
+import re
 import threading
 import time
 import traceback
@@ -69,6 +71,23 @@ class ApiError(Exception):
 
 
 # ----------------------------------------------------------------------- game
+WARM_READS = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "warm_reads.json")
+
+
+def _lab_reads(game: Any, actor: int) -> Optional[Dict[str, Any]]:
+    from .lab_api import table_reads
+
+    return table_reads(game, actor)
+
+
+def _warm_reads() -> Optional[Dict[str, Any]]:
+    try:
+        with open(WARM_READS, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 class GameSession:
     """A live table: humans act through the API, bots act in a worker thread."""
 
@@ -89,6 +108,13 @@ class GameSession:
         self.scenario: Optional[Dict[str, Any]] = None
         self.hand_counter = 0
         self.settled: set = set()  # id() of hands already written back to the table / archived
+        from .opponent_model import StyleTracker
+        self.styles = StyleTracker()  # per-player style counts for the AI advisor
+        from .you_model import TableWatch
+        self.watch = TableWatch()  # personal models: predicts every player's next move before it happens
+        self.last_lab: Optional[Dict[str, Any]] = None
+        self.adopted: Optional[Dict[str, Any]] = None  # "Now you play": the simulated model of you (adopt_you)
+        self.what_if: Optional[Dict[str, Any]] = None  # "If you had followed the coach", this hand (pokersim.what_if)
 
     # -- setup ----------------------------------------------------------------
     def new_game(self, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -100,6 +126,9 @@ class GameSession:
             seats = []
             self.agents = {}
             self.human_seats = []
+            from .you_model import TableWatch
+            self.watch = TableWatch()  # bots are new at every table; humans reload their history from disk
+            warm = _warm_reads() if cfg.get("warm_reads") else None
             for i, s in enumerate(seats_cfg):
                 seat_no = i + 1
                 spec = (s.get("agent") or "human").strip()
@@ -114,8 +143,19 @@ class GameSession:
                         agent = make_agent(spec, seed=rng.randrange(1 << 30))
                     except AgentError as exc:
                         raise ApiError(str(exc))
-                    name = name or f"{agent.label} {seat_no}"
+                    # demo-friendly names: "Shark", or "Shark 2" only when the same character sits twice
+                    same = sum(1 for t in seats_cfg if (t.get("agent") or "").split(":")[0].strip().lower() == agent.kind)
+                    name = name or (agent.label if same == 1 else f"{agent.label} {seat_no}")
                     agent.name = name
+                    if warm and spec in warm["by_agent"]:  # this bot was watched before (scripts/build_warm_reads.py)
+                        m = self.watch.model(name)
+                        m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
+                        m.warm_hands = int(warm["hands"])
+                        m.range_obs = [list(x) for x in (warm.get("range_obs") or {}).get(spec, [])]
+                    if agent.kind == "reader":  # the Shark reads the table through the players' models
+                        agent.reads_provider = lambda obs: _lab_reads(self, obs["hero"]["index"])
+                    if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
+                        agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
                 self.agents[seat_no] = agent
                 seats.append(Seat(seat_no=seat_no, name=name, stack=stack, agent=agent,
                                   kind="human" if agent is None else agent.kind, buy_in=stack))
@@ -127,13 +167,17 @@ class GameSession:
             except (EngineError, UnsupportedVariant) as exc:
                 raise ApiError(str(exc))
             self.bot_delay = max(0.0, float(cfg.get("bot_delay_ms", 700)) / 1000.0)
+            self.rebuy = bool(cfg.get("rebuy", False))  # the Lab table keeps all six players: anyone broke buys back in
             self.reveal = bool(cfg.get("spectate", False)) or not self.human_seats
             self.log = []
             self.records = []
+            self.styles.reset()
             self.hand = None
             self.mode = "table"
             self.scenario = None
             self.hand_counter = 0
+            self.what_if = None
+            self._apply_adopted()  # "Now you play" survives a new table
             return self.next_hand()
 
     def next_hand(self) -> Dict[str, Any]:
@@ -145,12 +189,20 @@ class GameSession:
             if self.hand is not None and self.hand.status not in ("finished", "incomplete"):
                 raise ApiError("the current hand is still running", 409)
             self._settle()
+            back = []
+            if getattr(self, "rebuy", False):
+                for seat in self.table.seats:
+                    if seat.buy_in > 0 and seat.stack < self.table.big_blind:
+                        seat.stack = seat.buy_in
+                        back.append(seat.name)
             try:
                 self.hand = self.table.new_hand()
             except EngineError as exc:
                 raise ApiError(str(exc), 409)
             self.hand_counter += 1
             self.log = [{"t": time.time(), "text": f"Hand #{self.table.hand_no} - dealing"}]
+            if back:
+                self.log.append({"t": time.time(), "text": f"{', '.join(back)} {'buy' if len(back) > 1 or back[0] == 'You' else 'buys'} back in"})
             self._kick_bots()
             return self.state()
 
@@ -160,9 +212,90 @@ class GameSession:
         if hand is None or hand.status not in ("finished", "incomplete") or id(hand) in self.settled:
             return
         self.settled.add(id(hand))
-        self.records.append(hand_to_record(hand, extra_meta={"venue": "pokersim live table"}))
+        try:
+            self.styles.add_hand(hand)
+        except Exception:  # noqa: BLE001
+            traceback.print_exc()
+        self._learn_ranges(hand)
+        rec = hand_to_record(hand, extra_meta={"venue": "pokersim live table"})
+        self.records.append(rec)
+        self._keep_hand(rec)
         if self.table is not None and self.table.current is hand:
             self.table.finish_hand()
+
+    def _learn_ranges(self, hand: Hand) -> None:
+        """Cards shown at showdown teach each player's range width: how likely our last guess made their real hand."""
+        seen = getattr(self, "range_seen", None)
+        if not seen or seen[0] != hand.hand_id:
+            return
+        from . import hand_range as HR
+
+        for j, (guess, count) in seen[1].items():
+            p = hand.players[j]
+            if p.mucked or not p.shown or len(p.shown) < 2 or None in p.shown[:2]:
+                continue
+            try:
+                k = HR.class_of(p.shown[0], p.shown[1])
+                self.watch.model(p.name).observe_range(float(guess[k]), float(count[k]))
+            except Exception:  # noqa: BLE001 - learning must never break the table
+                traceback.print_exc()
+
+    def _keep_hand(self, rec: Any) -> None:
+        """Append a finished hand to each human player's history (data/players/<name>/hands.phhs), so
+        scripts/build_replay.py can replay how the models learned them."""
+        from .you_model import PlayerModel
+
+        for seat_no in self.human_seats:
+            seat = next((s for s in (self.table.seats if self.table else []) if s.seat_no == seat_no), None)
+            if seat is None:
+                continue
+            try:
+                d = PlayerModel(seat.name)._dir()
+                os.makedirs(d, exist_ok=True)
+                path = os.path.join(d, "hands.phhs")
+                n = 0
+                if os.path.exists(path):
+                    with open(path, encoding="utf-8") as f:
+                        n = sum(1 for line in f if line.startswith("[") and line.rstrip().endswith("]"))
+                with open(path, "a", encoding="utf-8") as f:
+                    f.write(f"{chr(10) if n else ''}[{n + 1}]\n{phh.dump_hand(rec)}")
+            except Exception:  # noqa: BLE001 - keeping history must never break the table
+                traceback.print_exc()
+
+    def adopt_you(self, style: str) -> Dict[str, Any]:
+        """"Now you play": the model of you and the models of the five players start from what they learned in the
+        simulation (scripts/build_sim_you.py), in memory only (your real history on disk is untouched), and keep
+        learning from the live moves."""
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "demo", f"sim_you_{re.sub(r'[^a-z]', '', style)}.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, ValueError):
+            raise ApiError(f"no simulation for style {style!r} (python scripts/build_sim_you.py)", 404)
+        with self.lock:
+            self.adopted = {"counts": d["counts"], "hands": int(d["player"]["hands"]), "style": d["player"]["style_text"],
+                            "opponents": {k: v["counts"] for k, v in (d.get("opponents") or {}).items()}}
+            self._apply_adopted()
+            return {"ok": True, "style": self.adopted["style"], "hands": self.adopted["hands"]}
+
+    def _apply_adopted(self) -> None:
+        from .you_model import PlayerModel
+
+        if not self.adopted:
+            return
+        for seat in (self.table.seats if self.table else []):
+            human = seat.seat_no in self.human_seats
+            counts = self.adopted["counts"] if human else self.adopted["opponents"].get(seat.name)
+            if counts is None:
+                continue
+            old = self.watch.models.get(seat.name)
+            m = PlayerModel(seat.name, persist=False)  # scores start at zero: "right so far" counts live moves only
+            m.counts = json.loads(json.dumps(counts))
+            m.warm_hands = self.adopted["hands"]
+            if old is not None and not human:
+                m.range_obs = old.range_obs  # how wide each one plays stays from the warm reads
+            self.watch.models[seat.name] = m
+        self.last_lab = None
 
     # -- scenario (fork a recorded hand) --------------------------------------
     def start_scenario(self, sc: Dict[str, Any]) -> Dict[str, Any]:
@@ -263,22 +396,116 @@ class GameSession:
                 raise ApiError("it is a bot's turn", 409)
             if seat is not None and int(seat) != actor_seat:
                 raise ApiError(f"it is seat {actor_seat}'s turn", 409)
+            actor = hand.actor
             try:
-                result = hand.act(hand.actor, action, amount)
+                w_obs, w_pred, _ = self.watch.before(hand, actor, human=True)
+            except Exception:  # noqa: BLE001 - the personal model never blocks play
+                w_obs = None
+            snap = self._coach_snap(hand, actor)
+            try:
+                result = hand.act(actor, action, amount)
             except IllegalAction as exc:
                 raise ApiError(str(exc))
+            if snap is not None:
+                self._what_if_start(snap, result)
+            if w_obs is not None:
+                try:
+                    shown = (self.last_lab or {}).get("you") or {}
+                    self.watch.after(hand, actor, True, w_obs, w_pred, result, extra={"advice_shown": shown.get("should")})
+                    rl = (shown.get("should") or {}).get("rl") or {}
+                    coach = rl.get("actions")[0]["action"] if rl.get("actions") else None
+                    self.watch.model(hand.players[actor].name, True).note_coach(w_obs, actor, coach, result)
+                except Exception:  # noqa: BLE001
+                    traceback.print_exc()
             self._log_action(hand, actor_seat, result, raw=None)
             self._settle()
             self._kick_bots()
             return self.state()
 
+    # -- "If you had followed the coach" (pokersim.what_if) --------------------
+    def _coach_snap(self, hand: Hand, actor: int) -> Optional[Dict[str, Any]]:
+        """Before your move: the coach's mix and a copy of the hand, until your first move against the coach."""
+        if self.mode != "table" or len(self.human_seats) != 1:
+            return None
+        rec = self.what_if
+        if rec is None or rec["hand_id"] != hand.hand_id:
+            rec = self.what_if = {"hand_id": hand.hand_id, "viewer": actor, "decisions": 0, "status": None}
+        rec["decisions"] += 1
+        if rec["status"] is not None:  # only your first move against the coach is scored
+            return None
+        try:
+            from .rl_policy import load_policy
+            from .what_if import coach_mix
+
+            policy = load_policy()
+            if policy is None:
+                return None
+            styles = {p.index: self.styles.estimate(p.name) for p in hand.players}
+            obs = hand.observation(actor)
+            p, moves = coach_mix(obs, styles, policy)
+            return {"hand": copy.deepcopy(hand), "actor": actor, "p": p, "moves": moves, "styles": styles,
+                    "policy": policy, "street": obs["street"]}
+        except Exception:  # noqa: BLE001 - the what-if box never blocks play
+            traceback.print_exc()
+            return None
+
+    def _what_if_start(self, snap: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Your move went against the coach's top choice: play out every move from that spot, in the background."""
+        from .lab_api import reads_on
+        from .what_if import coach_pick, group_of, score_spot
+
+        pick = coach_pick(snap["p"], snap["moves"])
+        mine = group_of(result["action"])
+        if mine == group_of(pick["action"]):
+            return
+        moves = list(snap["moves"])
+        moves[mine] = {"action": result["action"], "amount": result.get("amount")}  # yours at your size
+        rec = self.what_if
+        hand = snap["hand"]
+        rec.update(status="running", street=snap["street"], you_move=_move_text(result, past=True),
+                   moves=[_move_text(m) if m else None for m in moves])
+        agents = {p.index: self.agents.get(self._seat_of(p.index)) for p in hand.players if p.index != snap["actor"]}
+        watch = self.watch
+
+        def run() -> None:
+            try:
+                res = score_spot(hand, snap["actor"], mine, snap["p"], moves, agents, snap["styles"], snap["policy"],
+                                 reads=lambda h, i: reads_on(h, i, watch), seed=int(hand.hand_id or 0))
+                rec.update(result=res, status="done")
+            except Exception:  # noqa: BLE001
+                traceback.print_exc()
+                rec["status"] = "failed"
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def what_if_report(self) -> Dict[str, Any]:
+        """GET /api/lab/whatif: once the hand is over, every move from your first move against the coach, played out,
+        and what yours cost against the coach's mix (pokersim.what_if)."""
+        with self.lock:
+            hand, rec = self.hand, self.what_if
+            if hand is None or rec is None or rec["hand_id"] != hand.hand_id:
+                return {"available": False}
+            if hand.status not in ("finished", "incomplete"):
+                return {"available": False, "reason": "hand running"}
+            p = hand.players[rec["viewer"]]
+            actual = round(p.stack - p.starting_stack, 1)
+            if rec["status"] is None:
+                return {"available": True, "ready": True, "followed": True, "decisions": rec["decisions"], "you": actual}
+            if rec["status"] != "done":
+                return {"available": rec["status"] == "running", "ready": False}
+            res = rec["result"]
+            opts = [{**o, "move": rec["moves"][o["group"]]} for o in res["options"]]
+            return {"available": True, "ready": True, "followed": False, "street": rec["street"], "you_move": rec["you_move"],
+                    "you": actual, **res, "options": opts}
+
     def _log_action(self, hand: Hand, seat: int, result: Dict[str, Any], raw: Optional[Dict[str, Any]]) -> None:
         ev = next((e for e in reversed(hand.events) if e["type"] == "action"), None)
         name = hand.players[ev["player"]].name if ev else f"seat {seat}"
         verb = result["action"]
-        text = f"{name} {verb}s" if verb in ("fold", "check") else (
-            f"{name} calls {_money(result.get('amount', 0))}" if verb == "call" else
-            f"{name} {verb}s to {_money(result.get('amount', 0))}")
+        s = "" if name == "You" else "s"
+        text = f"{name} {verb}{s}" if verb in ("fold", "check") else (
+            f"{name} {verb}{s} {_money(result.get('amount', 0))}" if verb in ("call", "bet") else
+            f"{name} {verb}{s} to {_money(result.get('amount', 0))}")
         if ev and ev.get("all_in"):
             text += " (all-in)"
         entry: Dict[str, Any] = {"t": time.time(), "text": text, "player": ev["player"] if ev else None,
@@ -316,12 +543,20 @@ class GameSession:
                         break
                     self.thinking = actor
                     obs = hand.observation(actor)
+                    try:
+                        w_obs, w_pred, _ = self.watch.before(hand, actor, human=False)
+                    except Exception:  # noqa: BLE001
+                        w_obs = None
                 self.bus.publish({"type": "game", "state": self.state()})
                 t0 = time.perf_counter()
                 action = safe_act(agent, obs)
                 elapsed = time.perf_counter() - t0
-                if self.bot_delay > elapsed:
-                    time.sleep(self.bot_delay - elapsed)
+                wait = self.bot_delay
+                if wait > 0 and getattr(self, "_paced", None) != (hand.hand_id, hand.street):
+                    self._paced = (hand.hand_id, hand.street)  # first bot move of a street: let the deal land first
+                    wait += 1.0 if hand.street == 0 else 0.7
+                if wait > elapsed:
+                    time.sleep(wait - elapsed)
                 with self.lock:
                     if self.hand is not hand or hand.status != "betting" or hand.actor != actor:
                         continue
@@ -330,6 +565,11 @@ class GameSession:
                     except IllegalAction as exc:
                         result = hand.act(actor, "call")
                         result["note"] = f"illegal action from model ({exc}); called instead"
+                    if w_obs is not None:
+                        try:
+                            self.watch.after(hand, actor, False, w_obs, w_pred, result)
+                        except Exception:  # noqa: BLE001
+                            traceback.print_exc()
                     self._log_action(hand, seat, result, raw=action)
                     self.thinking = None
                 self.bus.publish({"type": "game", "state": self.state()})
@@ -339,6 +579,85 @@ class GameSession:
             self.bus.publish({"type": "game", "state": self.state()})
         else:
             self.bus.publish({"type": "game", "state": self.state()})
+
+    # -- live advice for a human seat ----------------------------------------
+    def advice(self) -> Dict[str, Any]:
+        from .opponent_model import advise
+
+        with self.lock:
+            hand = self.hand
+            if hand is None or hand.status != "betting" or hand.actor is None:
+                return {"available": False, "reason_ja": "今は判断する場面ではありません。"}
+            actor = hand.actor
+            if self.agents.get(self._seat_of(actor)) is not None:
+                return {"available": False, "reason_ja": "ボットの手番です。"}
+            obs = hand.observation(actor)
+            styles = {p.index: self.styles.estimate(p.name) for p in hand.players}
+            key = (hand.hand_id, actor, len(obs.get("history") or []))
+        out = advise(obs, styles)  # Monte-Carlo runs outside the lock
+        try:
+            from .rl_policy import recommend
+            out["rl"] = recommend(obs, styles)
+        except Exception as exc:  # noqa: BLE001 - the explanation layer still works without the RL model
+            out["rl"] = {"available": False, "reason_ja": f"RLモデルを読み込めませんでした: {exc}"}
+        out["key"] = "|".join(str(k) for k in key)
+        return out
+
+    def observe(self, hands: int = 60) -> Dict[str, Any]:
+        """Watch the bots play ``hands`` hands among themselves (a stand-in takes the human seat) and
+        feed only the bots' actions to the style tracker, like watching a table before sitting down."""
+        from .replay import replay
+        from .simulate import run_match
+
+        hands = max(1, min(int(hands), 300))
+        with self.lock:
+            if self.table is None:
+                raise ApiError("start a table first")
+            specs, names, tracked = [], [], set()
+            for s in self.table.seats:
+                agent = self.agents.get(s.seat_no)
+                if agent is None or agent.kind in ("http", "claude"):
+                    specs.append("equity:iterations=80")  # stand-in; its actions are not recorded
+                    names.append(f"(代役 {s.seat_no})")
+                    continue
+                params = {k: v for k, v in agent.params.items() if k not in ("seed",)}
+                if agent.kind in ("equity", "tag", "lag"):
+                    params["iterations"] = min(int(params.get("iterations", 300)), 80)  # faster, same style
+                specs.append(agent.kind + (":" + ",".join(f"{k}={v}" for k, v in params.items()) if params else ""))
+                names.append(s.name)
+                tracked.add(s.name)
+            bb = float(self.table.big_blind or 1.0)
+            sb = float(self.table.small_blind or bb / 2)
+        t0 = time.perf_counter()
+        res = run_match(specs, hands=hands, stack=100 * bb, small_blind=sb, big_blind=bb, seed=random.randrange(1 << 30),
+                        keep_records=True, names=names)
+        added = 0
+        for rec in res.records:
+            try:
+                h = replay(rec, snapshots=False, observations=False).hand
+            except Exception:  # noqa: BLE001
+                continue
+            with self.lock:
+                self.styles.add_hand(h, only=tracked)  # the stand-in's actions are not recorded
+            added += 1
+        return {"observed_hands": added, "seconds": round(time.perf_counter() - t0, 1), "opponents": self.opponents()}
+
+    def opponents(self) -> Dict[str, Any]:
+        """Style estimate for every seat; the bot's configured type is returned separately, only to check the model."""
+        from .opponent_model import TYPES
+
+        with self.lock:
+            hand = self.hand
+            if hand is None:
+                return {"players": [], "types_source": TYPES["source"]}
+            out = []
+            for p in hand.players:
+                seat = self._seat_of(p.index)
+                agent = self.agents.get(seat)
+                est = self.styles.estimate(p.name)
+                out.append({"seat": seat, "name": p.name, "is_human": agent is None,
+                            "actual_label": agent.describe().get("label") if agent else "人間", **est})
+            return {"players": out, "types_source": TYPES["source"], "hands_total": max(self.styles.hands.values(), default=0)}
 
     # -- reporting ------------------------------------------------------------
     def set_reveal(self, reveal: bool) -> Dict[str, Any]:
@@ -385,6 +704,15 @@ class GameSession:
                 "scenario": {"label": self.scenario["record"].label, "step_index": self.scenario.get("step_index")}
                 if self.scenario else None,
             }
+
+
+def _move_text(a: Dict[str, Any], past: bool = False) -> str:
+    """An engine action as words: "fold", "call 8", "raise to 24" (``past``: "folded", "called 8", "raised to 24")."""
+    verb, amt = a["action"], a.get("amount")
+    word = {"fold": "folded", "check": "checked", "call": "called", "bet": "bet", "raise": "raised"}.get(verb, verb) if past else verb
+    if verb in ("fold", "check") or amt is None:
+        return word
+    return f"{word} {_money(amt)}" if verb in ("call", "bet") else f"{word} to {_money(amt)}"
 
 
 def _money(x: Any) -> str:
@@ -781,8 +1109,8 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/"):
                 self._json(self._get_api(path, qs))
                 return
-            if path == "/":
-                self._static("index.html")
+            if path in ("/", "/mirror"):  # Poker Mirror is the front page
+                self._static("lab.html")
             else:
                 self._static(path)
         except ApiError as exc:
@@ -813,6 +1141,31 @@ class Handler(BaseHTTPRequestHandler):
                     "anthropic_key": bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))}
         if path == "/api/game/state":
             return APP.game.state()
+        if path == "/api/game/advice":
+            return APP.game.advice()
+        if path == "/api/game/opponents":
+            return APP.game.opponents()
+        if path == "/api/lab/predict":
+            from .lab_api import predict
+            return predict(APP.game)
+        if path == "/api/lab/whatif":  # "If you had followed the coach" (pokersim.what_if)
+            return APP.game.what_if_report()
+        if path == "/api/lab/bluff":
+            from .lab_api import bluff
+            return bluff(APP.game, float(qs.get("amount", 0) or 0))
+        if path == "/api/lab/table":  # the Poker Mirror opponents (lab_api.MIRROR_TABLE)
+            from .lab_api import MIRROR_TABLE, MIRROR_TYPE
+            return {"seats": [{"agent": spec, "name": name, "type": MIRROR_TYPE.get(name)} for spec, name in MIRROR_TABLE]}
+        if path == "/api/lab/scorecard":
+            from .lab_api import scorecard
+            return scorecard()
+        if path == "/api/lab/replay":  # precomputed by scripts/build_replay.py
+            name = f"sim_you_{re.sub(r'[^a-z]', '', qs.get('style', 'calls'))}.json" if qs.get("who") == "sim" else "replay.json"
+            rp = os.path.join(os.path.dirname(__file__), "..", "data", "demo", name)
+            if not os.path.exists(rp):
+                raise ApiError("no replay built (python scripts/build_replay.py)", 404)
+            with open(rp, encoding="utf-8") as f:
+                return json.load(f)
         if path == "/api/game/export":
             recs = APP.game.records
             if not recs:
@@ -871,6 +1224,10 @@ class Handler(BaseHTTPRequestHandler):
             return APP.game.human_act(body.get("seat"), body.get("action", ""), float(amt) if amt not in (None, "") else None)
         if path == "/api/game/reveal":
             return APP.game.set_reveal(bool(body.get("reveal", True)))
+        if path == "/api/lab/adopt":
+            return APP.game.adopt_you(str(body.get("style", "calls")))
+        if path == "/api/game/observe":
+            return APP.game.observe(int(body.get("hands", 60)))
         if path == "/api/replay/load":
             return APP.load_records(body)
         if path == "/api/replay/predict":
@@ -887,9 +1244,19 @@ class Handler(BaseHTTPRequestHandler):
         raise ApiError("not found", 404)
 
 
+class _Server(ThreadingHTTPServer):
+    # On Windows SO_REUSEADDR lets a second server bind a port that is already taken, and requests keep
+    # reaching the stale process.  Refuse instead, so an old server cannot silently shadow new code.
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
+
+
 def serve(host: str = "127.0.0.1", port: int = 8000, open_browser: bool = False) -> None:
-    httpd = ThreadingHTTPServer((host, port), Handler)
-    httpd.daemon_threads = True
+    try:
+        httpd = _Server((host, port), Handler)
+    except OSError as exc:
+        print(f"cannot listen on {host}:{port} ({exc}). Another pokersim server is probably running: stop it or pass --port.")
+        raise SystemExit(1)
     url = f"http://{host}:{port}/"
     print(f"pokersim serving on {url}  (Ctrl+C to stop)")
     if open_browser:

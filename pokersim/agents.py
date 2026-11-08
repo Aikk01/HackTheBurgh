@@ -16,11 +16,12 @@ from __future__ import annotations
 
 import json
 import os
+import math
 import random
 import time
 import urllib.error
 import urllib.request
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import cards as C
 from .equity import estimate_equity, preflop_strength
@@ -100,8 +101,8 @@ def sized_raise(obs: Observation, fraction_of_pot: float, la: Dict[str, Any]) ->
 # ------------------------------------------------------------------- built-ins
 class RandomAgent(Agent):
     kind = "random"
-    label = "Random"
-    description = "Uniformly random legal action with random bet sizes. A sanity baseline."
+    label = "Wildcard"
+    description = "Plays at random: any hand, any bet."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -118,8 +119,8 @@ class RandomAgent(Agent):
 
 class CallingStationAgent(Agent):
     kind = "station"
-    label = "Calling station"
-    description = "Never folds, never raises."
+    label = "Caller"
+    description = "Calls almost everything and rarely folds or raises."
 
     def act(self, obs: Observation) -> Action:
         return passive(obs)
@@ -128,7 +129,7 @@ class CallingStationAgent(Agent):
 class ManiacAgent(Agent):
     kind = "maniac"
     label = "Maniac"
-    description = "Bets and raises most of the time regardless of cards."
+    description = "Raises and bluffs constantly, whatever the cards."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -147,8 +148,8 @@ class EquityAgent(Agent):
     """
 
     kind = "equity"
-    label = "Equity bot"
-    description = "Realistic baseline: plays pot odds against Monte-Carlo equity, position aware."
+    label = "Calculator"
+    description = "Plays the odds: calls when the price is right for its hand's chances."
 
     def __init__(self, **params: Any):
         super().__init__(**params)
@@ -224,8 +225,8 @@ class EquityAgent(Agent):
 
 class TightAggressiveAgent(EquityAgent):
     kind = "tag"
-    label = "TAG bot"
-    description = "Tight-aggressive preset of the equity bot."
+    label = "Shark"
+    description = "Tight and aggressive: plays few hands, and bets them hard."
 
     def __init__(self, **params: Any):
         params.setdefault("aggression", 0.75)
@@ -235,8 +236,8 @@ class TightAggressiveAgent(EquityAgent):
 
 class LooseAggressiveAgent(EquityAgent):
     kind = "lag"
-    label = "LAG bot"
-    description = "Loose-aggressive preset of the equity bot."
+    label = "Hustler"
+    description = "Loose and aggressive: plays many hands and keeps the pressure on."
 
     def __init__(self, **params: Any):
         params.setdefault("aggression", 0.9)
@@ -415,7 +416,306 @@ class ClaudeAgent(Agent):
 
 
 # -------------------------------------------------------------------- registry
+class RLAgent(Agent):
+    """The PPO-trained 6-max policy (``data/rl/policy.npz``, see TRAINING.md).
+
+    A table can hand it opponent style estimates through ``styles_provider(obs) -> {index: style}``;
+    without one it assumes population-average opponents."""
+
+    kind = "rl"
+    label = "RL model"
+    description = "PPO policy trained by self-play against many opponent styles; uses opponent style estimates."
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.greedy = bool(params.get("greedy", False))
+        self.styles_provider: Optional[Callable[[Observation], Dict[int, Dict[str, Any]]]] = None
+
+    def act(self, obs: Observation) -> Action:
+        from .rl_policy import act as rl_act, load_policy
+
+        policy = load_policy()
+        if policy is None:
+            return passive(obs)
+        styles = self.styles_provider(obs) if self.styles_provider else {}
+        return rl_act(obs, styles, policy, self.rng, greedy=self.greedy)
+
+
+class ProAgent(Agent):
+    """Plays like the players of the Pluribus logs: the next-move model (data/rl/next_move.npz) with its own cards.
+
+    ``temp`` scales the randomness, ``tilt_f`` / ``tilt_c`` / ``tilt_r`` shift the logits of fold / call / raise."""
+
+    kind = "pro"
+    label = "Pro"
+    description = "Plays like the professionals in the Pluribus games (learned from their decisions)."
+    pluribus = False
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.temp = float(params.get("temp", 1.0))
+        self.tilt = (float(params.get("tilt_f", 0.0)), float(params.get("tilt_c", 0.0)), float(params.get("tilt_r", 0.0)))
+
+    def act(self, obs: Observation) -> Action:
+        from .next_move import sample_action
+
+        return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=self.tilt)
+
+
+TYPE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "type_tilts.json")
+TYPE_CODES = {"tag": "tight aggressive", "lag": "loose aggressive", "lp": "loose passive", "tp": "tight passive"}
+_TYPE_TABLE: Dict[str, Any] = {}
+
+
+def type_table() -> Dict[str, Any]:
+    if "t" not in _TYPE_TABLE:
+        try:
+            with open(TYPE_FILE, encoding="utf-8") as f:
+                _TYPE_TABLE["t"] = json.load(f)
+        except (OSError, ValueError):
+            _TYPE_TABLE["t"] = {}
+    return _TYPE_TABLE["t"]
+
+
+class TypeAgent(ProAgent):
+    """A player of one classic type, mined from real regulars (scripts/mine_types.py, scripts/fit_types.py): the
+    card-aware model of the professionals, tilted situation by situation (street x facing a bet x position) so that
+    its fold / call / raise rates match its type's, played at the temperature that won most for that type."""
+
+    kind = "type"
+    label = "Regular"
+    description = "Plays like real regulars of one type (tight or loose, aggressive or passive), mined from online hands."
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.style = TYPE_CODES.get(str(params.get("style", "")).lower())
+        fit = type_table().get("types", {}).get(self.style or "", {})
+        self.table = fit.get("tilt")  # [street][facing][position] -> [fold, call, raise]
+        if self.table is not None and "temp" not in params:
+            self.temp = float(fit.get("temp", 1.0))
+
+    def tilt_for(self, obs: Observation) -> Tuple[float, float, float]:
+        if not self.table:
+            return self.tilt
+        n, i = len(obs["players"]), obs["hero"]["index"]
+        street = ["preflop", "flop", "turn", "river"].index(obs["street"]) if obs["street"] in ("preflop", "flop", "turn", "river") else 3
+        facing = 1 if float((obs.get("legal_actions") or {}).get("call") or 0) > 0 else 0
+        pos = 0 if i < 2 else 2 if i >= n - 2 else 1  # blinds / early / late; the button is the last index
+        t = self.table[street][facing][pos]
+        return (t[0] + self.tilt[0], t[1] + self.tilt[1], t[2] + self.tilt[2])
+
+    def act(self, obs: Observation) -> Action:
+        from .next_move import sample_action
+
+        return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=self.tilt_for(obs))
+
+
+class ReaderAgent(TypeAgent):
+    """A Pro that reads the table (the Poker Mirror's Shark): before each move it asks the models of the players still
+    in how likely they all are to fold if it bets about the pot, against how often people in general would, and raises
+    more when they fold more (it bluffs them) and less when they call more.  One level only: it reads what players do,
+    never what they think it will do, and only it adapts, so there is no loop.  It pounces on early evidence: the gap
+    between the two (in logits) is multiplied by GAIN and capped at ±CAP on the raise logit.  Without a
+    ``reads_provider`` (outside a live table) it plays as its type."""
+
+    kind = "reader"
+    label = "Shark"
+    description = "Plays like the professionals and reads the table: bluffs players who fold too much, not those who call."
+    GAIN, CAP = 2.5, 2.0
+
+    def __init__(self, **params: Any):
+        super().__init__(**params)
+        self.reads_provider = None
+        self.last_read: Optional[Dict[str, Any]] = None
+
+    def act(self, obs: Observation) -> Action:
+        from .next_move import sample_action
+
+        tilt = self.tilt_for(obs)
+        if self.reads_provider is not None:
+            try:
+                r = self.reads_provider(obs)
+            except Exception:  # noqa: BLE001 - reading must never stop the bot from playing
+                r = None
+            if r and r.get("all_fold") is not None:
+                lo = lambda q: math.log(max(q, 1e-3) / max(1.0 - q, 1e-3))  # noqa: E731
+                delta = max(-self.CAP, min(self.CAP, self.GAIN * (lo(r["all_fold"]) - lo(r["people"]))))
+                tilt = (tilt[0], tilt[1], tilt[2] + delta)
+                self.last_read = {**r, "delta": round(delta, 2), "hand_id": obs.get("hand_id"),
+                                  "action": "bluffs more" if delta > 0.15 else "bluffs less" if delta < -0.15 else "plays its normal game"}
+        return sample_action(obs, self.rng, pluribus=self.pluribus, temp=self.temp, tilt=tilt)
+
+
+class PluribusLikeAgent(ProAgent):
+    kind = "plur"
+    label = "Machine"
+    description = "Plays like the Pluribus poker AI (learned from its decisions); never seen by the RL model in training."
+    pluribus = True
+
+
+class _RuleAgent(Agent):
+    """Shared helpers for the held-out rule bots (never used as RL training opponents)."""
+
+    def _strength(self, obs: Observation) -> float:
+        hole = [c for c in hero_cards(obs) if c is not None]
+        return preflop_strength(hole) if len(hole) == 2 else 0.0
+
+    def _equity(self, obs: Observation) -> float:
+        hole = [c for c in hero_cards(obs) if c is not None]
+        n_opp = max(1, sum(1 for p in obs["players"] if not p["folded"] and not p["is_hero"]))
+        return float(estimate_equity(hole, board_cards(obs), n_opp, iterations=60, rng=self.rng)["equity"])
+
+    def _fold_or_check(self, obs: Observation) -> Action:
+        la = legal(obs)
+        return {"action": "check"} if la["check"] else {"action": "fold"} if la["fold"] else passive(obs)
+
+
+class NitShoverAgent(_RuleAgent):
+    kind = "nit"
+    label = "Rock"
+    description = "Waits for premium hands, then goes all-in."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        if obs["street"] == "preflop":
+            if self._strength(obs) >= 0.62:
+                return {"action": "all_in"} if la["raise"] else passive(obs)
+            return self._fold_or_check(obs) if la["call"] > 0 else passive(obs)
+        eq = self._equity(obs)
+        if eq > 0.7 and la["raise"]:
+            return {"action": "all_in"}
+        return passive(obs) if (la["call"] <= 0 or eq > 0.5) else self._fold_or_check(obs)
+
+
+class TrapperAgent(_RuleAgent):
+    kind = "trapper"
+    label = "Trapper"
+    description = "Slow-plays strong hands, then springs a big raise on the river."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        if obs["street"] == "preflop":
+            return passive(obs) if self._strength(obs) >= 0.38 or la["call"] <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if eq > 0.75:
+            if obs["street"] == "river" and la["raise"]:
+                return sized_raise(obs, 1.0, la)
+            return passive(obs)
+        pot = float(obs["total_pot"])
+        to_call = la["call"]
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if eq >= to_call / (pot + to_call) + 0.05 else self._fold_or_check(obs)
+
+
+class MinRaiserAgent(_RuleAgent):
+    kind = "minraiser"
+    label = "Nibbler"
+    description = "Makes lots of small raises, backs off when someone fights back."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        s = self._strength(obs) if obs["street"] == "preflop" else self._equity(obs)
+        facing = la["call"] > float(obs["min_bet"]) * 1.01
+        if la["raise"] and s >= (0.45 if obs["street"] == "preflop" else 0.5) and not (facing and s < 0.7):
+            return {"action": la["kind"], "amount": round_to_unit(la["min_to"], obs, la)}
+        if facing and s < 0.6:
+            return self._fold_or_check(obs)
+        return passive(obs)
+
+
+class PotOddsAgent(_RuleAgent):
+    kind = "potodds"
+    label = "Accountant"
+    description = "Calls exactly when the odds say so, bets for value, never bluffs."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        eq = self._strength(obs) * 0.9 if obs["street"] == "preflop" else self._equity(obs)
+        pot = float(obs["total_pot"])
+        to_call = la["call"]
+        if la["raise"] and eq > 0.68:
+            return sized_raise(obs, 0.5, la)
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if eq >= to_call / (pot + to_call) else self._fold_or_check(obs)
+
+
+# The three bots below are for the sealed final test only (scripts/sealed_eval.py): written after training started,
+# never RL training opponents and never used to pick a model.
+class OverbettorAgent(_RuleAgent):
+    kind = "overbettor"
+    label = "Bully"
+    description = "Bets twice the pot with strong hands and with some bluffs; folds the middle."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        s = self._strength(obs) if obs["street"] == "preflop" else self._equity(obs)
+        strong, weak = (0.6, 0.25) if obs["street"] == "preflop" else (0.7, 0.3)
+        if la["raise"] and (s >= strong or (s < weak and self.rng.random() < 0.2)):
+            return sized_raise(obs, 2.0, la)
+        to_call = la["call"]
+        if to_call <= 0:
+            return {"action": "check"}
+        return passive(obs) if s >= to_call / (float(obs["total_pot"]) + to_call) + 0.1 else self._fold_or_check(obs)
+
+
+class LimperAgent(_RuleAgent):
+    kind = "limper"
+    label = "Tourist"
+    description = "Limps in with many hands, leads out small with any piece, rarely raises."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        to_call = la["call"]
+        if obs["street"] == "preflop":
+            s = self._strength(obs)
+            if s >= 0.75 and la["raise"]:
+                return {"action": la["kind"], "amount": round_to_unit(la["min_to"], obs, la)}
+            cheap = to_call <= float(obs["min_bet"]) * 1.01
+            return passive(obs) if (s >= 0.3 and cheap) or s >= 0.5 or to_call <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if to_call <= 0:
+            return sized_raise(obs, 0.5, la) if eq > 0.45 and la["raise"] else {"action": "check"}
+        if eq > 0.85 and la["raise"]:
+            return sized_raise(obs, 1.0, la)
+        return passive(obs) if eq >= 0.35 else self._fold_or_check(obs)
+
+
+class CheckRaiserAgent(_RuleAgent):
+    kind = "checkraiser"
+    label = "Ambusher"
+    description = "Checks after the flop, then raises when bet into with a strong hand."
+
+    def act(self, obs: Observation) -> Action:
+        la = legal(obs)
+        to_call = la["call"]
+        if obs["street"] == "preflop":
+            s = self._strength(obs)
+            if s >= 0.6 and la["raise"]:
+                return sized_raise(obs, 0.75, la)
+            return passive(obs) if s >= 0.4 or to_call <= 0 else self._fold_or_check(obs)
+        eq = self._equity(obs)
+        if to_call <= 0:
+            return sized_raise(obs, 1.0, la) if obs["street"] == "river" and eq > 0.8 and la["raise"] else {"action": "check"}
+        if eq > 0.65 and la["raise"]:
+            return sized_raise(obs, 1.0, la)
+        return passive(obs) if eq >= to_call / (float(obs["total_pot"]) + to_call) else self._fold_or_check(obs)
+
+
 AGENT_TYPES: Dict[str, type] = {
+    "rl": RLAgent,
+    "pro": ProAgent,
+    "plur": PluribusLikeAgent,
+    "reader": ReaderAgent,
+    "type": TypeAgent,
+    "nit": NitShoverAgent,
+    "trapper": TrapperAgent,
+    "minraiser": MinRaiserAgent,
+    "potodds": PotOddsAgent,
+    "overbettor": OverbettorAgent,
+    "limper": LimperAgent,
+    "checkraiser": CheckRaiserAgent,
     "random": RandomAgent,
     "station": CallingStationAgent,
     "maniac": ManiacAgent,
