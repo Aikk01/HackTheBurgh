@@ -202,7 +202,7 @@
       el("div", { class: "pot" }, el("span", { class: "stack", "aria-hidden": "true" },
         ...Array.from({ length: Math.max(1, Math.min(5, 1 + Math.floor(Math.log2(Math.max(1, h.total_pot / 2))))) }, () => el("i", { class: "pchip" }))),
         "Pot ", el("b", { text: fmt(h.total_pot) })),
-      resultLine(h),
+      ...[resultLine(h)].filter(Boolean),  // append(null) would print "null"
       el("div", { class: "last", text: story(h) || (last ? last.text : ""),
         title: "Where the real hand sat in our guess, likeliest first. Top guesses: the likeliest hands holding half our guess. Expected: 80% of it. Possible: 90%. Measured on fresh hands, they hold the real hand 45%, 78% and 89% of the time." }));
 
