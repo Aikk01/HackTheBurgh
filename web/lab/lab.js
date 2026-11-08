@@ -71,7 +71,7 @@
     if (!pred || !pred.actions || !pred.actions.length) return noModel();
     const [a, b] = pred.actions;
     return el("span", { class: "v" }, el("b", { text: actionText(a) }), el("span", { class: "pp", text: pct(a.p) }),
-      n > 1 && b ? el("span", { class: "p2" }, ` · ${actionText(b)} `, el("span", { class: "pp", text: pct(b.p) })) : null);
+      n > 1 && b && b.p >= 0.01 ? el("span", { class: "p2" }, ` · ${actionText(b)} `, el("span", { class: "pp", text: pct(b.p) })) : null);
   }
   function handSlot(h, n) {
     if (!h || !h.top || !h.top.length) return noModel();
@@ -114,8 +114,8 @@
     $("#handMeta").textContent = h ? `Hand ${L.st.hand_no} · blinds ${fmt(t && t.small_blind)}/${fmt(t && t.big_blind)} · ${h.status === "betting" ? h.street : "hand over"}` : "";
     const ul = $("#models");
     ul.innerHTML = "";
-    const parts = { base: [["actions", "moves"], ["hands", "hands"]], rl: [["actions", "moves"], ["hands", "hands"]], personal: [["actions", "moves"]] };
-    [["base", "Base model"], ["rl", "RL model"], ["personal", "Your model"]].forEach(([key, label]) => {
+    const parts = { base: [["actions", "moves"], ["hands", "hands"]], rl: [["actions", "moves"]], personal: [["actions", "moves"]] };
+    [["base", "Base model"], ["rl", "RL model"], ["personal", "Player models"]].forEach(([key, label]) => {
       const have = parts[key].filter(([p]) => loaded(key, p));
       const li = el("li", { class: have.length ? "on" : "" }, el("b", { text: label }));
       if (!have.length) li.append(noModel());
@@ -180,22 +180,25 @@
           won > 0 && h.status !== "betting" ? el("span", { class: "flag win", text: `wins ${fmt(won)}` })
             : flags.length ? el("span", { class: "flag", text: flags.join(" · ") }) : null));
       const seat = el("div", { class: "seat" + (isMe ? " me" : "") + (acting ? " acting" : "") + (p.folded ? " folded" : ""), style: `left:${x}px;top:${y}px` });
-      if (!isMe) seat.append(seatBox(p));
+      if (!isMe && !p.folded) seat.append(seatBox(p));
       seat.append(plate);
       seats.append(seat);
       if (p.bet > 0) seats.append(el("div", { class: "bet", style: `left:${x + (g.cx - x) * 0.4}px;top:${y + (g.cy - y) * 0.42}px`, text: fmt(p.bet) }));
     });
   }
 
-  // the two-model box above an opponent: next move and likely hand, from each model
+  // the box above an opponent: what people do here (Base) and what this player does (their own model, learned at
+  // this table); likely hand: the top starting hand, and the range read on this board
   function seatBox(p) {
+    if (p.folded) return null;  // nothing left to predict
     const pr = predFor(p.seat);
-    const b = pr && pr.base, r = pr && pr.rl;
+    const b = pr && pr.base, t = pr && pr.this_player;
     return el("div", { class: "mbox", "aria-label": `Model reads for ${p.name}` },
       el("div", { class: "mtable" },
         el("span"), el("span", { class: "h", text: "Next move" }), el("span", { class: "h", text: "Likely hand" }),
         el("span", { class: "k", text: "Base" }), moveSlot(b && b.action, 1), handSlot(b && b.hands, 1),
-        el("span", { class: "k", text: "RL" }), moveSlot(r && r.action, 1), handSlot(r && r.hands, 1)));
+        el("span", { class: "k", text: "This player", title: t && t.seen ? `learned from ${t.seen} of their moves` : "no moves seen yet" }),
+        moveSlot(t && t.action, 1), handSlot(t && t.hands, 1)));
   }
 
   function renderYou() {
@@ -205,12 +208,20 @@
     should.innerHTML = "";
     should.append(el("span", { class: "k", text: "Base" }), yourSlot(you && you.should && you.should.base, "base"),
       el("span", { class: "k", text: "RL" }), yourSlot(you && you.should && you.should.rl, "rl"));
+    const ev = you && you.should && you.should.rl_value_bb;
+    if (ev !== null && ev !== undefined) {
+      should.append(el("span", { class: "k", text: "RL expects" }),
+        el("span", { class: "v" }, el("b", { text: `${ev >= 0 ? "+" : ""}${ev.toFixed(1)} bb` }), el("span", { class: "p2", text: " this hand (estimate)" })));
+    }
 
     const would = $("#would");
     would.className = "mtable two";
     would.innerHTML = "";
     const acc = you && you.accuracy;
-    would.append(el("span", { class: "k", text: "Your model" }), yourSlot(you && you.would && you.would.personal, "personal"),
+    // your model's guess is made before you act but shown only afterwards, so it cannot steer you
+    const hidden = you && you.your_turn && you.would && you.would.personal;
+    would.append(el("span", { class: "k", text: "Your model" }),
+      hidden ? el("span", { class: "nm", text: "Revealed after you act" }) : yourSlot(null, "personal"),
       el("span", { class: "k", text: "Right so far" }),
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
         el("span", { class: "p2", text: ` · usual-move guess ${acc.baseline_right}` })) : noModel());
@@ -269,12 +280,11 @@
       b.addEventListener("click", () => { L.sel = p.seat; renderSide(); });
       chips.append(b);
     });
-    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.src === L.src)));
 
     const sel = opps.find((p) => p.seat === L.sel);
     const pc = sel ? colourOf(sel.seat) : "--line-2";
     const pr = sel ? predFor(sel.seat) : null;
-    const hands = pr && pr[L.src] ? pr[L.src].hands : null;
+    const hands = pr && pr.base ? pr.base.hands : null;
     const wrap = $("#gridWrap");
     wrap.innerHTML = "";
     wrap.style.setProperty("--pc", `var(${pc})`);
@@ -293,15 +303,20 @@
 
   function grid13(hands, who) {
     const g = el("div", { class: "g13" + (hands ? "" : " empty"), role: "grid", tabindex: hands ? 0 : -1, "aria-label": hands ? `Likely hands for ${who}. Arrow keys read cells.` : `Likely hands for ${who}: ${NO_MODEL}` });
-    const vals = hands ? hands.grid.flat() : [];
+    // shade by probability per combination: offsuit cells hold 12 combinations, suited 4, pairs 6, so shading by the
+    // cell total would make offsuit hands look about 3x likelier than they are
+    const dens = hands ? (hands.density || hands.grid) : null;
+    const vals = dens ? dens.flat() : [];
     const max = vals.length ? Math.max(...vals) : 0;
     const cells = [];
     for (let r = 0; r < 13; r++) {
       for (let c = 0; c < 13; c++) {
         const name = r === c ? RANKS[r] + RANKS[c] : r < c ? RANKS[r] + RANKS[c] + "s" : RANKS[c] + RANKS[r] + "o";
         const p = hands ? hands.grid[r][c] : 0;
-        const a = p > 0 && max > 0 ? 0.1 + 0.9 * (p / max) : 0;
-        const cell = el("div", { class: "c" + (a > 0.55 ? " hi" : ""), role: "gridcell" }, el("span", { class: "f", style: `--a:${a.toFixed(3)}` }), el("span", { class: "t", text: name }));
+        const d = dens ? dens[r][c] : 0;
+        const a = d > 0 && max > 0 ? 0.1 + 0.9 * (d / max) : 0;
+        const shown = hands && hands.shown === name;
+        const cell = el("div", { class: "c" + (a > 0.55 ? " hi" : "") + (shown ? " shown" : ""), role: "gridcell", title: shown ? "their real hand" : "" }, el("span", { class: "f", style: `--a:${a.toFixed(3)}` }), el("span", { class: "t", text: name }));
         cell.dataset.name = name;
         cell.dataset.p = p;
         if (hands) cell.addEventListener("mouseenter", () => focusCell(r * 13 + c));
@@ -373,7 +388,7 @@
   async function newTable() {
     try {
       onState(await api("/api/game/new", {
-        seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "equity" }, { agent: "lag" }, { agent: "equity" }, { agent: "random" }],
+        seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "station" }],
         small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false,
       }));
       L.lastCheck = null;
@@ -394,7 +409,7 @@
     $("#btnNext").addEventListener("click", nextHand);
     $("#raiseSlider").addEventListener("input", (e) => { $("#raiseInput").value = e.target.value; });
     $("#raiseInput").addEventListener("input", (e) => { $("#raiseSlider").value = e.target.value; });
-    document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { L.src = b.dataset.src; renderSide(); }));
+
     $("#clearInject").addEventListener("click", () => window.Lab.clear());
     document.addEventListener("keydown", (e) => {
       if (e.target.matches("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;

@@ -100,8 +100,8 @@ def sized_raise(obs: Observation, fraction_of_pot: float, la: Dict[str, Any]) ->
 # ------------------------------------------------------------------- built-ins
 class RandomAgent(Agent):
     kind = "random"
-    label = "Random"
-    description = "Uniformly random legal action with random bet sizes. A sanity baseline."
+    label = "Wildcard"
+    description = "Plays at random: any hand, any bet."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -118,8 +118,8 @@ class RandomAgent(Agent):
 
 class CallingStationAgent(Agent):
     kind = "station"
-    label = "Calling station"
-    description = "Never folds, never raises."
+    label = "Caller"
+    description = "Calls almost everything and rarely folds or raises."
 
     def act(self, obs: Observation) -> Action:
         return passive(obs)
@@ -128,7 +128,7 @@ class CallingStationAgent(Agent):
 class ManiacAgent(Agent):
     kind = "maniac"
     label = "Maniac"
-    description = "Bets and raises most of the time regardless of cards."
+    description = "Raises and bluffs constantly, whatever the cards."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -147,8 +147,8 @@ class EquityAgent(Agent):
     """
 
     kind = "equity"
-    label = "Equity bot"
-    description = "Realistic baseline: plays pot odds against Monte-Carlo equity, position aware."
+    label = "Calculator"
+    description = "Plays the odds: calls when the price is right for its hand's chances."
 
     def __init__(self, **params: Any):
         super().__init__(**params)
@@ -224,8 +224,8 @@ class EquityAgent(Agent):
 
 class TightAggressiveAgent(EquityAgent):
     kind = "tag"
-    label = "TAG bot"
-    description = "Tight-aggressive preset of the equity bot."
+    label = "Shark"
+    description = "Tight and aggressive: plays few hands, and bets them hard."
 
     def __init__(self, **params: Any):
         params.setdefault("aggression", 0.75)
@@ -235,8 +235,8 @@ class TightAggressiveAgent(EquityAgent):
 
 class LooseAggressiveAgent(EquityAgent):
     kind = "lag"
-    label = "LAG bot"
-    description = "Loose-aggressive preset of the equity bot."
+    label = "Hustler"
+    description = "Loose and aggressive: plays many hands and keeps the pressure on."
 
     def __init__(self, **params: Any):
         params.setdefault("aggression", 0.9)
@@ -446,8 +446,8 @@ class ProAgent(Agent):
     ``temp`` scales the randomness, ``tilt_f`` / ``tilt_c`` / ``tilt_r`` shift the logits of fold / call / raise."""
 
     kind = "pro"
-    label = "Pro-like bot"
-    description = "Behaviour cloned from the 13 professionals of the Pluribus logs (next-move model with cards)."
+    label = "Pro"
+    description = "Plays like the professionals in the Pluribus games (learned from their decisions)."
     pluribus = False
 
     def __init__(self, **params: Any):
@@ -463,8 +463,8 @@ class ProAgent(Agent):
 
 class PluribusLikeAgent(ProAgent):
     kind = "plur"
-    label = "Pluribus-like bot"
-    description = "Behaviour cloned from Pluribus's own decisions; held out from RL training."
+    label = "Machine"
+    description = "Plays like the Pluribus poker AI (learned from its decisions); never seen by the RL model in training."
     pluribus = True
 
 
@@ -487,8 +487,8 @@ class _RuleAgent(Agent):
 
 class NitShoverAgent(_RuleAgent):
     kind = "nit"
-    label = "Nit (push/fold)"
-    description = "Held-out rule bot: plays only premium hands and moves all-in with them."
+    label = "Rock"
+    description = "Waits for premium hands, then goes all-in."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -505,7 +505,7 @@ class NitShoverAgent(_RuleAgent):
 class TrapperAgent(_RuleAgent):
     kind = "trapper"
     label = "Trapper"
-    description = "Held-out rule bot: slow-plays strong hands (check-call) and raises big on the river."
+    description = "Slow-plays strong hands, then springs a big raise on the river."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -525,8 +525,8 @@ class TrapperAgent(_RuleAgent):
 
 class MinRaiserAgent(_RuleAgent):
     kind = "minraiser"
-    label = "Min-raiser"
-    description = "Held-out rule bot: min-raises often with medium hands, folds to resistance."
+    label = "Nibbler"
+    description = "Makes lots of small raises, backs off when someone fights back."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)
@@ -541,8 +541,8 @@ class MinRaiserAgent(_RuleAgent):
 
 class PotOddsAgent(_RuleAgent):
     kind = "potodds"
-    label = "Pot-odds caller"
-    description = "Held-out rule bot: calls exactly when equity beats the price, value-bets half pot, never bluffs."
+    label = "Accountant"
+    description = "Calls exactly when the odds say so, bets for value, never bluffs."
 
     def act(self, obs: Observation) -> Action:
         la = legal(obs)

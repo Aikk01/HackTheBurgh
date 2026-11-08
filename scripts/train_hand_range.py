@@ -27,6 +27,7 @@ sys.path.insert(0, ROOT)
 
 from pokersim import hand_range as H  # noqa: E402
 from pokersim.mirror_data import N_SHARDS, iter_rows, row_to_record, shard_path  # noqa: E402
+from pokersim.demo_player import row_has_reserved  # noqa: E402
 from pokersim.replay import replay  # noqa: E402
 
 CACHE = os.path.join(ROOT, "data", "cache", "hand_range")
@@ -58,7 +59,7 @@ def extract_shard(args):
     n_hands = 0
     for row in iter_rows(shard_path(i), columns=None):
         acts = row.get("actions") or []
-        if len(acts) <= 1 or row.get("variant") != "NT" or not _has_known_cards(acts):
+        if len(acts) <= 1 or row.get("variant") != "NT" or not _has_known_cards(acts) or row_has_reserved(row):
             continue
         src = row.get("source_file") or ""
         pluribus = src.startswith("pluribus/")

@@ -19,3 +19,4 @@ data/rl/runs/**/keep/
 data/rl/v1_backup/
 data/rl/runs/*smoke*/
 data/rl/v2_u50/*.pt
+data/rl/remote/

@@ -91,6 +91,9 @@ class GameSession:
         self.settled: set = set()  # id() of hands already written back to the table / archived
         from .opponent_model import StyleTracker
         self.styles = StyleTracker()  # per-player style counts for the AI advisor
+        from .you_model import TableWatch
+        self.watch = TableWatch()  # personal models: predicts every player's next move before it happens
+        self.last_lab: Optional[Dict[str, Any]] = None
 
     # -- setup ----------------------------------------------------------------
     def new_game(self, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -102,6 +105,8 @@ class GameSession:
             seats = []
             self.agents = {}
             self.human_seats = []
+            from .you_model import TableWatch
+            self.watch = TableWatch()  # bots are new at every table; humans reload their history from disk
             for i, s in enumerate(seats_cfg):
                 seat_no = i + 1
                 spec = (s.get("agent") or "human").strip()
@@ -116,7 +121,9 @@ class GameSession:
                         agent = make_agent(spec, seed=rng.randrange(1 << 30))
                     except AgentError as exc:
                         raise ApiError(str(exc))
-                    name = name or f"{agent.label} {seat_no}"
+                    # demo-friendly names: "Shark", or "Shark 2" only when the same character sits twice
+                    same = sum(1 for t in seats_cfg if (t.get("agent") or "").split(":")[0].strip().lower() == agent.kind)
+                    name = name or (agent.label if same == 1 else f"{agent.label} {seat_no}")
                     agent.name = name
                     if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
                         agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
@@ -272,10 +279,21 @@ class GameSession:
                 raise ApiError("it is a bot's turn", 409)
             if seat is not None and int(seat) != actor_seat:
                 raise ApiError(f"it is seat {actor_seat}'s turn", 409)
+            actor = hand.actor
             try:
-                result = hand.act(hand.actor, action, amount)
+                w_obs, w_pred, _ = self.watch.before(hand, actor, human=True)
+            except Exception:  # noqa: BLE001 - the personal model never blocks play
+                w_obs = None
+            try:
+                result = hand.act(actor, action, amount)
             except IllegalAction as exc:
                 raise ApiError(str(exc))
+            if w_obs is not None:
+                try:
+                    shown = (self.last_lab or {}).get("you") or {}
+                    self.watch.after(hand, actor, True, w_obs, w_pred, result, extra={"advice_shown": shown.get("should")})
+                except Exception:  # noqa: BLE001
+                    traceback.print_exc()
             self._log_action(hand, actor_seat, result, raw=None)
             self._settle()
             self._kick_bots()
@@ -325,6 +343,10 @@ class GameSession:
                         break
                     self.thinking = actor
                     obs = hand.observation(actor)
+                    try:
+                        w_obs, w_pred, _ = self.watch.before(hand, actor, human=False)
+                    except Exception:  # noqa: BLE001
+                        w_obs = None
                 self.bus.publish({"type": "game", "state": self.state()})
                 t0 = time.perf_counter()
                 action = safe_act(agent, obs)
@@ -339,6 +361,11 @@ class GameSession:
                     except IllegalAction as exc:
                         result = hand.act(actor, "call")
                         result["note"] = f"illegal action from model ({exc}); called instead"
+                    if w_obs is not None:
+                        try:
+                            self.watch.after(hand, actor, False, w_obs, w_pred, result)
+                        except Exception:  # noqa: BLE001
+                            traceback.print_exc()
                     self._log_action(hand, seat, result, raw=action)
                     self.thinking = None
                 self.bus.publish({"type": "game", "state": self.state()})

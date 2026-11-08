@@ -19,19 +19,19 @@ class LabApiTest(unittest.TestCase):
             self.game.hand = None
 
     def test_shape_without_models(self):
-        none = {"base": {"actions": False, "hands": False}, "rl": {"actions": False, "hands": False}, "personal": {"actions": False}}
+        none = {"base": {"actions": False, "hands": False}, "rl": {"actions": False}, "personal": {"actions": False}}
         with mock.patch.object(lab_api, "_status", return_value=none):
             out = lab_api.predict(self.game)
         self.assertEqual(out["models"], none)
         you = out["you"]
         self.assertIsNotNone(you)
-        self.assertEqual(you["should"], {"base": None, "rl": None})
+        self.assertEqual(you["should"], {"base": None, "rl": None, "rl_value_bb": None})
         self.assertEqual(you["would"], {"personal": None})
         self.assertIsNone(you["accuracy"])
         self.assertEqual(len(out["players"]), 3)
         for p in out["players"]:
             self.assertEqual(p["base"], {"action": None, "hands": None})
-            self.assertEqual(p["rl"], {"action": None, "hands": None})
+            self.assertEqual(p["this_player"], {"action": None, "hands": None, "seen": 0, "accuracy": None})
             self.assertNotEqual(p["index"], you["index"])
 
     def test_no_hidden_cards_in_response(self):

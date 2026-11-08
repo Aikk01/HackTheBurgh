@@ -30,6 +30,7 @@ sys.path.insert(0, ROOT)
 from pokersim import cards as C  # noqa: E402
 from pokersim import next_move as NM  # noqa: E402
 from pokersim.mirror_data import N_SHARDS, iter_rows, row_to_record, shard_path  # noqa: E402
+from pokersim.demo_player import row_has_reserved  # noqa: E402
 from pokersim.replay import replay  # noqa: E402
 from pokersim.rl_features import action_targets  # noqa: E402
 
@@ -64,7 +65,7 @@ def extract_shard(args):
     cols = {k: [] for k in ("pub", "cards", "board", "label", "mask", "pluribus", "logs", "split", "street")}
     online = 0
     for row in iter_rows(shard_path(i), columns=None):
-        if row.get("variant") != "NT":
+        if row.get("variant") != "NT" or row_has_reserved(row):  # the reserved demo player stays unseen
             continue
         players = row.get("players") or []
         if len(players) not in (5, 6):
