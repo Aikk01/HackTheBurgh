@@ -1,13 +1,14 @@
 """Personal model: what *this* player will do next, for you and for every opponent at the table.
 
 The prior is the next-move model's public prediction (``pokersim.next_move``: what people in general do here, without
-the player's cards).  Each player's own choices then shift it, per situation bucket (street x facing a bet) and action
-group (fold / call / raise), by Dirichlet shrinkage::
+the player's cards).  Each player's own choices then tilt it, per situation bucket (street x facing a bet) and action
+group (fold / call / raise), by a shrunk observed-to-expected ratio::
 
-    p(a) = p_prior(a) * [(n_g + alpha * q_g) / (N + alpha)] / q_g
+    p(a) ∝ p_prior(a) * (n_g + alpha) / (e_g + alpha)
 
-where ``q_g`` is the prior's share of group ``g`` and ``n_g / N`` the player's own counts in that bucket.  With no data
-this is the prior; with many decisions it follows the player's own frequencies.  Every prediction is made *before*
+where ``n_g`` counts how often the player chose group ``g`` in that bucket and ``e_g`` how often the prior expected it
+(the sum of the prior's group-``g`` probability over the same decisions).  "Calls 1.3x more than people do" tilts every
+situation while keeping what is specific to it; with no data the ratio is 1 and this is the prior.  Every prediction is made *before*
 the action and scored after it, next to the "usual move" baseline (the player's most frequent group in that bucket
 so far).  Human players' counts and decision logs persist in ``data/players/<name>/``.
 """
@@ -25,7 +26,7 @@ import numpy as np
 from .rl_features import ACTIONS, N_ACTIONS
 
 PLAYERS_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "players")
-ALPHA = 5.0
+ALPHA = 8.0
 GROUPS = ("fold", "call", "raise")
 GROUP_OF = np.array([0, 1, 2, 2, 2, 2, 2])
 
@@ -80,36 +81,36 @@ class PlayerModel:
                 f.write(json.dumps(row, default=float) + "\n")
 
     # ------------------------------------------------------------ model
-    def predict(self, obs: Dict[str, Any], j: int) -> Tuple[np.ndarray, str]:
-        """Probabilities over :data:`ACTIONS` for player ``j`` (public information only) and the prior's source."""
+    def _prior(self, obs: Dict[str, Any], j: int) -> Tuple[np.ndarray, str, np.ndarray]:
         from .next_move import hypothetical_mask, predict as nm_predict
         from .rl_features import action_targets
 
         mask = action_targets(obs)[0] if (obs["hero"]["index"] == j and obs.get("legal_actions")) else hypothetical_mask(obs, j)[0]
-        prior = None
         try:
             prior = nm_predict(obs, j, with_cards=False)
         except Exception:  # noqa: BLE001
             prior = None
-        source = "next_move"
         if prior is None:
-            prior = mask / mask.sum()
-            source = "uniform"
-        n = np.asarray(self.counts.get(bucket_of(obs, j), [0.0, 0.0, 0.0]))
-        q = np.array([prior[GROUP_OF == g].sum() for g in range(3)])
-        p = prior.copy()
-        for g in range(3):
-            if q[g] > 1e-9:
-                p[GROUP_OF == g] *= ((n[g] + ALPHA * q[g]) / (n.sum() + ALPHA)) / q[g]
-        p = p * mask
+            return mask / mask.sum(), "uniform", mask
+        return prior, "next_move", mask
+
+    def predict(self, obs: Dict[str, Any], j: int) -> Tuple[np.ndarray, str]:
+        """Probabilities over :data:`ACTIONS` for player ``j`` (public information only) and the prior's source."""
+
+        prior, source, mask = self._prior(obs, j)
+        c = self.counts.get(bucket_of(obs, j), [0.0] * 6)
+        n, e = np.asarray(c[:3]), np.asarray(c[3:6] if len(c) >= 6 else [0.0] * 3)
+        ratio = (n + ALPHA) / (e + ALPHA)
+        p = prior * ratio[GROUP_OF] * mask
         return p / max(p.sum(), 1e-12), source
 
     def usual_group(self, obs: Dict[str, Any], j: int) -> Optional[int]:
         n = self.counts.get(bucket_of(obs, j))
-        return int(np.argmax(n)) if n and sum(n) > 0 else None
+        return int(np.argmax(n[:3])) if n and sum(n[:3]) > 0 else None
 
-    def observe(self, obs: Dict[str, Any], j: int, pred: np.ndarray, action: Dict[str, Any]) -> Dict[str, Any]:
-        """Score the prediction made before the action, then learn from the action."""
+    def observe(self, obs: Dict[str, Any], j: int, pred: np.ndarray, action: Dict[str, Any],
+                prior: Optional[np.ndarray] = None) -> Dict[str, Any]:
+        """Score the prediction made before the action, then learn from the action (``prior``: the prior used)."""
         g_true = group_of_action(action)
         g_pred = int(GROUP_OF[int(np.argmax(pred))])
         usual = self.usual_group(obs, j)
@@ -117,8 +118,14 @@ class PlayerModel:
         self.right += int(g_pred == g_true)
         self.baseline_right += int(usual is not None and usual == g_true)
         b = bucket_of(obs, j)
-        n = self.counts.setdefault(b, [0.0, 0.0, 0.0])
+        n = self.counts.setdefault(b, [0.0] * 6)
+        if len(n) < 6:
+            n.extend([0.0] * (6 - len(n)))
         n[g_true] += 1.0
+        if prior is None:
+            prior = self._prior(obs, j)[0]
+        for g in range(3):
+            n[3 + g] += float(prior[GROUP_OF == g].sum())
         group_p = [float(pred[GROUP_OF == g].sum()) for g in range(3)]
         self.last = {"predicted": GROUPS[g_pred], "p": round(group_p[g_pred], 3), "actual": GROUPS[g_true],
                      "right": g_pred == g_true, "probs": {GROUPS[g]: round(group_p[g], 3) for g in range(3)}}

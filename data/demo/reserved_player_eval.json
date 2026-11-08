@@ -1,0 +1,53 @@
+{
+ "player": "KsdS3CqVKoZ9FsoxzScmwg",
+ "venue": "PartyPoker",
+ "alpha": 8.0,
+ "decisions": 850,
+ "blocks": {
+  "1-50": {
+   "personal_top1": 0.74,
+   "people_top1": 0.74,
+   "usual_top1": 0.64,
+   "personal_logloss": 0.5779353868792136,
+   "people_logloss": 0.5734923993051052,
+   "gain_nats": -0.004442987574108561,
+   "gain_ci95": 0.01115550699053191
+  },
+  "51-200": {
+   "personal_top1": 0.72,
+   "people_top1": 0.7266666666666667,
+   "usual_top1": 0.7,
+   "personal_logloss": 0.6413262236309157,
+   "people_logloss": 0.6369454675416152,
+   "gain_nats": -0.004380756089300541,
+   "gain_ci95": 0.013753442705028325
+  },
+  "201-500": {
+   "personal_top1": 0.7433333333333333,
+   "people_top1": 0.7466666666666667,
+   "usual_top1": 0.7133333333333334,
+   "personal_logloss": 0.6056462163594456,
+   "people_logloss": 0.6013305494251351,
+   "gain_nats": -0.0043156669343105076,
+   "gain_ci95": 0.005589063194777624
+  },
+  "501-850": {
+   "personal_top1": 0.7742857142857142,
+   "people_top1": 0.7742857142857142,
+   "usual_top1": 0.7542857142857143,
+   "personal_logloss": 0.5637393791189161,
+   "people_logloss": 0.5629625027094568,
+   "gain_nats": -0.0007768764094593748,
+   "gain_ci95": 0.004015066244750648
+  },
+  "1-850": {
+   "personal_top1": 0.7517647058823529,
+   "people_top1": 0.7541176470588236,
+   "usual_top1": 0.7235294117647059,
+   "personal_logloss": 0.5930568829271204,
+   "people_logloss": 0.5901793892615859,
+   "gain_nats": -0.0028774936655346383,
+   "gain_ci95": 0.003599965180912938
+  }
+ }
+}
