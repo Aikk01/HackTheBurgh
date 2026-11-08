@@ -50,6 +50,9 @@ class PlayerModel:
         self.counts: Dict[str, List[float]] = {}
         self.right = self.total = self.baseline_right = 0
         self.last: Optional[Dict[str, Any]] = None
+        # where this player and the coach (RL) disagree: "bucket|you|coach" -> count, and decisions per bucket
+        self.gaps: Dict[str, int] = {}
+        self.gap_totals: Dict[str, int] = {}
         if persist:
             self._load()
 
@@ -62,6 +65,7 @@ class PlayerModel:
             with open(os.path.join(self._dir(), "model.json"), encoding="utf-8") as f:
                 d = json.load(f)
             self.counts = d.get("counts", {})
+            self.gaps, self.gap_totals = d.get("gaps", {}), d.get("gap_totals", {})
             self.right, self.total, self.baseline_right = d.get("right", 0), d.get("total", 0), d.get("baseline_right", 0)
         except (OSError, ValueError):
             pass
@@ -71,7 +75,7 @@ class PlayerModel:
         tmp = os.path.join(self._dir(), "model.json.tmp")
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"counts": self.counts, "right": self.right, "total": self.total,
-                       "baseline_right": self.baseline_right}, f)
+                       "baseline_right": self.baseline_right, "gaps": self.gaps, "gap_totals": self.gap_totals}, f)
         os.replace(tmp, os.path.join(self._dir(), "model.json"))
 
     def log(self, row: Dict[str, Any]) -> None:
@@ -132,6 +136,33 @@ class PlayerModel:
         if self.persist:
             self._save()
         return self.last
+
+    def note_coach(self, obs: Dict[str, Any], j: int, coach_action: Optional[str], action: Dict[str, Any]) -> None:
+        """Remember what the coach advised and what the player did, per situation bucket."""
+        if not coach_action:
+            return
+        b = bucket_of(obs, j)
+        cg = 0 if coach_action == "fold" else 1 if coach_action in ("check", "call") else 2
+        yg = group_of_action(action)
+        self.gap_totals[b] = self.gap_totals.get(b, 0) + 1
+        if cg != yg:
+            k = f"{b}|{GROUPS[yg]}|{GROUPS[cg]}"
+            self.gaps[k] = self.gaps.get(k, 0) + 1
+        if self.persist:
+            self._save()
+
+    def gap_summary(self, min_count: int = 3, top: int = 2) -> List[Dict[str, Any]]:
+        """The player's most frequent disagreements with the coach, in plain words."""
+        out = []
+        for k, c in self.gaps.items():
+            if c < min_count:
+                continue
+            street, facing, you, coach = k.split("|")  # key: "<street>|<bet|free>|<you>|<coach>"
+            b = f"{street}|{facing}"
+            where = f"{'preflop' if street == 'preflop' else 'on the ' + street}, {'facing a bet' if facing == 'bet' else 'when you can check'}"
+            out.append({"where": where, "you": you, "coach": coach, "times": c, "of": self.gap_totals.get(b, c)})
+        out.sort(key=lambda g: (-g["times"], -g["times"] / max(g["of"], 1)))
+        return out[:top]
 
     def score(self) -> Dict[str, int]:
         return {"right": self.right, "total": self.total, "baseline_right": self.baseline_right}

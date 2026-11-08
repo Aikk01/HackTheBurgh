@@ -292,6 +292,9 @@ class GameSession:
                 try:
                     shown = (self.last_lab or {}).get("you") or {}
                     self.watch.after(hand, actor, True, w_obs, w_pred, result, extra={"advice_shown": shown.get("should")})
+                    rl = (shown.get("should") or {}).get("rl") or {}
+                    coach = rl.get("actions")[0]["action"] if rl.get("actions") else None
+                    self.watch.model(hand.players[actor].name, True).note_coach(w_obs, actor, coach, result)
                 except Exception:  # noqa: BLE001
                     traceback.print_exc()
             self._log_action(hand, actor_seat, result, raw=None)

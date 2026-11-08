@@ -196,6 +196,7 @@ def predict(game: Any) -> Dict[str, Any]:
             "should": {"base": should_base, "rl": should_rl, "rl_value_bb": rl_value},
             "would": {"personal": would},
             "accuracy": you_model.score() if you_model is not None and you_model.total else None,
+            "coach_gaps": you_model.gap_summary() if you_model is not None else [],
         },
         "players": rows,
     }

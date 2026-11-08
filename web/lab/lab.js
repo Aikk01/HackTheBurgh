@@ -222,6 +222,12 @@
       el("span", { class: "k", text: "Right so far" }),
       acc ? el("span", { class: "v" }, el("b", { text: `${acc.right} of ${acc.total} (${pct(acc.right / Math.max(acc.total, 1))})` }),
         el("span", { class: "p2", text: ` · usual-move guess ${acc.baseline_right}` })) : noModel());
+    const gaps = (you && you.coach_gaps) || [];
+    if (gaps.length && !L.replay) {
+      const g = gaps[0];
+      would.append(el("span", { class: "k", text: "You vs coach" }), el("span", { class: "v" },
+        `${g.where[0].toUpperCase()}${g.where.slice(1)}: you ${g.you}, the coach would ${g.coach} `, el("span", { class: "p2", text: `(${g.times} of ${g.of})` })));
+    }
     if (L.lastCheck) {
       const c = L.lastCheck;
       would.append(el("span", { class: "k", text: "Last move" }), el("span", { class: "check" },
