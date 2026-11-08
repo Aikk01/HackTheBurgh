@@ -37,7 +37,7 @@
     return data;
   }
 
-  const L = { types: {}, st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null,
+  const L = { lastStateAt: 0, types: {}, st: null, pred: null, predKey: null, token: 0, src: "base", sel: null, injected: false, lastCheck: null, cursor: 0, lastLog: "", replay: false, liveSt: null,
     // motion: what each grid last showed, how much each guess moved and why, the ✓/✗ badges, when you last picked a chip
     drawn: {}, mem: {}, shift: {}, flash: {}, scale: {}, logLen: 0, picked: 0, shownPick: null };
   const MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -856,6 +856,7 @@
     if (L.replay) { L.liveSt = st; return; }  // the live table keeps going in the background during a replay
     noteActions(L.st, st);
     L.st = st;
+    L.lastStateAt = Date.now();
     const last = st && st.log && st.log.length ? st.log[st.log.length - 1].text : "";
     if (last && last !== L.lastLog) { L.lastLog = last; announce(last); }
     render();
@@ -1331,9 +1332,22 @@
     new ResizeObserver(() => { if (L.st) renderTable(); }).observe($("#stage"));
   }
 
+  // The table is pushed over an event stream.  If that stream drops (server restart, sleep, a flaky tab) the browser
+  // reconnects by itself, but the moves made meanwhile are gone: so every (re)connect re-reads the state, and a
+  // watchdog re-reads it whenever a bot has been "thinking" for longer than it ever does.
+  async function resync() {
+    try { onState(await api("/api/game/state")); } catch (e) { /* server away: keep what we have, try again later */ }
+  }
   function connect() {
     const es = new EventSource("/api/events");
     es.addEventListener("game", (e) => onState(JSON.parse(e.data).state));
+    es.onopen = () => { if (L.lastStateAt) resync(); };  // a reconnect, not the first open (boot reads the state itself)
+    setInterval(() => {
+      const h = hand(), m = me();
+      const botToAct = h && h.status === "betting" && !(m && h.actor === m.index);
+      if (botToAct && Date.now() - L.lastStateAt > 4000) resync();
+      if (!h && L.st && L.st.active === false && Date.now() - L.lastStateAt > 15000) resync();
+    }, 2000);
   }
 
   window.Lab = {
