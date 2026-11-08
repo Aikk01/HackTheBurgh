@@ -1,0 +1,24 @@
+{
+ "run_dir": "data/rl/runs/v3-bc (bc_init.pt, before any RL)",
+ "updates": 0,
+ "use_ranges": true,
+ "opponent_mix": "v3",
+ "obs_dim": 193,
+ "hidden": [
+  512,
+  512,
+  256
+ ],
+ "imitation_only": true,
+ "bc_init": {
+  "decisions": 300019,
+  "use_ranges": true,
+  "epochs": 8,
+  "val_cross_entropy": 0.5875,
+  "target_entropy": 0.4729,
+  "val_value_loss": 4.2628,
+  "top_choice_agreement": 0.8801,
+  "seconds": 118
+ },
+ "note": "the imitation network alone: Base-model (Pluribus-like) play copied into the RL network; no RL"
+}

@@ -1,0 +1,10 @@
+{
+ "decisions": 300019,
+ "use_ranges": true,
+ "epochs": 8,
+ "val_cross_entropy": 0.5875,
+ "target_entropy": 0.4729,
+ "val_value_loss": 4.2628,
+ "top_choice_agreement": 0.8801,
+ "seconds": 118
+}
