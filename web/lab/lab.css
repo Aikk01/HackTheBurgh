@@ -1,4 +1,4 @@
-/* Table Lab - a stand-alone page (web/lab.html). Shares only the font files with the main app. */
+/* Poker Mirror - a stand-alone page (web/lab.html). Shares only the font files with the main app. */
 
 @font-face { font-family: "Instrument Serif"; src: url("/fonts/instrument-serif.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Instrument Sans"; src: url("/fonts/instrument-sans.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }

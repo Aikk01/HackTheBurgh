@@ -39,7 +39,7 @@ because almost everyone folds often enough that a half-pot bluff is nearly alway
 **Waiting on.** The GPU run (see "Handoff: GPU run"), the rest of Phase 6, merging `poker-mirror` into `main`,
 and the team rehearsal. Volunteer sessions are now optional.
 
-## Phase 7 · 6-max Table Lab (branch `train-v3`, 2026-11-08)
+## Phase 7 · Poker Mirror, the 6-max table (branch `train-v3`, 2026-11-08)
 
 **What it is.** One clean screen (`/lab.html`): you against five bots. At every decision it shows three views of
 the same moment:
@@ -76,7 +76,7 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
   facing-a-bet bucket.
   - Every prediction is made before the action and scored after it, against the "usual move" baseline.
   - Your counts and a full decision log persist in `data/players/<name>/`.
-- **Table Lab frontend** (built on the `table-lab` branch design):
+- **Poker Mirror frontend** (built on the design of an earlier frontend branch):
   - Each opponent box shows only the next move (People / This player).
   - The grid is shaded per card combination, and real hands are outlined at showdown.
   - Your panel shows Base and RL top actions; your model's guess is revealed only after you act, with a running

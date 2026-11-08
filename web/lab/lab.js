@@ -1,4 +1,4 @@
-/* Table Lab (web/lab.html): play six-handed and read two models side by side.
+/* Poker Mirror (web/lab.html): play six-handed and read two models side by side.
 
    MODEL SLOTS
    Every model value on this page is drawn by a slot renderer that receives the value or null. A null
@@ -314,6 +314,14 @@
     const top = $("#top2");
     top.innerHTML = "";
     top.append(el("div", { class: "row" }, el("span", { class: "k", text: "Top 2 hands" }), handSlot(hands, 2)));
+    // how good the "This player" read has been at this table, scored before each of their moves
+    const acc = pr && pr.this_player && pr.this_player.accuracy;
+    if (acc && acc.total) {
+      top.append(el("div", { class: "row", title: acc.warm_hands ? `Read built from ${acc.warm_hands} earlier hands with ${sel.name}; scored only on moves at this table` : "" },
+        el("span", { class: "k", text: "Next-move read" }),
+        el("span", { class: "v" }, el("b", { text: `right ${acc.right} of ${acc.total}` }),
+          el("span", { class: "p2", text: ` · people in general ${acc.people_right}` }))));
+    }
     const ramp = $("#ramp");
     ramp.innerHTML = "";
     ramp.style.setProperty("--pc", `var(${pc})`);
@@ -409,7 +417,7 @@
     try {
       onState(await api("/api/game/new", {
         seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "station" }],
-        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false,
+        small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true,
       }));
       L.lastCheck = null;
     } catch (e) { $("#actNote").textContent = e.message; }

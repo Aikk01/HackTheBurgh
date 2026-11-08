@@ -48,7 +48,8 @@ class PlayerModel:
         self.name = name
         self.persist = persist
         self.counts: Dict[str, List[float]] = {}
-        self.right = self.total = self.baseline_right = 0
+        self.right = self.total = self.baseline_right = self.people_right = 0
+        self.warm_hands = 0  # earlier hands the counts were seeded from (Lab bots), not scored here
         self.last: Optional[Dict[str, Any]] = None
         # where this player and the coach (RL) disagree: "bucket|you|coach" -> count, and decisions per bucket
         self.gaps: Dict[str, int] = {}
@@ -67,6 +68,7 @@ class PlayerModel:
             self.counts = d.get("counts", {})
             self.gaps, self.gap_totals = d.get("gaps", {}), d.get("gap_totals", {})
             self.right, self.total, self.baseline_right = d.get("right", 0), d.get("total", 0), d.get("baseline_right", 0)
+            self.people_right = d.get("people_right", 0)
         except (OSError, ValueError):
             pass
 
@@ -75,7 +77,8 @@ class PlayerModel:
         tmp = os.path.join(self._dir(), "model.json.tmp")
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"counts": self.counts, "right": self.right, "total": self.total,
-                       "baseline_right": self.baseline_right, "gaps": self.gaps, "gap_totals": self.gap_totals}, f)
+                       "baseline_right": self.baseline_right, "people_right": self.people_right, "gaps": self.gaps,
+                       "gap_totals": self.gap_totals}, f)
         os.replace(tmp, os.path.join(self._dir(), "model.json"))
 
     def log(self, row: Dict[str, Any]) -> None:
@@ -128,6 +131,7 @@ class PlayerModel:
         n[g_true] += 1.0
         if prior is None:
             prior = self._prior(obs, j)[0]
+        self.people_right += int(int(GROUP_OF[int(np.argmax(prior))]) == g_true)
         for g in range(3):
             n[3 + g] += float(prior[GROUP_OF == g].sum())
         group_p = [float(pred[GROUP_OF == g].sum()) for g in range(3)]
@@ -166,7 +170,8 @@ class PlayerModel:
         return out[:top]
 
     def score(self) -> Dict[str, int]:
-        return {"right": self.right, "total": self.total, "baseline_right": self.baseline_right}
+        return {"right": self.right, "total": self.total, "baseline_right": self.baseline_right,
+                "people_right": self.people_right, "warm_hands": self.warm_hands}
 
 
 class TableWatch:

@@ -1,4 +1,4 @@
-"""Precompute the Table Lab replay of the reserved unseen player (data/demo/replay.json, served at /api/lab/replay).
+"""Precompute the Poker Mirror replay of the reserved unseen player (data/demo/replay.json, served at /api/lab/replay).
 
     python scripts/build_replay.py [--showcase 10]
 

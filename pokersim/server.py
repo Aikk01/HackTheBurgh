@@ -69,6 +69,17 @@ class ApiError(Exception):
 
 
 # ----------------------------------------------------------------------- game
+WARM_READS = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "warm_reads.json")
+
+
+def _warm_reads() -> Optional[Dict[str, Any]]:
+    try:
+        with open(WARM_READS, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 class GameSession:
     """A live table: humans act through the API, bots act in a worker thread."""
 
@@ -107,6 +118,7 @@ class GameSession:
             self.human_seats = []
             from .you_model import TableWatch
             self.watch = TableWatch()  # bots are new at every table; humans reload their history from disk
+            warm = _warm_reads() if cfg.get("warm_reads") else None
             for i, s in enumerate(seats_cfg):
                 seat_no = i + 1
                 spec = (s.get("agent") or "human").strip()
@@ -125,6 +137,10 @@ class GameSession:
                     same = sum(1 for t in seats_cfg if (t.get("agent") or "").split(":")[0].strip().lower() == agent.kind)
                     name = name or (agent.label if same == 1 else f"{agent.label} {seat_no}")
                     agent.name = name
+                    if warm and spec in warm["by_agent"]:  # this bot was watched before (scripts/build_warm_reads.py)
+                        m = self.watch.model(name)
+                        m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
+                        m.warm_hands = int(warm["hands"])
                     if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
                         agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
                 self.agents[seat_no] = agent

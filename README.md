@@ -29,7 +29,7 @@ Use `--host 0.0.0.0` to share the table on a LAN. Deep links: `#demo` deals a bo
 `#replay=pluribus-session-30.phhs&i=7&step=12&lens=tag` opens a sample hand at a step with a model
 lens, `#replay=<file>&eval=tag` runs an evaluation, `#sim=equity,tag,lag,random&hands=200` a match.
 
-**Table Lab** (`/lab.html`) is a separate page: you and five bots at one table. Above each opponent it shows
+**Poker Mirror** (`/lab.html`) is a separate page: you and five bots at one table. Above each opponent it shows
 the base model's and the RL model's next-move and likely-hand guesses. On the right is a 13×13 likely-hand grid per
 opponent. Your panel shows what you should do (base, RL) and what you would do (your own model). Values come from
 `GET /api/lab/predict`; the response is documented in `pokersim/lab_api.py`. A model whose files are missing shows

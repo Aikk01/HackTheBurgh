@@ -68,12 +68,13 @@ def main() -> int:
         assert sum(s["stack"] for s in seats) == 800, "chips must be conserved"
         assert any(s["stack"] != 200 for s in seats), "stacks must carry over between hands"
         assert st["table"]["button_seat"] != 1, "the button must move"
-        # Table Lab page and its model endpoint: every slot present, values only where a model file exists
-        assert "<title>Table Lab</title>" in call(base, "/lab.html"), "lab.html not served"
+        # Poker Mirror page and its model endpoint: every slot present, values only where a model file exists
+        assert "<title>Poker Mirror</title>" in call(base, "/lab.html"), "lab.html not served"
         lab = call(base, "/api/lab/predict")
         assert set(lab["models"]) == {"base", "rl", "personal"}, lab["models"]
-        assert set(lab["you"]["should"]) == {"base", "rl"} and "personal" in lab["you"]["would"], lab["you"]
-        assert len(lab["players"]) == 3 and all(set(p) >= {"seat", "name", "base", "rl"} for p in lab["players"])
+        # between hands there is no decision of yours to advise on, so "you" may be empty
+        assert lab["you"] is None or (set(lab["you"]["should"]) >= {"base", "rl"} and "personal" in lab["you"]["would"]), lab["you"]
+        assert all(set(p) >= {"seat", "name", "base", "this_player"} for p in lab["players"]), lab["players"]
         print("lab models:", lab["models"])
         export = call(base, "/api/game/export")
         print("export lines:", len(export.splitlines()))

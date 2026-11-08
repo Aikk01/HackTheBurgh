@@ -1,4 +1,4 @@
-"""Table Lab endpoint (pokersim.lab_api): the response always has every slot, and nothing leaks hidden cards."""
+"""Poker Mirror endpoint (pokersim.lab_api): the response always has every slot, and nothing leaks hidden cards."""
 import json
 import unittest
 from unittest import mock

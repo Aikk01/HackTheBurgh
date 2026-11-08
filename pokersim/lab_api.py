@@ -1,4 +1,4 @@
-"""Model values for the Table Lab page (``web/lab.html``): one call, ``GET /api/lab/predict``.
+"""Model values for the Poker Mirror page (``web/lab.html``): one call, ``GET /api/lab/predict``.
 
 The page prints "No model loaded" wherever a value below is ``None``.  Response::
 
