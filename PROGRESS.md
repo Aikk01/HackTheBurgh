@@ -153,7 +153,9 @@ penalty keeps play closer to Pluribus but wins less on these tables.
   you" 78% vs 67% for people in general over the last 100 hands.
 - **Judge fixes:** the simulation is a reveal (no result before the run, the curve grows during the fast-forward, big
   numbers at the end); surprises say how often they happen; the scorecard shows +1.3 ± 1.2 points on 30 real players.
-- **Sealed test at the registered 30,000 hands per table** running on Eddie (same frozen candidates).
+- **Sealed test at the registered 30,000 hands per table** (same frozen candidates): the coach v3-bc is +156 ± 15
+  bb/100 against the equity bot, +154 ± 14 over the Pluribus copy, and the predicted hands add +82 ± 14. Every
+  conclusion of the 10,000-hand run holds.
 - **Training stopped** where it could no longer matter: v3-bc-s2 (drifted to −11) and v3-noranges-s2.
 
 **Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).

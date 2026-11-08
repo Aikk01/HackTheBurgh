@@ -105,16 +105,16 @@ to 3.5 hours per run.
 
 | Run | Start | Predicted hands | Leash | Kept version | Held-out | Sealed test |
 |---|---|---|---|---|---|---|
-| **v3-bc (shipped)** | Pluribus copy | on | — | update 50 | +150 | **+149 ± 26** |
-| v3-bc-s2 | Pluribus copy | on | — | update 100 | +121 | +207 ± 30 |
-| v3-bc-kl10 | Pluribus copy | on | 0.1 | update 100 | +123 | +69 ± 20 |
-| v3-bc-kl30 | Pluribus copy | on | 0.3 | update 100 | +87 | +32 ± 19 |
-| v3-noranges-s2 | scratch | off | — | update 150 | +186 | +120 ± 27 |
-| v3-ranges-s2 | scratch | on | — | update 100 | +110 | +73 ± 24 |
-| v3-noranges | scratch | off | — | update 300 | +96 | +59 ± 27 |
-| v3-ranges | scratch | on | — | update 150 | +94 | +21 ± 28 |
-| v2-eddie | scratch; rule-based opponents only | on | — | update 150 | +73 | +15 ± 26 |
-| imitation-only | Pluribus copy, no RL | on | — | — | — | −3 ± 18 |
+| **v3-bc (shipped)** | Pluribus copy | on | — | update 50 | +150 | **+156 ± 15** |
+| v3-bc-s2 | Pluribus copy | on | — | update 100 | +121 | +202 ± 18 |
+| v3-bc-kl10 | Pluribus copy | on | 0.1 | update 100 | +123 | +79 ± 12 |
+| v3-bc-kl30 | Pluribus copy | on | 0.3 | update 100 | +87 | +45 ± 11 |
+| v3-noranges-s2 | scratch | off | — | update 150 | +186 | +115 ± 16 |
+| v3-ranges-s2 | scratch | on | — | update 100 | +110 | +75 ± 14 |
+| v3-noranges | scratch | off | — | update 300 | +96 | +58 ± 16 |
+| v3-ranges | scratch | on | — | update 150 | +94 | +49 ± 17 |
+| v2-eddie | scratch; rule-based opponents only | on | — | update 150 | +73 | +18 ± 15 |
+| imitation-only | Pluribus copy, no RL | on | — | — | — | +2 ± 10 |
 
 v2-eddie, the one run that never met human-like opponents in training, did worst of the RL runs on the sealed tables.
 With a single run that is a hint, not a proof.
@@ -129,7 +129,7 @@ qsub eddie/rl_bc.sh data/rl/runs/<name> <end HH:MM> [seed] [trainer flags]
 python scripts/rl_supervise.py --run-dir data/rl/runs/<name> --hours 3 -- --mix v3 --seed 2
 
 # the sealed test
-python scripts/sealed_eval.py --policy <name>=<run>/export_heldout ... --hands 10000
+python scripts/sealed_eval.py --policy <name>=<run>/export_heldout ... --hands 30000
 ```
 
 ## How we tested it
@@ -148,7 +148,7 @@ with the opponent styles blanked out. The difference says what each input is wor
 - **Written down before any result.** The opponents, the hand counts and the questions are in the git history.
 - **New opponents:** three new rule bots (Bully, Tourist, Ambusher) and human-like bots pushed outside every style
   used in training.
-- **What it compared:** every run's best version, plus the Pluribus copy with no RL, all on the same deals, 10,000
+- **What it compared:** every run's best version, plus the Pluribus copy with no RL, all on the same deals, 30,000
   hands per table.
 - **It picks nothing:** the shipped coach was not chosen by its sealed score.
 
@@ -156,16 +156,16 @@ with the opponent styles blanked out. The difference says what each input is wor
 
 | Coach | Against the maths bot | Better than the Pluribus copy by |
 |---|---|---|
-| Pluribus copy, no RL | −3 ± 18 | — |
-| **Imitation start + PPO (shipped)** | **+149 ± 26** | **+152 ± 24** |
-| Same method, second seed | +207 ± 30 | +210 ± 29 |
-| Best run from scratch | +120 ± 27 | +123 ± 25 |
-| Imitation start + leash (0.1 / 0.3) | +69 / +32 | +72 / +35 |
+| Pluribus copy, no RL | +2 ± 10 | — |
+| **Imitation start + PPO (shipped)** | **+156 ± 15** | **+154 ± 14** |
+| Same method, second seed | +202 ± 18 | +200 ± 17 |
+| Best run from scratch | +115 ± 16 | |
+| Imitation start + leash (0.1 / 0.3) | +79 / +45 | |
 
 - **RL adds a lot to copying Pluribus.** The copy alone only breaks even on new opponents, and PPO turns it into about
   +150.
 - **Starting from the copy beats starting from scratch.** Both seeds did better than every run from scratch.
-- **The predicted hands help the shipped coach: +75 ± 24** when they are switched off. They help the leashed coaches a
+- **The predicted hands help the shipped coach: +82 ± 14** when they are switched off. They help the leashed coaches a
   little, and the coaches trained from scratch not at all.
 - **The leash keeps play closer to Pluribus but wins less** against these opponents. Exploiting them paid more.
 - **Left alone too long, RL over-fits.** After about 100 updates, both free runs from the copy kept winning more
@@ -176,7 +176,8 @@ with the opponent styles blanked out. The difference says what each input is wor
 
 - **Every RL result is against bots, not people.** The bots are built from real players' decisions, but they are
   still bots.
-- **10,000 hands per table is enough to separate +150 from 0, not +150 from +120.**
+- **30,000 hands per table gives about ±15 bb/100:** enough to separate the shipped coach from the best run from
+  scratch (41 ± 16), not to rank runs that are a few points apart.
 - **The demo table's players are the same kind of bot the coach trained against**, nudged a bit further, so the demo
   is not a test. The sealed test is.
 - **Poker sites ban real-time help.** Poker Mirror is a training and analysis tool, not something to use while

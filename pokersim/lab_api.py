@@ -266,7 +266,8 @@ def scorecard() -> Dict[str, Any]:
         gb = load("demo", "grid_on_bots_widened.json")  # scripts/grid_on_bots.py --widen
         if gb:
             out["hands"]["bots"] = [gb["all"]["inside_50"], gb["all"]["inside_80"], gb["all"]["inside_90"]]
-    sealed, meta = load("rl", "sealed_eval.json"), load("rl", "policy.json") or {}
+    # the registered size (30,000 hands per table) when it exists, else the earlier 10,000-hand run of the same test
+    sealed, meta = load("rl", "sealed_eval_30k.json") or load("rl", "sealed_eval.json"), load("rl", "policy.json") or {}
     if sealed and sealed.get("policies"):
         run = os.path.basename(str(meta.get("run_dir", "")))
         name = run if run in sealed["policies"] else next(iter(sealed["policies"]))

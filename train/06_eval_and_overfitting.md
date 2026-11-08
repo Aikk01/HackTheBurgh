@@ -150,3 +150,25 @@ with the same deals as the 10,000-hand run, so this extends it rather than repea
 
 **06:56:** v3-bc-s2 (held-out down to −11 at update 250) and v3-noranges-s2 stopped. Training after the 05:57 freeze
 cannot change the candidates; kl10 and kl30 run to their planned end (~07:05).
+
+## Sealed test at the registered size (07:05; `data/rl/sealed_eval_30k.json`)
+
+30,000 hands per table, same frozen candidates and seeds (it extends the 10,000-hand run). bb/100 against the equity
+bot, pooled, 95% intervals over hands. Every result is reported.
+
+| Candidate | vs equity bot | Range inputs worth | Style inputs worth |
+|---|---|---|---|
+| v3-bc-s2 | +202 ± 18 | −5 ± 18 | +27 ± 17 |
+| **v3-bc (shipped)** | **+156 ± 15** | **+82 ± 14** | −1 ± 14 |
+| v3-noranges-s2 | +115 ± 16 | — | −80 ± 19 |
+| v3-bc-kl10 | +79 ± 12 | +32 ± 10 | −13 ± 10 |
+| v3-ranges-s2 | +75 ± 14 | −21 ± 15 | −11 ± 14 |
+| v3-noranges | +58 ± 16 | — | +15 ± 17 |
+| v3-ranges | +49 ± 17 | −44 ± 17 | −46 ± 20 |
+| v3-bc-kl30 | +45 ± 11 | +28 ± 7 | −5 ± 7 |
+| v2-eddie | +18 ± 15 | −21 ± 14 | −2 ± 18 |
+| imitation-only | +2 ± 10 | +12 ± 4 | −1 ± 4 |
+
+Paired: v3-bc − imitation-only **+154 ± 14**; v3-bc-s2 − imitation-only +200 ± 17; v3-noranges-s2 − v3-bc −41 ± 16
+(the decision rule of 05:13 keeps v3-bc, now clearly); v3-bc − kl10 +77 ± 14. Every conclusion of the 10,000-hand run
+holds, with intervals about 40% narrower.
