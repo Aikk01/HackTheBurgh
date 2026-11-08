@@ -15,67 +15,67 @@
  "widths": {},
  "reference": "Pluribus test hands (humans and Pluribus): inside 50/80/90% = 0.47 / 0.78 / 0.89",
  "all": {
-  "n": 13366,
-  "inside_50": 0.413,
-  "inside_80": 0.722,
-  "inside_90": 0.833
+  "n": 14003,
+  "inside_50": 0.392,
+  "inside_80": 0.707,
+  "inside_90": 0.824
  },
  "by_player": {
   "Gambler": {
-   "n": 2534,
-   "inside_50": 0.403,
-   "inside_80": 0.701,
-   "inside_90": 0.835
+   "n": 2798,
+   "inside_50": 0.375,
+   "inside_80": 0.684,
+   "inside_90": 0.809
   },
   "Pro": {
-   "n": 2463,
-   "inside_50": 0.447,
-   "inside_80": 0.747,
-   "inside_90": 0.849
+   "n": 2571,
+   "inside_50": 0.417,
+   "inside_80": 0.73,
+   "inside_90": 0.842
   },
   "Rock": {
-   "n": 2536,
-   "inside_50": 0.405,
-   "inside_80": 0.737,
-   "inside_90": 0.853
+   "n": 2503,
+   "inside_50": 0.396,
+   "inside_80": 0.724,
+   "inside_90": 0.829
   },
   "Shark": {
-   "n": 2595,
-   "inside_50": 0.398,
-   "inside_80": 0.709,
-   "inside_90": 0.837
+   "n": 2644,
+   "inside_50": 0.38,
+   "inside_80": 0.715,
+   "inside_90": 0.839
   },
   "Sticky": {
-   "n": 3238,
-   "inside_50": 0.414,
-   "inside_80": 0.716,
-   "inside_90": 0.802
+   "n": 3487,
+   "inside_50": 0.393,
+   "inside_80": 0.691,
+   "inside_90": 0.807
   }
  },
  "by_street": {
   "preflop": {
-   "n": 10547,
-   "inside_50": 0.419,
-   "inside_80": 0.725,
-   "inside_90": 0.833
+   "n": 10682,
+   "inside_50": 0.4,
+   "inside_80": 0.712,
+   "inside_90": 0.824
   },
   "flop": {
-   "n": 1338,
-   "inside_50": 0.398,
-   "inside_80": 0.704,
-   "inside_90": 0.837
+   "n": 1611,
+   "inside_50": 0.356,
+   "inside_80": 0.678,
+   "inside_90": 0.812
   },
   "turn": {
-   "n": 909,
-   "inside_50": 0.409,
-   "inside_80": 0.719,
-   "inside_90": 0.851
+   "n": 1004,
+   "inside_50": 0.374,
+   "inside_80": 0.707,
+   "inside_90": 0.833
   },
   "river": {
-   "n": 572,
-   "inside_50": 0.355,
-   "inside_80": 0.698,
-   "inside_90": 0.808
+   "n": 706,
+   "inside_50": 0.377,
+   "inside_80": 0.694,
+   "inside_90": 0.829
   }
  }
 }

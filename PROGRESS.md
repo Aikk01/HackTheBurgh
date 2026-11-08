@@ -195,7 +195,20 @@ penalty keeps play closer to Pluribus but wins less on these tables.
 - **The trade-off:** our models of these realistic players guess the next move no better than people in general (69%
   vs 70%). Real regulars differ in how often they do things, not in their single most likely move.
 
-**Running now:** the Shark simulation for the new replay (`scripts/build_sim_shark.py`). Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+**Done 07:40–08:05:**
+- **More distinct bots:** the most extreme 15% of regulars of each type (tight aggressive 385 players: VPIP 16%, PFR 13%,
+  AF 4.6; loose aggressive 20: 36 / 27 / 4.8; loose passive 738: 42 / 10 / 1.6; tight passive 55: 15 / 5 / 1.4).
+  - The bots fit to 17 / 15 / 4.3, 33 / 23 / 4.8, 39 / 10 / 1.7 and 16 / 5 / 1.9.
+  - Rebuilt: bluff check 30.1% said vs 27.7% happened (each player 68% / 68%); grid 48 / 79 / 90%.
+- **"The Shark learns you"** is the default replay (`scripts/build_sim_shark.py`, `data/demo/sim_you_shark.json`).
+  - A leaky player ("fit or fold") sits in your seat for a 60-hand sitting, and the Shark reads it.
+  - Measured over 100 sittings, each with and without the Shark's read: in hands 51–60 it bets heads-up into you 52%
+    of the time, against 26% in hands 1–10 and 31% for the same Shark not reading. No chip loss is measurable in 10
+    hands, and none is claimed.
+  - The Shark reacts 2.5× to its read, capped at ±2; reacting one-for-one showed nothing in 60 hands.
+- The grid says "Hand over" instead of "no model" between hands.
+
+**Running now:** nothing. Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
 - 07:20: the sealed test, ship the best held-out policy to `data/rl/policy.npz`, rebuild the replay.

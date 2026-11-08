@@ -9,570 +9,584 @@
  ],
  "seed": 29,
  "all_fold": {
-  "n": 851,
-  "said": 0.339,
-  "happened": 0.303,
-  "ece": 0.072,
+  "n": 871,
+  "said": 0.301,
+  "happened": 0.277,
+  "ece": 0.054,
   "bins": [
    {
     "from": 0.0,
     "to": 0.05,
     "n": 120,
-    "said": 0.014,
-    "happened": 0.033
+    "said": 0.016,
+    "happened": 0.025
    },
    {
     "from": 0.05,
     "to": 0.15,
-    "n": 80,
-    "said": 0.104,
-    "happened": 0.163
+    "n": 122,
+    "said": 0.108,
+    "happened": 0.131
    },
    {
     "from": 0.15,
     "to": 0.3,
-    "n": 215,
-    "said": 0.217,
-    "happened": 0.251
+    "n": 209,
+    "said": 0.196,
+    "happened": 0.239
    },
    {
     "from": 0.3,
     "to": 0.5,
-    "n": 207,
-    "said": 0.401,
-    "happened": 0.406
+    "n": 270,
+    "said": 0.396,
+    "happened": 0.356
    },
    {
     "from": 0.5,
     "to": 0.7,
-    "n": 165,
-    "said": 0.6,
-    "happened": 0.4
+    "n": 106,
+    "said": 0.608,
+    "happened": 0.481
    },
    {
     "from": 0.7,
     "to": 0.9,
-    "n": 64,
-    "said": 0.778,
-    "happened": 0.578
+    "n": 44,
+    "said": 0.787,
+    "happened": 0.568
    }
   ]
  },
  "each_opponent": {
-  "n": 2003,
-  "said": 0.712,
-  "happened": 0.704,
-  "ece": 0.019,
+  "n": 1947,
+  "said": 0.681,
+  "happened": 0.676,
+  "ece": 0.016,
   "bins": [
    {
     "from": 0.0,
     "to": 0.05,
-    "n": 78,
-    "said": 0.02,
-    "happened": 0.051
+    "n": 53,
+    "said": 0.018,
+    "happened": 0.019
    },
    {
     "from": 0.05,
     "to": 0.15,
-    "n": 49,
-    "said": 0.094,
-    "happened": 0.163
+    "n": 86,
+    "said": 0.093,
+    "happened": 0.105
    },
    {
     "from": 0.15,
     "to": 0.3,
-    "n": 95,
-    "said": 0.231,
-    "happened": 0.211
+    "n": 94,
+    "said": 0.232,
+    "happened": 0.33
    },
    {
     "from": 0.3,
     "to": 0.5,
-    "n": 135,
-    "said": 0.415,
-    "happened": 0.452
+    "n": 119,
+    "said": 0.405,
+    "happened": 0.403
    },
    {
     "from": 0.5,
     "to": 0.7,
-    "n": 249,
-    "said": 0.622,
-    "happened": 0.602
+    "n": 380,
+    "said": 0.609,
+    "happened": 0.571
    },
    {
     "from": 0.7,
     "to": 0.9,
-    "n": 971,
-    "said": 0.81,
-    "happened": 0.798
+    "n": 940,
+    "said": 0.807,
+    "happened": 0.804
    },
    {
     "from": 0.9,
     "to": 1.0,
-    "n": 426,
-    "said": 0.942,
-    "happened": 0.92
+    "n": 275,
+    "said": 0.938,
+    "happened": 0.927
    }
   ]
  },
  "by_size": {
   "min": {
-   "n": 202,
-   "said": 0.141,
-   "happened": 0.208,
-   "ece": 0.072,
+   "n": 205,
+   "said": 0.148,
+   "happened": 0.171,
+   "ece": 0.036,
    "bins": [
     {
      "from": 0.0,
      "to": 0.05,
-     "n": 79,
-     "said": 0.01,
-     "happened": 0.025
+     "n": 66,
+     "said": 0.013,
+     "happened": 0.03
     },
     {
      "from": 0.05,
      "to": 0.15,
-     "n": 14,
-     "said": 0.083,
-     "happened": 0.143
+     "n": 38,
+     "said": 0.115,
+     "happened": 0.105
     },
     {
      "from": 0.15,
      "to": 0.3,
-     "n": 91,
-     "said": 0.216,
-     "happened": 0.33
+     "n": 74,
+     "said": 0.192,
+     "happened": 0.257
     },
     {
      "from": 0.3,
      "to": 0.5,
-     "n": 17,
-     "said": 0.372,
-     "happened": 0.471
+     "n": 23,
+     "said": 0.385,
+     "happened": 0.391
     },
     {
      "from": 0.5,
      "to": 0.7,
-     "n": 1,
-     "said": 0.551,
-     "happened": 0.0
+     "n": 4,
+     "said": 0.505,
+     "happened": 0.25
     }
    ]
   },
   "2x": {
-   "n": 200,
-   "said": 0.605,
-   "happened": 0.44,
-   "ece": 0.165,
+   "n": 205,
+   "said": 0.538,
+   "happened": 0.395,
+   "ece": 0.143,
    "bins": [
     {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 9,
-     "said": 0.271,
+     "from": 0.05,
+     "to": 0.15,
+     "n": 1,
+     "said": 0.137,
      "happened": 0.0
-    },
-    {
-     "from": 0.3,
-     "to": 0.5,
-     "n": 30,
-     "said": 0.408,
-     "happened": 0.267
-    },
-    {
-     "from": 0.5,
-     "to": 0.7,
-     "n": 98,
-     "said": 0.584,
-     "happened": 0.449
-    },
-    {
-     "from": 0.7,
-     "to": 0.9,
-     "n": 63,
-     "said": 0.778,
-     "happened": 0.571
-    }
-   ]
-  },
-  "half": {
-   "n": 235,
-   "said": 0.203,
-   "happened": 0.243,
-   "ece": 0.05,
-   "bins": [
-    {
-     "from": 0.0,
-     "to": 0.05,
-     "n": 41,
-     "said": 0.021,
-     "happened": 0.049
-    },
-    {
-     "from": 0.05,
-     "to": 0.15,
-     "n": 43,
-     "said": 0.118,
-     "happened": 0.186
-    },
-    {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 101,
-     "said": 0.218,
-     "happened": 0.208
-    },
-    {
-     "from": 0.3,
-     "to": 0.5,
-     "n": 48,
-     "said": 0.386,
-     "happened": 0.521
-    },
-    {
-     "from": 0.5,
-     "to": 0.7,
-     "n": 2,
-     "said": 0.621,
-     "happened": 0.5
-    }
-   ]
-  },
-  "pot": {
-   "n": 214,
-   "said": 0.427,
-   "happened": 0.332,
-   "ece": 0.109,
-   "bins": [
-    {
-     "from": 0.05,
-     "to": 0.15,
-     "n": 23,
-     "said": 0.092,
-     "happened": 0.13
     },
     {
      "from": 0.15,
      "to": 0.3,
      "n": 14,
-     "said": 0.185,
-     "happened": 0.214
+     "said": 0.223,
+     "happened": 0.143
     },
     {
      "from": 0.3,
      "to": 0.5,
-     "n": 112,
-     "said": 0.41,
-     "happened": 0.384
+     "n": 107,
+     "said": 0.453,
+     "happened": 0.364
     },
     {
      "from": 0.5,
      "to": 0.7,
-     "n": 64,
-     "said": 0.623,
-     "happened": 0.328
+     "n": 46,
+     "said": 0.634,
+     "happened": 0.413
     },
     {
      "from": 0.7,
      "to": 0.9,
-     "n": 1,
-     "said": 0.768,
-     "happened": 1.0
-    }
-   ]
-  }
- },
- "by_opponent": {
-  "Pro": {
-   "n": 696,
-   "said": 0.817,
-   "happened": 0.828,
-   "ece": 0.044,
-   "bins": [
-    {
-     "from": 0.0,
-     "to": 0.05,
-     "n": 10,
-     "said": 0.024,
-     "happened": 0.2
-    },
-    {
-     "from": 0.05,
-     "to": 0.15,
-     "n": 4,
-     "said": 0.075,
-     "happened": 0.0
-    },
-    {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 5,
-     "said": 0.18,
-     "happened": 0.2
-    },
-    {
-     "from": 0.3,
-     "to": 0.5,
-     "n": 33,
-     "said": 0.419,
-     "happened": 0.606
-    },
-    {
-     "from": 0.5,
-     "to": 0.7,
-     "n": 26,
-     "said": 0.63,
-     "happened": 0.346
-    },
-    {
-     "from": 0.7,
-     "to": 0.9,
-     "n": 400,
-     "said": 0.827,
-     "happened": 0.855
-    },
-    {
-     "from": 0.9,
-     "to": 1.0,
-     "n": 218,
-     "said": 0.945,
-     "happened": 0.927
+     "n": 37,
+     "said": 0.794,
+     "happened": 0.568
     }
    ]
   },
-  "Gambler": {
-   "n": 531,
-   "said": 0.731,
-   "happened": 0.748,
-   "ece": 0.019,
+  "half": {
+   "n": 242,
+   "said": 0.179,
+   "happened": 0.219,
+   "ece": 0.057,
    "bins": [
     {
      "from": 0.0,
      "to": 0.05,
-     "n": 25,
+     "n": 53,
      "said": 0.02,
      "happened": 0.0
     },
     {
      "from": 0.05,
      "to": 0.15,
-     "n": 7,
-     "said": 0.105,
-     "happened": 0.143
+     "n": 47,
+     "said": 0.119,
+     "happened": 0.234
     },
     {
      "from": 0.15,
      "to": 0.3,
-     "n": 13,
-     "said": 0.184,
-     "happened": 0.462
+     "n": 96,
+     "said": 0.196,
+     "happened": 0.26
     },
     {
      "from": 0.3,
      "to": 0.5,
-     "n": 50,
-     "said": 0.445,
-     "happened": 0.46
+     "n": 38,
+     "said": 0.364,
+     "happened": 0.368
     },
     {
      "from": 0.5,
      "to": 0.7,
-     "n": 5,
-     "said": 0.593,
-     "happened": 0.8
+     "n": 8,
+     "said": 0.515,
+     "happened": 0.375
+    }
+   ]
+  },
+  "pot": {
+   "n": 219,
+   "said": 0.356,
+   "happened": 0.329,
+   "ece": 0.036,
+   "bins": [
+    {
+     "from": 0.0,
+     "to": 0.05,
+     "n": 1,
+     "said": 0.037,
+     "happened": 1.0
+    },
+    {
+     "from": 0.05,
+     "to": 0.15,
+     "n": 36,
+     "said": 0.086,
+     "happened": 0.028
+    },
+    {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 25,
+     "said": 0.19,
+     "happened": 0.16
+    },
+    {
+     "from": 0.3,
+     "to": 0.5,
+     "n": 102,
+     "said": 0.349,
+     "happened": 0.333
+    },
+    {
+     "from": 0.5,
+     "to": 0.7,
+     "n": 48,
+     "said": 0.608,
+     "happened": 0.583
     },
     {
      "from": 0.7,
      "to": 0.9,
-     "n": 324,
-     "said": 0.798,
-     "happened": 0.809
+     "n": 7,
+     "said": 0.751,
+     "happened": 0.571
+    }
+   ]
+  }
+ },
+ "by_opponent": {
+  "Pro": {
+   "n": 685,
+   "said": 0.809,
+   "happened": 0.819,
+   "ece": 0.026,
+   "bins": [
+    {
+     "from": 0.0,
+     "to": 0.05,
+     "n": 2,
+     "said": 0.02,
+     "happened": 0.0
+    },
+    {
+     "from": 0.05,
+     "to": 0.15,
+     "n": 9,
+     "said": 0.095,
+     "happened": 0.111
+    },
+    {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 12,
+     "said": 0.221,
+     "happened": 0.333
+    },
+    {
+     "from": 0.3,
+     "to": 0.5,
+     "n": 21,
+     "said": 0.458,
+     "happened": 0.619
+    },
+    {
+     "from": 0.5,
+     "to": 0.7,
+     "n": 30,
+     "said": 0.587,
+     "happened": 0.4
+    },
+    {
+     "from": 0.7,
+     "to": 0.9,
+     "n": 432,
+     "said": 0.823,
+     "happened": 0.84
     },
     {
      "from": 0.9,
      "to": 1.0,
+     "n": 179,
+     "said": 0.939,
+     "happened": 0.939
+    }
+   ]
+  },
+  "Gambler": {
+   "n": 542,
+   "said": 0.673,
+   "happened": 0.657,
+   "ece": 0.022,
+   "bins": [
+    {
+     "from": 0.0,
+     "to": 0.05,
+     "n": 16,
+     "said": 0.019,
+     "happened": 0.0
+    },
+    {
+     "from": 0.05,
+     "to": 0.15,
+     "n": 23,
+     "said": 0.085,
+     "happened": 0.13
+    },
+    {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 19,
+     "said": 0.181,
+     "happened": 0.211
+    },
+    {
+     "from": 0.3,
+     "to": 0.5,
+     "n": 49,
+     "said": 0.412,
+     "happened": 0.367
+    },
+    {
+     "from": 0.5,
+     "to": 0.7,
      "n": 107,
-     "said": 0.941,
-     "happened": 0.944
+     "said": 0.674,
+     "happened": 0.617
+    },
+    {
+     "from": 0.7,
+     "to": 0.9,
+     "n": 277,
+     "said": 0.79,
+     "happened": 0.787
+    },
+    {
+     "from": 0.9,
+     "to": 1.0,
+     "n": 51,
+     "said": 0.94,
+     "happened": 0.922
     }
    ]
   },
   "Sticky": {
-   "n": 402,
-   "said": 0.571,
-   "happened": 0.567,
+   "n": 400,
+   "said": 0.506,
+   "happened": 0.502,
+   "ece": 0.031,
+   "bins": [
+    {
+     "from": 0.0,
+     "to": 0.05,
+     "n": 26,
+     "said": 0.017,
+     "happened": 0.0
+    },
+    {
+     "from": 0.05,
+     "to": 0.15,
+     "n": 27,
+     "said": 0.097,
+     "happened": 0.037
+    },
+    {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 43,
+     "said": 0.242,
+     "happened": 0.326
+    },
+    {
+     "from": 0.3,
+     "to": 0.5,
+     "n": 25,
+     "said": 0.38,
+     "happened": 0.36
+    },
+    {
+     "from": 0.5,
+     "to": 0.7,
+     "n": 188,
+     "said": 0.584,
+     "happened": 0.564
+    },
+    {
+     "from": 0.7,
+     "to": 0.9,
+     "n": 85,
+     "said": 0.754,
+     "happened": 0.776
+    },
+    {
+     "from": 0.9,
+     "to": 1.0,
+     "n": 6,
+     "said": 0.929,
+     "happened": 0.833
+    }
+   ]
+  },
+  "Rock": {
+   "n": 182,
+   "said": 0.671,
+   "happened": 0.648,
    "ece": 0.058,
    "bins": [
     {
      "from": 0.0,
      "to": 0.05,
-     "n": 25,
-     "said": 0.013,
+     "n": 8,
+     "said": 0.022,
+     "happened": 0.125
+    },
+    {
+     "from": 0.05,
+     "to": 0.15,
+     "n": 9,
+     "said": 0.093,
+     "happened": 0.0
+    },
+    {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 6,
+     "said": 0.237,
+     "happened": 0.0
+    },
+    {
+     "from": 0.3,
+     "to": 0.5,
+     "n": 9,
+     "said": 0.376,
+     "happened": 0.0
+    },
+    {
+     "from": 0.5,
+     "to": 0.7,
+     "n": 40,
+     "said": 0.567,
+     "happened": 0.525
+    },
+    {
+     "from": 0.7,
+     "to": 0.9,
+     "n": 91,
+     "said": 0.834,
+     "happened": 0.857
+    },
+    {
+     "from": 0.9,
+     "to": 1.0,
+     "n": 19,
+     "said": 0.934,
+     "happened": 0.947
+    }
+   ]
+  },
+  "Shark": {
+   "n": 138,
+   "said": 0.601,
+   "happened": 0.587,
+   "ece": 0.196,
+   "bins": [
+    {
+     "from": 0.0,
+     "to": 0.05,
+     "n": 1,
+     "said": 0.016,
      "happened": 0.0
     },
     {
      "from": 0.05,
      "to": 0.15,
      "n": 18,
-     "said": 0.096,
-     "happened": 0.167
-    },
-    {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 46,
-     "said": 0.264,
-     "happened": 0.13
-    },
-    {
-     "from": 0.3,
-     "to": 0.5,
-     "n": 29,
-     "said": 0.38,
-     "happened": 0.276
-    },
-    {
-     "from": 0.5,
-     "to": 0.7,
-     "n": 142,
-     "said": 0.629,
-     "happened": 0.697
-    },
-    {
-     "from": 0.7,
-     "to": 0.9,
-     "n": 112,
-     "said": 0.775,
-     "happened": 0.75
-    },
-    {
-     "from": 0.9,
-     "to": 1.0,
-     "n": 30,
-     "said": 0.941,
-     "happened": 0.933
-    }
-   ]
-  },
-  "Rock": {
-   "n": 208,
-   "said": 0.702,
-   "happened": 0.62,
-   "ece": 0.09,
-   "bins": [
-    {
-     "from": 0.0,
-     "to": 0.05,
-     "n": 7,
-     "said": 0.022,
-     "happened": 0.0
-    },
-    {
-     "from": 0.05,
-     "to": 0.15,
-     "n": 14,
-     "said": 0.103,
-     "happened": 0.143
-    },
-    {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 4,
-     "said": 0.239,
-     "happened": 0.25
-    },
-    {
-     "from": 0.3,
-     "to": 0.5,
-     "n": 12,
-     "said": 0.394,
-     "happened": 0.417
-    },
-    {
-     "from": 0.5,
-     "to": 0.7,
-     "n": 42,
-     "said": 0.6,
-     "happened": 0.524
-    },
-    {
-     "from": 0.7,
-     "to": 0.9,
-     "n": 75,
-     "said": 0.843,
-     "happened": 0.693
-    },
-    {
-     "from": 0.9,
-     "to": 1.0,
-     "n": 54,
-     "said": 0.931,
-     "happened": 0.87
-    }
-   ]
-  },
-  "Shark": {
-   "n": 166,
-   "said": 0.567,
-   "happened": 0.482,
-   "ece": 0.14,
-   "bins": [
-    {
-     "from": 0.0,
-     "to": 0.05,
-     "n": 11,
-     "said": 0.027,
-     "happened": 0.182
-    },
-    {
-     "from": 0.05,
-     "to": 0.15,
-     "n": 6,
-     "said": 0.067,
-     "happened": 0.333
-    },
-    {
-     "from": 0.15,
-     "to": 0.3,
-     "n": 27,
-     "said": 0.204,
+     "said": 0.097,
      "happened": 0.222
     },
     {
+     "from": 0.15,
+     "to": 0.3,
+     "n": 14,
+     "said": 0.279,
+     "happened": 0.643
+    },
+    {
      "from": 0.3,
      "to": 0.5,
-     "n": 11,
-     "said": 0.38,
-     "happened": 0.455
+     "n": 15,
+     "said": 0.369,
+     "happened": 0.533
     },
     {
      "from": 0.5,
      "to": 0.7,
-     "n": 34,
-     "said": 0.615,
-     "happened": 0.471
+     "n": 15,
+     "said": 0.616,
+     "happened": 0.8
     },
     {
      "from": 0.7,
      "to": 0.9,
-     "n": 60,
-     "said": 0.781,
-     "happened": 0.583
+     "n": 55,
+     "said": 0.797,
+     "happened": 0.564
     },
     {
      "from": 0.9,
      "to": 1.0,
-     "n": 17,
-     "said": 0.935,
-     "happened": 0.824
+     "n": 20,
+     "said": 0.934,
+     "happened": 0.85
     }
    ]
   }
  },
  "worth": {
-  "said": -4.53,
-  "happened_bluff_only": -5.25,
-  "said_pays": 87,
-  "n": 851
+  "said": -5.19,
+  "happened_bluff_only": -4.9,
+  "said_pays": 90,
+  "n": 871
  }
 }

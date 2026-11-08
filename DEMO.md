@@ -47,13 +47,27 @@ display only. Turn it on for judges, off for real play.
 1. **Table (1 min).** Deal and play a hand with the hole-card cam on. Point at one read: "Rock: Fold 90%, and you can see
    he holds 7♣2♦."
 2. **A decision (1 min).** Click a bet size and read the bluff check aloud. If the coaches disagree, read the note.
-3. **"Watch the model learn a player" (1 min).**
+3. **"Watch the model learn a player" → "The Shark learns you" (1 min, about 10 s of replay).**
+   - Your seat has a common human leak: it gives up to almost any bet after the flop. Nobody is told.
+   - The first hands: the Shark's seat says "plays its normal game", and its read of you is people in general.
+   - The fast-forward to hand 50: the model of you learns the leak ("you fold 86% to a bet after the flop; people
+     52%").
+   - The next hands: the Shark's seat says "bluffs more"; it bets, you fold.
+   - The end screen:
+     - you fold 86%;
+     - the Shark bets into you heads-up 26% → 52% (hands 1–10 → 51–60), against 31% for the same Shark not reading
+       you;
+     - measured over 100 sittings of 60 hands, each with and without its read;
+     - no chip loss is claimed (10 hands is too few).
+   - **Now you play:** the Shark keeps its read of you until you change.
+   - The older "A player like you" replay (the learning curve) is the second option on the same card.
+4. **(Optional) "A player like you" (1 min).**
    - A simulated player who calls a lot plays 500 hands in your seat, in about 10 seconds, while every model starts
      knowing nothing.
    - It ends on: model of you **81%** vs people in general **70%** (last 100 hands); the five players' models **72%**
      vs **68%**.
    - Press **Now you play**: all those models carry over. Call a lot, and watch it predict you.
-4. **"How good are the guesses?" (1 min).** The strongest screen: lead with it and do not rush it. Every number sits next to its baseline,
+5. **"How good are the guesses?" (1 min).** The strongest screen: lead with it and do not rush it. Every number sits next to its baseline,
    on data no model was trained on.
 
 Both mock judges said the same thing: **lead with the scorecard and the bluff check, not the table.**
@@ -70,6 +84,21 @@ Both mock judges said the same thing: **lead with the scorecard and the bluff ch
 | RL coach wins | **+156 ± 15** bb/100 against a maths bot, same cards | sealed tables: opponents it never trained on or was picked on, 30,000 hands each |
 | RL adds to copying Pluribus | **+154 ± 14** over the same network copying Pluribus without RL | same |
 | Our hand predictions help the coach | **+82 ± 14** when switched off | same |
+
+## The Shark, measured
+
+The Shark reacts to the gap between how often the players still in would fold by their own models and how often people
+in general would, multiplied by 2.5 and capped at ±2 on its raise logit, so it pounces on early evidence. With the
+leaky player above, over 100 sittings of 60 hands (`scripts/build_sim_shark.py`):
+
+| Hands 51–60 | Shark reading you | Same Shark, not reading |
+|---|---|---|
+| Bets when heads-up with you after the flop | 52% (46 spots); 26% in hands 1–10 | 31% (61 spots) |
+| You fold to its bets | 83% | 70% |
+| Chips you lose to it per sitting | 3.0 ± 1.4 | 3.2 ± 1.3 (no measurable difference in 10 hands) |
+
+With a milder leak, or with the Shark reacting one-for-one to the read, the difference was within noise in 60 hands.
+That is why the Shark pounces, and why the claim is about what it does, not about chips.
 
 ## Scenarios worth showing (pick one, about 30 s)
 

@@ -514,13 +514,14 @@ class ReaderAgent(TypeAgent):
     """A Pro that reads the table (the Poker Mirror's Shark): before each move it asks the models of the players still
     in how likely they all are to fold if it bets about the pot, against how often people in general would, and raises
     more when they fold more (it bluffs them) and less when they call more.  One level only: it reads what players do,
-    never what they think it will do, and only it adapts, so there is no loop.  The shift is capped at ±1 on the
-    raise logit.  Without a ``reads_provider`` (outside a live table) it plays as a plain tilted Pro."""
+    never what they think it will do, and only it adapts, so there is no loop.  It pounces on early evidence: the gap
+    between the two (in logits) is multiplied by GAIN and capped at ±CAP on the raise logit.  Without a
+    ``reads_provider`` (outside a live table) it plays as its type."""
 
     kind = "reader"
     label = "Shark"
     description = "Plays like the professionals and reads the table: bluffs players who fold too much, not those who call."
-    CAP = 1.0
+    GAIN, CAP = 2.5, 2.0
 
     def __init__(self, **params: Any):
         super().__init__(**params)
@@ -538,7 +539,7 @@ class ReaderAgent(TypeAgent):
                 r = None
             if r and r.get("all_fold") is not None:
                 lo = lambda q: math.log(max(q, 1e-3) / max(1.0 - q, 1e-3))  # noqa: E731
-                delta = max(-self.CAP, min(self.CAP, lo(r["all_fold"]) - lo(r["people"])))
+                delta = max(-self.CAP, min(self.CAP, self.GAIN * (lo(r["all_fold"]) - lo(r["people"]))))
                 tilt = (tilt[0], tilt[1], tilt[2] + delta)
                 self.last_read = {**r, "delta": round(delta, 2), "hand_id": obs.get("hand_id"),
                                   "action": "bluffs more" if delta > 0.15 else "bluffs less" if delta < -0.15 else "plays its normal game"}

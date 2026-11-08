@@ -595,12 +595,14 @@
       shiftEl.dataset.at = sh.at;
       shiftEl.animate([{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: "ease-out" });
     }
-    if (!hands) wrap.append(el("div", { class: "grid-over" }, noModel()));
+    const over = hand() && hand().status !== "betting";  // between hands there is nothing to guess: say so, not "no model"
+    if (!hands) wrap.append(el("div", { class: "grid-over" }, over ? el("span", { class: "nm", text: "Hand over" }) : noModel()));
     wrap.append(el("div", { class: "readout", text: "" }));
 
     const top = $("#top2");
     top.innerHTML = "";
-    top.append(el("div", { class: "row" }, el("span", { class: "k", text: "Top 2 hands" }), handSlot(hands, 2)));
+    top.append(el("div", { class: "row" }, el("span", { class: "k", text: "Top 2 hands" }),
+      !hands && over ? el("span", { class: "nm", text: "Hand over" }) : handSlot(hands, 2)));
     if (hands && hands.shown) {  // where the real hand sat in our guess: the likeliest X% of it held the real hand
       top.append(el("div", { class: "row real", title: "The 169 hand types ranked from our likeliest guess down. On 44,036 unseen test hands, the real hand fell inside our likeliest half 47% of the time." },
         el("span", { class: "k", text: "Real hand" }),
@@ -848,24 +850,29 @@
   // ------------------------------------------------------------ replay of a real player no model has seen
   // Precomputed by scripts/build_replay.py with the same models as the live table (GET /api/lab/replay).
   // "A player like you": scripts/build_sim_you.py simulates a human-like player with a hidden style in your seat.
-  const RP = { data: null, cache: {}, who: "sim", style: "calls", h: 0, f: 0, timer: null };
+  // "The Shark learns you": scripts/build_sim_shark.py, a leaky player in your seat and the table-reading Shark.
+  const RP = { data: null, cache: {}, who: "shark", style: "calls", h: 0, f: 0, timer: null };
+  const rpStyle = () => (RP.who === "shark" ? "shark" : RP.style);
   const theirs = () => L.replay && !(RP.data && RP.data.player.mine);
   const DONE = { fold: "folded", call: "called", raise: "raised" };
   async function openReplay() {
-    const key = RP.who === "sim" ? `sim:${RP.style}` : "unseen";
+    const key = RP.who === "unseen" ? "unseen" : `sim:${rpStyle()}`;
     if (!(key in RP.cache)) {
-      try { RP.cache[key] = await api(RP.who === "sim" ? `/api/lab/replay?who=sim&style=${RP.style}` : "/api/lab/replay"); } catch (e) { RP.cache[key] = null; }
+      try { RP.cache[key] = await api(RP.who === "unseen" ? "/api/lab/replay" : `/api/lab/replay?who=sim&style=${rpStyle()}`); } catch (e) { RP.cache[key] = null; }
     }
     document.querySelectorAll("#replayWho .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.who === RP.who)));
     $("#replayStyle").hidden = RP.who !== "sim";
     document.querySelectorAll("#replayStyle .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.style === RP.style)));
     RP.data = RP.cache[key];
     if (!RP.data) { $("#actNote").textContent = "No replay built (python scripts/build_sim_you.py, scripts/build_replay.py)"; return; }
-    const d = RP.data, s = d.summary, sim = !!d.player.sim, mine = d.player.mine;
-    $("#replayTitle").textContent = sim ? "A player like you, simulated" : "A real player, learned as they play";
+    const d = RP.data, s = d.summary, sim = !!d.player.sim, mine = d.player.mine, shark = !!d.player.shark;
+    $("#replayTitle").textContent = shark ? "The Shark learns you" : sim ? "A player like you, simulated" : "A real player, learned as they play";
     $("#habitsHead").textContent = sim ? "What the model of you learned" : "What our model learned about them";
-    $("#replayStep").firstChild.textContent = sim ? `Simulate ${d.player.hands} hands ` : "Play their hands ";
-    $("#replayNote").textContent = sim
+    $("#replayStep").firstChild.textContent = shark ? `Play ${d.shark.sitting_hands} hands ` : sim ? `Simulate ${d.player.hands} hands ` : "Play their hands ";
+    $("#replayNote").textContent = shark
+      ? `Your seat has a common human leak: it ${d.player.style_text}. Nobody is told. The Shark reads every player's model before it bets. ` +
+        `Watch its seat: at first it plays its normal game; over ${d.shark.learn_hands} hands the model of you learns the leak, and the Shark starts to use it.`
+      : sim
       ? `A human-like player who ${d.player.style_text} sits in your seat for ${d.player.hands} hands; no model is told the style. ` +
         `Watch the model of you start as people in general, miss, and then pull away. Then you take the seat and play like that.`
       : `${d.player.hands} real hands of one online player no model was trained on, studied in order like a poker tracker would. ` +
@@ -903,7 +910,45 @@
   const legend = () => el("p", { class: "curve-legend" }, el("span", { class: "lg l-you", text: "Model of you" }),
     el("span", { class: "lg l-ppl", text: "People in general" }), el("span", { class: "lg l-usu", text: "Your usual move" }));
   // between the first hands and the last ones: the hands in between fly by while the curve grows (about 3 s)
+  function sharkForward(done) {
+    const d = RP.data, rows = d.shark.series, box = $("#ffwd");
+    box.className = "ffwd";
+    box.hidden = false;
+    const t0 = performance.now(), dur = MOTION ? 3000 : 0;
+    const frame = (now) => {
+      if (!L.replay) { box.hidden = true; return; }
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1, r = rows[Math.max(0, Math.round((rows.length - 1) * k))];
+      box.innerHTML = "";
+      box.append(el("p", { class: "kicker", text: `Fast-forward · hand ${r[0]} of ${d.shark.learn_hands} · the Shark is watching you` }),
+        el("div", { class: "ff-now" }, el("span", { class: "ff-k", text: "You" }), el("span", { class: "ff-you" }, "fold to a bet after the flop ", el("b", { text: pct(r[1]) })),
+          el("span", { class: "ff-ppl" }, "people in general ", el("b", { text: pct(r[2]) }))),
+        el("p", { class: "ff-note", text: "The model of you learns this from your moves alone; the Shark asks it before every bet." }));
+      if (k < 1) requestAnimationFrame(frame);
+      else setTimeout(() => { box.hidden = true; done(); }, 350);
+    };
+    requestAnimationFrame(frame);
+  }
+  function showSharkEnd() {
+    const d = RP.data, sh = d.shark, on = sh.with_reads, off = sh.without_reads, box = $("#ffwd");
+    const last = sh.series[sh.series.length - 1], before = on.first10.shark_bets.rate, after = on.last10.shark_bets.rate;
+    const go = el("button", { class: "btn primary", type: "button", text: "Now you play ▸" });
+    go.addEventListener("click", adopt);
+    box.className = "ffwd end";
+    box.innerHTML = "";
+    box.append(...[el("p", { class: "kicker", text: `After ${sh.learn_hands} hands, the Shark knows you` }),
+      el("div", { class: "ff-big" },
+        el("div", { class: "ff-you" }, el("b", { text: pct(last[1]) }), el("span", { text: `you fold to a bet after the flop (people ${pct(last[2])})` })),
+        el("div", { class: "ff-ppl" }, el("b", { text: `${pct(before)} → ${pct(after)}` }), el("span", { text: `the Shark bets into you heads-up: hands 1–10 → ${sh.learn_hands + 1}–${sh.sitting_hands}` })),
+        el("div", { class: "ff-usu" }, el("b", { text: pct(off.last10.shark_bets.rate) }), el("span", { text: "the same Shark, not reading you" }))),
+      el("p", { class: "ff-note", text: `Measured over ${sh.sessions} sittings of ${sh.sitting_hands} hands, each played with and without the Shark's read. You fold to ${pct(on.last10.you_fold.rate)} of its bets. ` +
+        "Over 10 hands the chips at stake are small and luck decides most of them, so we do not claim a chip loss: the change is in what it does to you." }),
+      d.habits && d.habits[0] ? el("p", { class: "ff-note", text: `The mirror showed the leak too: "${d.habits[0].text}". Now you play: change it, and watch the Shark's read follow.` }) : null,
+      go].filter(Boolean));
+    box.hidden = false;
+    if (MOTION) box.animate([{ opacity: 0, transform: "translate(-50%, -46%)" }, { opacity: 1, transform: "translate(-50%, -50%)" }], { duration: 320, easing: "ease-out" });
+  }
   function fastForward(done) {
+    if (RP.data.player.shark) { sharkForward(done); return; }
     const d = RP.data, rows = d.curve, box = $("#ffwd");
     const fromHand = d.hands[RP.lateAt - 1].hand_no, toHand = d.hands[RP.lateAt].hand_no;
     const a = Math.max(0, rows.findIndex((r) => r[0] > fromHand)), b0 = rows.findIndex((r) => r[0] >= toHand), b = b0 < 0 ? rows.length : b0;
@@ -932,6 +977,7 @@
   }
   // the reveal, at the end: its last 100 hands, large, with the whole curve and what it learned
   function showSimEnd() {
+    if (RP.data.player.shark) { showSharkEnd(); return; }
     const d = RP.data, s = d.summary.last100, o = d.summary.opp_last100, f = d.summary.first20, box = $("#ffwd");
     const cv = el("div", { class: "curve" });
     cv.innerHTML = curveSVG(d.curve, d.curve.length);
@@ -994,7 +1040,12 @@
     }
     L.lastCheck = prev ? { pred: prev.pred, actual: DONE[prev.actual] || prev.actual, hit: prev.hit } : null;
     render();
-    if (RP.data.player.sim) {
+    if (RP.data.player.shark) {
+      const sh = RP.data.shark;
+      $("#actTitle").textContent = `Hand ${hnd.hand_no} of ${sh.sitting_hands} · ${hnd.phase === "early" ? "the Shark does not know you yet" : "the Shark has read you"}`;
+      $("#actNote").textContent = hnd.phase === "early" ? "Watch the Shark's seat: it plays its normal game." :
+        `After ${hnd.hand_no - 1} hands its read of you says you fold too much; watch what it does.`;
+    } else if (RP.data.player.sim) {
       $("#actTitle").textContent = `Simulated hand ${hnd.hand_no} of ${RP.data.player.hands} · ${hnd.phase === "early" ? "it knows nothing yet" : "it has learned this player"}`;
       $("#actNote").textContent = hnd.phase === "early" ? "The model of you starts as people in general." :
         `The model of you has watched ${hnd.hand_no - 1} hands of this player. It never sees their cards.`;
@@ -1017,8 +1068,9 @@
       play(false);
       const s = RP.data.summary, mine = RP.data.player.mine;
       if (RP.data.player.sim) {
-        $("#actTitle").textContent = `Simulation done · ${RP.data.player.hands} hands`;
-        $("#actNote").textContent = `Your turn: press "Now you play" and play like a player who ${RP.data.player.style_text}.`;
+        $("#actTitle").textContent = RP.data.player.shark ? `Sitting done · ${RP.data.shark.sitting_hands} hands` : `Simulation done · ${RP.data.player.hands} hands`;
+        $("#actNote").textContent = RP.data.player.shark ? "Your turn: press \"Now you play\". The Shark keeps its read of you until you change." :
+          `Your turn: press "Now you play" and play like a player who ${RP.data.player.style_text}.`;
         showSimEnd();
         return;
       }
@@ -1035,7 +1087,7 @@
   // "Now you play": the live model of you starts from what it learned about the simulated player
   async function adopt() {
     let r = null;
-    try { r = await api("/api/lab/adopt", { style: RP.style }); } catch (e) { r = null; }
+    try { r = await api("/api/lab/adopt", { style: rpStyle() }); } catch (e) { r = null; }
     exitReplay();
     $("#actNote").textContent = r ? `The model of you has watched ${r.hands} hands of a player who ${r.style}. Play like that, and watch "What you would do".` :
       "Could not hand over the simulated model (python scripts/build_sim_you.py)";
