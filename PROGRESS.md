@@ -128,6 +128,19 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
   of you / Your usual move" labels.
 - `/` and `/mirror` open Poker Mirror (no `.html` in the address).
 
+**Done 05:30–06:10:**
+- **Human-like table:** the five opponents are the next-move model of human pros, each nudged to one instinct (Pro,
+  Sticky, Aggro, Nervous, Gambler; `lab_api.MIRROR_TABLE`). Grid on them after width learning: 46 / 79 / 91% inside
+  the likeliest 50 / 80 / 90%.
+- **Bluff check, recalibrated:** on this table the raw fold chances were a few points high and "they all fold" said
+  39.7% where 28.8% happened. A two-number correction (`data/demo/bluff_fit.json`) fitted on one simulated session;
+  on a fresh one it says 32.4%, happens 30.0%.
+- **"A player like you"** (`scripts/build_sim_you.py`): a simulated player who calls a lot plays 500 hands in your
+  seat, replayed in about 9 s. Last 100 hands: model of you right 81% vs 67% for people in general (75% vs 54% facing a
+  bet). "Now you play" hands that model to the live table, in memory only.
+- **Table motion:** the dealer deals, board cards turn over, chips go to the pot and the pot to the winner.
+- **Training:** v3-bc and v3-ranges-s2 stopped (drift / plateau); `judges/` holds the mock-judge criteria.
+
 **Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
