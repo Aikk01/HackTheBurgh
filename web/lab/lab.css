@@ -231,5 +231,5 @@ kbd { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor;
 .replay-card .ln.usu { stroke: var(--muted); stroke-dasharray: 4 4; }
 .curve-legend { display: flex; gap: 16px; font-size: 12px; }
 .curve-legend .lg::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
-.curve-legend .you { color: var(--amber); } .curve-legend .ppl { color: #8fb8ff; } .curve-legend .usu { color: var(--muted); }
+.curve-legend .l-you { color: var(--amber); } .curve-legend .l-ppl { color: #8fb8ff; } .curve-legend .l-usu { color: var(--muted); }
 .replay-actions, .replay-nav { display: flex; gap: 8px; flex-wrap: wrap; }

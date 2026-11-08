@@ -306,9 +306,10 @@ class GameSession:
         ev = next((e for e in reversed(hand.events) if e["type"] == "action"), None)
         name = hand.players[ev["player"]].name if ev else f"seat {seat}"
         verb = result["action"]
-        text = f"{name} {verb}s" if verb in ("fold", "check") else (
-            f"{name} calls {_money(result.get('amount', 0))}" if verb == "call" else
-            f"{name} {verb}s to {_money(result.get('amount', 0))}")
+        s = "" if name == "You" else "s"
+        text = f"{name} {verb}{s}" if verb in ("fold", "check") else (
+            f"{name} call{s} {_money(result.get('amount', 0))}" if verb == "call" else
+            f"{name} {verb}{s} to {_money(result.get('amount', 0))}")
         if ev and ev.get("all_in"):
             text += " (all-in)"
         entry: Dict[str, Any] = {"t": time.time(), "text": text, "player": ev["player"] if ev else None,

@@ -44,7 +44,8 @@
   const fmt = (x) => (x === null || x === undefined ? "" : String(Math.round(Number(x) * 100) / 100));
   const pct = (p) => `${Math.round(100 * p)}%`;
   const pctHand = (p) => (p < 0.1 ? `${(100 * p).toFixed(1)}%` : pct(p));  // single hands are rarely above 10%
-  const actionText = (a) => (a.amount !== null && a.amount !== undefined && ["call", "bet", "raise"].includes(a.action) ? `${ACT[a.action]} ${fmt(a.amount)}` : ACT[a.action] || a.action);
+  const actionText = (a) => (a.amount !== null && a.amount !== undefined && ["call", "bet", "raise"].includes(a.action) ? `${ACT[a.action]} ${fmt(a.amount)}` :
+    a.action === "raise" ? "Raise" : ACT[a.action] || a.action);
   const announce = (t) => { $("#announcer").textContent = t; };
 
   // ------------------------------------------------------------ table geometry helpers
@@ -67,9 +68,20 @@
   const predFor = (seat) => (L.pred && L.pred.players ? L.pred.players.find((p) => p.seat === seat) : null) || null;
 
   // ------------------------------------------------------------ slots (model values or NO_MODEL)
+  // fold / check-call / bet-raise, with every raise size and all-in summed, so all models answer the same three choices
+  function grouped(actions) {
+    const free = actions.some((a) => a.action === "check" || a.action === "bet");
+    const g = new Map();
+    for (const a of actions) {
+      const k = a.action === "fold" ? "fold" : a.action === "check" || a.action === "call" ? "call" : "raise";
+      if (g.has(k)) g.get(k).p += a.p;
+      else g.set(k, k === "raise" ? { action: free ? "bet" : "raise", amount: null, p: a.p } : { ...a });
+    }
+    return [...g.values()].sort((x, y) => y.p - x.p);
+  }
   function moveSlot(pred, n) {
     if (!pred || !pred.actions || !pred.actions.length) return noModel();
-    const [a, b] = pred.actions;
+    const [a, b] = grouped(pred.actions);
     return el("span", { class: "v" }, el("b", { text: actionText(a) }), el("span", { class: "pp", text: pct(a.p) }),
       n > 1 && b && b.p >= 0.01 ? el("span", { class: "p2" }, ` · ${actionText(b)} `, el("span", { class: "pp", text: pct(b.p) })) : null);
   }
@@ -190,7 +202,8 @@
   // the box above an opponent: what people do here (Base) and what this player does (their own model, learned at
   // this table); likely hand: the top starting hand, and the range read on this board
   function seatBox(p) {
-    if (p.folded) return null;  // nothing left to predict
+    const h = hand();
+    if (p.folded || (h && h.status !== "betting")) return null;  // nothing left to predict
     const pr = predFor(p.seat);
     const b = pr && pr.base, t = pr && pr.this_player;
     // one idea per box: their next move, as people in general play (Base) and as this player plays; their likely
@@ -207,8 +220,10 @@
     const should = $("#should");
     should.className = "mtable two";
     should.innerHTML = "";
-    should.append(el("span", { class: "k", text: "Base" }), yourSlot(you && you.should && you.should.base, "base", 1),
-      el("span", { class: "k", text: "RL" }), yourSlot(you && you.should && you.should.rl, "rl", 1));
+    should.append(el("span", { class: "k", text: "Base", title: "Learned from data: what Pluribus did in spots like this, given your cards" }),
+      yourSlot(you && you.should && you.should.base, "base", 1),
+      el("span", { class: "k", text: "RL", title: "Reinforcement learning: a policy trained by self-play that reads everyone's predicted hands" }),
+      yourSlot(you && you.should && you.should.rl, "rl", 1));
 
     const would = $("#would");
     would.className = "mtable two";
