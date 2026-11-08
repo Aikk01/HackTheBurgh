@@ -39,7 +39,7 @@ from . import cards as C
 # fold / call / raise logits, strongly enough that each type is plain to see (RL training used tilts within ±0.5; the
 # sealed test uses 1.2).
 MIRROR_TABLE = [("pro", "Pro"), ("pro:tilt_f=-1.5,tilt_r=1.5", "Gambler"), ("pro:tilt_f=-1.5,tilt_c=1.5,tilt_r=-1.0", "Sticky"),
-                ("pro:tilt_f=1.5,tilt_r=-1.0", "Rock"), ("pro:tilt_f=0.6,tilt_r=1.0", "Shark")]
+                ("pro:tilt_f=1.5,tilt_r=-1.0", "Rock"), ("reader:tilt_f=0.6,tilt_r=1.0", "Shark")]  # the Shark reads the table
 MIRROR_TYPE = {"Pro": "tight aggressive", "Gambler": "loose aggressive", "Sticky": "loose passive", "Rock": "tight passive",
                "Shark": "tight aggressive"}
 
@@ -171,7 +171,10 @@ def predict(game: Any) -> Dict[str, Any]:
                     this_act = None
         hands = _hands(ranges[j], p["shown"]) if j in ranges else None
         m = models.get(j)
+        ag = (getattr(game, "agents", None) or {}).get(p["seat"])
+        rd = getattr(ag, "last_read", None)  # the Shark's last read of the table, this hand only
         rows.append({"index": j, "seat": p["seat"], "name": p["name"], "folded": p["folded"],
+                     **({"reads": rd} if rd and rd.get("hand_id") == hand.hand_id else {}),
                      "base": {"action": base_act, "hands": hands},
                      "this_player": {"action": this_act, "hands": _summary(ranges[j], board) if j in ranges else None,
                                      "seen": m.total if m else 0, "accuracy": m.score() if m else None,
@@ -294,6 +297,46 @@ def _fold_fit() -> Optional[List[float]]:
         except (OSError, ValueError, KeyError):
             _FOLD_FIT["v"] = None
     return _FOLD_FIT["v"]
+
+
+def table_reads(game: Any, actor: int) -> Optional[Dict[str, Any]]:
+    """What a reading bot (agents.ReaderAgent) sees before its move: if it bets about the pot, how likely the players
+    still in all fold, by each player's own model (the bluff check's models and correction) and by people in general.
+    Public information only; called from the bot's own turn."""
+    import copy
+
+    from .next_move import predict as nm_predict
+
+    with game.lock:
+        hand = game.hand
+        if hand is None or hand.status != "betting" or hand.actor != actor:
+            return None
+        obs = hand.observation(actor)
+        la = obs.get("legal_actions") or {}
+        if not la.get("raise"):
+            return None
+        pot, to_call, mine = float(obs["total_pot"]), float(la.get("call") or 0), float(obs["hero"]["bet"] or 0)
+        amount = min(max(mine + to_call + pot + to_call, float(la["min_raise_to"])), float(la["max_raise_to"]))
+        h = copy.deepcopy(hand)
+    h.act(actor, la.get("raise_kind", "raise"), amount)
+    fit = _fold_fit()
+
+    def fix(f: float) -> float:
+        if not fit:
+            return f
+        x = np.log(max(f, 1e-4) / max(1.0 - f, 1e-4))
+        return float(1.0 / (1.0 + np.exp(-(fit[0] * x + fit[1]))))
+
+    ours = people = 1.0
+    guard = 0
+    while h.status == "betting" and h.actor is not None and h.actor != actor and guard < 12:
+        guard += 1
+        j = h.actor
+        o = h.observation(j)
+        ours *= fix(float(game.watch.model(h.players[j].name).predict(o, j)[0][0]))
+        people *= fix(float(nm_predict(o, j, with_cards=False)[0]))
+        h.fold(j)
+    return {"all_fold": round(ours, 3), "people": round(people, 3), "amount": amount}
 
 
 def bluff(game: Any, amount: float, raw: bool = False) -> Optional[Dict[str, Any]]:

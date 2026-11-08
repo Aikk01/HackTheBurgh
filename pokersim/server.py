@@ -73,6 +73,12 @@ class ApiError(Exception):
 WARM_READS = os.path.join(os.path.dirname(__file__), "..", "data", "demo", "warm_reads.json")
 
 
+def _lab_reads(game: Any, actor: int) -> Optional[Dict[str, Any]]:
+    from .lab_api import table_reads
+
+    return table_reads(game, actor)
+
+
 def _warm_reads() -> Optional[Dict[str, Any]]:
     try:
         with open(WARM_READS, encoding="utf-8") as f:
@@ -144,6 +150,8 @@ class GameSession:
                         m.counts = json.loads(json.dumps(warm["by_agent"][spec]))
                         m.warm_hands = int(warm["hands"])
                         m.range_obs = [list(x) for x in (warm.get("range_obs") or {}).get(spec, [])]
+                    if agent.kind == "reader":  # the Shark reads the table through the players' models
+                        agent.reads_provider = lambda obs: _lab_reads(self, obs["hero"]["index"])
                     if agent.kind == "rl":  # the RL bot reads the same opponent style estimates as the advisor
                         agent.styles_provider = lambda obs: {p["index"]: self.styles.estimate(p["name"]) for p in obs["players"]}
                 self.agents[seat_no] = agent

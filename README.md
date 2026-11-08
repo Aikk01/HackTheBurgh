@@ -1,3 +1,23 @@
+# Poker Mirror
+
+A poker training simulator that holds up a mirror: you play against the four classic types of player, models trained on
+21.6 million real hands learn everyone's habits (yours included) and show them, a bluff check prices your bets, and a
+reinforcement-learning coach suggests a better move. Nothing on screen ever sees a hidden card.
+
+```bash
+python -m pokersim serve --port 8765      # then open http://localhost:8765/
+```
+
+- **[DEMO.md](DEMO.md):** what is on the screen, the 4-minute demo, the numbers and what they were tested on.
+- **[train/TRAINING.md](train/TRAINING.md):** what each model was trained on, why, and how it was tested.
+- **[train/06_eval_and_overfitting.md](train/06_eval_and_overfitting.md):** the sealed RL test, registered before
+  any result, and every result.
+- **[PROGRESS.md](PROGRESS.md):** what was built when.
+
+The rest of this file describes PokerSim, the engine and tools Poker Mirror is built on.
+
+---
+
 # PokerSim - interactive hold'em simulator + hand-history replayer
 
 A realistic, playable No-Limit Texas Hold'em table with a browser UI, a replayer for

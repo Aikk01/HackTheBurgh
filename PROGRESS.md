@@ -158,7 +158,22 @@ penalty keeps play closer to Pluribus but wins less on these tables.
   conclusion of the 10,000-hand run holds.
 - **Training stopped** where it could no longer matter: v3-bc-s2 (drifted to −11) and v3-noranges-s2.
 
-**Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+**Done 07:00–07:25:**
+- **Clearly distinct player types** (tilts of 1.5): Pro and Shark (tight aggressive), Gambler (loose aggressive),
+  Sticky (loose passive), Rock (tight passive). Rebuilt for this table: bluff check on a fresh session 27.4% said,
+  24.1% happened (each player 66% / 67%); grid 45 / 78 / 89%.
+- **"A player like you" learns everyone:** the model of you and the five players' models all start from nothing; last
+  100 of 500 hands: you 81% vs 70% for people in general, the players 72% vs 68%. "Now you play" carries all of them
+  into the live table (`/api/lab/adopt`).
+- **The Shark reads the table** (`agents.ReaderAgent`, `lab_api.table_reads`): before each move it compares how often
+  the players still in would all fold to a pot-sized bet, by their own models and by people in general, and shifts its
+  raising (capped at ±1 on the raise logit). One level, only the Shark adapts, so no loops.
+- **Hole-card cam** (header toggle): every card shown to the audience, tagged "hidden from the models"; display only.
+- **Sealed test at 30,000 hands:** coach +156 ± 15, +154 ± 14 over the Pluribus copy, predicted hands +82 ± 14.
+- **All training finished** (kl10 best +136, kl30 +104 held-out; after the freeze, so not candidates).
+- **Docs:** [DEMO.md](DEMO.md) for the presenter; README now opens with Poker Mirror.
+
+**Running now:** nothing. Earlier: four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
 - 07:20: the sealed test, ship the best held-out policy to `data/rl/policy.npz`, rebuild the replay.

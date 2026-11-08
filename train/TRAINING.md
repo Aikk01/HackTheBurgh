@@ -178,6 +178,9 @@ with the opponent styles blanked out. The difference says what each input is wor
   still bots.
 - **30,000 hands per table gives about ±15 bb/100:** enough to separate the shipped coach from the best run from
   scratch (41 ± 16), not to rank runs that are a few points apart.
+- **The coach does not adapt during play.** It is a fixed policy: it does not notice an opponent exploiting it (the
+  demo's Shark does exactly that). It only reacts through its inputs, each opponent's predicted range and style, and
+  the style inputs measured no reliable effect. Training it against table-reading opponents is the next step.
 - **The demo table's players are the same kind of bot the coach trained against**, nudged a bit further, so the demo
   is not a test. The sealed test is.
 - **Poker sites ban real-time help.** Poker Mirror is a training and analysis tool, not something to use while

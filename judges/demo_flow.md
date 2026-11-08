@@ -9,6 +9,10 @@ Shared by every mock judge in this folder. The judge watches; the presenter driv
      player disagrees with people in general.
    - Right panel: the opponent's likely starting hands on a 13×13 grid. It changes as they act.
    - Centre: one line per move. Did we read it (✓/✗), and how much did it move our guess?
+   - "Hole-card cam" (header toggle): the audience sees every player's cards, see-through and tagged "hidden from the
+     models"; the grid outlines the real hand live. Display only.
+   - The Shark reads the table: before its move it asks the players' models how likely they all fold to a pot-sized
+     bet against people in general, and bluffs more or less. Its seat shows the read.
 2. **A decision (about 1 minute).**
    - Two coaches as fold/call/raise bars: Base copies Pluribus, RL was trained against players like these. When
      they disagree, a note says why.
