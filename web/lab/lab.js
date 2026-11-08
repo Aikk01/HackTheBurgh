@@ -889,6 +889,31 @@
     noteShifts(p);
     L.pred = p;
     render();
+    autoplay();
+  }
+  // Autopilot: the RL coach's top choice is played for you a moment after it appears; the next hand follows by itself
+  function autoplay() {
+    if (!L.auto) return;
+    const h = hand(), m = me(), you = L.pred && L.pred.you;
+    if (!h) return;
+    if (h.status !== "betting") {
+      if (L.autoNext !== h.hand_id) { L.autoNext = h.hand_id; setTimeout(() => { if (L.auto && hand() && hand().status !== "betting") nextHand(); }, 3500); }
+      return;
+    }
+    if (!(m && h.actor === m.index && you && you.your_turn && you.should)) return;
+    const key = `${h.hand_id}|${(L.st.log || []).length}`;
+    if (L.autoKey === key) return;
+    L.autoKey = key;
+    const rec = you.should.rl || you.should.base;
+    const top = rec && rec.actions && rec.actions[0];
+    setTimeout(() => {
+      const hh = hand();
+      if (!L.auto || !hh || hh.status !== "betting" || hh.actor !== m.index) return;
+      if (!top) { act("call"); return; }
+      if (top.action === "fold") act(hh.legal && hh.legal.fold ? "fold" : "call");
+      else if (top.action === "check" || top.action === "call") act("call");
+      else act("raise", Number(top.amount) || Number($("#raiseInput").value));
+    }, 700);
   }
   // new moves by opponents: was our read of them right (✓/✗ on their seat), and follow the action in the grid
   function noteActions(prev, st) {
@@ -1292,6 +1317,11 @@
     $("#replayBtn").addEventListener("click", openReplay);
     $("#scoreBtn").addEventListener("click", openScore);
     $("#camBtn").addEventListener("click", toggleCam);
+    $("#autoBtn").addEventListener("click", () => {
+      L.auto = $("#autoBtn").getAttribute("aria-pressed") !== "true";
+      $("#autoBtn").setAttribute("aria-pressed", String(L.auto));
+      if (L.auto && !hand()) newTable(); else autoplay();
+    });
     $("#scoreExit").addEventListener("click", () => { $("#scoreCard").hidden = true; });
     $("#replayStep").addEventListener("click", enterSteps);
     $("#replayExit").addEventListener("click", exitReplay);

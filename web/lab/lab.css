@@ -507,3 +507,6 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 .zoom-top .zk { width: auto; margin-right: 2px; }
 .zoom-how { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1250px) { .zoom-how { white-space: normal; } }
+
+.btn.toggle#autoBtn[aria-pressed="true"] { border-color: var(--coach); color: var(--coach); background: rgba(184, 161, 255, 0.12); }
+.btn.toggle#autoBtn[aria-pressed="true"]::before { background: var(--coach); border-color: var(--coach); }
