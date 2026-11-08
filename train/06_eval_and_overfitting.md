@@ -74,3 +74,7 @@ lead is the method or luck. It joins the candidates with its `export_heldout/`.
   measures what RL adds on top of copying Pluribus.
 - **Reading:** together with v3-bc and v3-bc-s2 (no pull) this gives a ladder: imitation only → strong pull → light
   pull → free. The v3-bc vs v3-bc-s2 gap is the noise level.
+
+**Added at 05:25, before any sealed result:** `scripts/sealed_eval.py` gained a `--seed0` option, used only for a
+pipeline smoke test on other deals (seed 900,000, 500 hands per table, v3-bc and imitation-only); its numbers were not
+read. The registered test keeps the default seeds (700,000). Speed: about 220 hands/s on 6 busy cores.

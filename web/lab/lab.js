@@ -649,7 +649,7 @@
   async function newTable() {
     try {
       onState(await api("/api/game/new", {
-        seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "station" }],
+        seats: [{ name: "You", agent: "human" }, { agent: "tag" }, { agent: "pro" }, { agent: "lag" }, { agent: "equity" }, { agent: "potodds" }],
         small_blind: 1, big_blind: 2, ante: 0, stack: 200, bot_delay_ms: 900, spectate: false, warm_reads: true, rebuy: true,
       }));
       L.lastCheck = null;
@@ -672,7 +672,7 @@
       el("div", { class: "sb" + (ours ? " ours" : "") }, el("span", { class: "sl", text: label }),
         el("span", { class: "st" }, el("i", { style: `width:${(100 * Math.max(0, Math.min(1, v))).toFixed(1)}%` })), el("b", { text: pct(v) }))));
     const row = (title, body, note) => el("section", { class: "srow" }, el("h3", { text: title }), body, el("p", { class: "snote", text: note }));
-    const m = d && d.moves, h = d && d.hands, c = d && d.coach;
+    const m = d && d.moves, h = d && d.hands, c = d && d.coach, b = d && d.bluff;
     rows.append(row("Their next move", m && m.ours ? bars([["Our model of that player", m.ours, true], ["People in general", m.people], ["Their usual move", m.usual]]) : noModel(),
       m ? `${m.players ? `${m.players} real players, ${m.decisions.toLocaleString()} decisions, guessed before each move; better for ${m.helped} of ${m.players}. ` : ""}` +
         `When it says ${pct(m.says)}, it happens ${pct(m.happens)} of the time (${m.calib_n.toLocaleString()} decisions).` : ""));
@@ -680,6 +680,9 @@
       h.post ? [["After the flop: our top 10", h.post, true], ["After the flop: card counting", h.post_counting]] : [])) : noModel(),
       h ? `Share of ${h.n.toLocaleString()} guesses on about 2,000 unseen Pluribus hands, every card known, where the real hand was in the top 10. Our likeliest half held it ${pct(h.half)} of the time (50% would be perfect)` +
         (h.bots ? `. On this table's bots, after learning how wide each one plays: ${pct(h.bots[0])} / ${pct(h.bots[1])} / ${pct(h.bots[2])} inside our likeliest 50 / 80 / 90% (fresh hands).` : ".") : ""));
+    if (b) rows.append(row("Bluff check: will they all fold?", bars([["Bluff check said", b.said, true], ["They really all folded", b.happened]]),
+      `${b.n.toLocaleString()} bets really made at this table, at the size buttons, with a stand-in in your seat. ` +
+      `Each player's own fold chance: said ${pct(b.each_said)}, folded ${pct(b.each_happened)} (${b.each_n.toLocaleString()} answers).`));
     rows.append(row("Your best move (RL coach)",
       c ? el("div", { class: "sbig" }, el("b", { text: `${sgn(c.vs_equity[0])} ± ${Math.round(c.vs_equity[1])}` }), " big blinds per 100 hands against a pure-maths bot") :
         el("div", { class: "sbig muted", text: "Tested once, on sealed tables, when training ends." }),
@@ -694,13 +697,20 @@
   const RP = { data: null, cache: {}, who: "unseen", h: 0, f: 0, timer: null };
   const theirs = () => L.replay && !(RP.data && RP.data.player.mine);
   const DONE = { fold: "folded", call: "called", raise: "raised" };
-  async function openReplay() {
+  const YOU_MIN = 30;  // your own replay is offered once the model has studied this many of your moves
+  async function openReplay(fresh) {
     if (!("unseen" in RP.cache)) {
       try { RP.cache.unseen = await api("/api/lab/replay"); } catch (e) { RP.cache.unseen = null; }
-      try { RP.cache.you = await api("/api/lab/replay?who=you"); } catch (e) { RP.cache.you = null; }
-      RP.who = RP.cache.you ? "you" : "unseen";
     }
-    $("#replayWho").hidden = !(RP.cache.you && RP.cache.unseen);
+    if (fresh !== false) {  // your replay grows as you play (the server rebuilds it), so fetch it on every open
+      try { RP.cache.you = await api("/api/lab/replay?who=you"); } catch (e) { RP.cache.you = null; }
+    }
+    const yd = RP.cache.you, ready = !!(yd && yd.player.decisions >= YOU_MIN);
+    if (fresh !== false) RP.who = ready ? "you" : "unseen";
+    $("#replayWho").hidden = !(yd && RP.cache.unseen);
+    const yb = document.querySelector('#replayWho [data-who="you"]');
+    yb.disabled = !ready;
+    yb.textContent = ready ? "You" : `You (after ${YOU_MIN} of your moves; ${yd ? yd.player.decisions : 0} so far)`;
     document.querySelectorAll("#replayWho .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.who === RP.who)));
     RP.data = RP.cache[RP.who];
     if (!RP.data) { $("#actNote").textContent = "No replay built (python scripts/build_replay.py)"; return; }
@@ -718,12 +728,15 @@
     hl.innerHTML = "";
     (d.habits || []).forEach((h) => hl.append(el("li", {}, h.text, el("span", { class: "p2", text: ` (${h.detail})` }))));
     hl.hidden = !(d.habits || []).length;
+    $("#habitsHead").hidden = hl.hidden;
+    document.querySelector(".curve-legend .l-you").textContent = mine ? "Model of you" : "This player's model";
+    document.querySelector(".curve-legend .l-usu").textContent = mine ? "Your usual move" : "Their usual move";
     drawCurve(d.curve);
     $("#replayCard").hidden = false;
   }
   function drawCurve(rows) {
-    // share right over the last 100 decisions, for each model, as the hands go by
-    const W = 560, H = 150, win = 100, lo = 0.3, hi = 0.85;
+    // share right over the last 100 decisions (fewer for a short replay), for each model, as the hands go by
+    const W = 560, H = 150, win = Math.min(100, Math.max(10, Math.floor(rows.length / 3))), lo = 0.3, hi = 0.85;
     const pts = [[], [], []];
     for (let i = win; i <= rows.length; i++) {
       const w = rows.slice(i - win, i);
@@ -733,7 +746,7 @@
     const Yv = (v) => 10 + (H - 30) * (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo));
     const line = (p) => p.map(([i, v], k) => `${k ? "L" : "M"}${X(i).toFixed(1)},${Yv(v).toFixed(1)}`).join("");
     const ticks = [0.4, 0.6, 0.8].map((v) => `<line x1="30" x2="${W - 10}" y1="${Yv(v)}" y2="${Yv(v)}" class="gl"/><text x="2" y="${Yv(v) + 4}">${Math.round(v * 100)}%</text>`).join("");
-    $("#replayCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last 100 decisions">${ticks}` +
+    $("#replayCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of moves predicted right over the last ${win} decisions">${ticks}` +
       `<path d="${line(pts[2])}" class="ln usu"/><path d="${line(pts[1])}" class="ln ppl"/><path d="${line(pts[0])}" class="ln you"/>` +
       `<text x="${W - 10}" y="${H - 4}" text-anchor="end">decisions studied →</text></svg>`;
   }
@@ -807,7 +820,7 @@
     $("#replayExit").addEventListener("click", exitReplay);
     $("#rpPrev").addEventListener("click", () => stepReplay(-1));
     $("#rpPlay").addEventListener("click", () => play(!RP.timer));
-    document.querySelectorAll("#replayWho .chip").forEach((b) => b.addEventListener("click", () => { RP.who = b.dataset.who; openReplay(); }));
+    document.querySelectorAll("#replayWho .chip").forEach((b) => b.addEventListener("click", () => { RP.who = b.dataset.who; openReplay(false); }));
     $("#rpNext").addEventListener("click", () => stepReplay(1));
     $("#rpExit").addEventListener("click", exitReplay);
     $("#newTable").addEventListener("click", newTable);

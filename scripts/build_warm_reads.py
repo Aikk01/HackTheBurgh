@@ -24,7 +24,7 @@ from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
 from pokersim.you_model import TableWatch  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "warm_reads.json")
-LAB_TABLE = ["tag", "pro", "lag", "equity", "station"]  # the Lab's default opponents (web/lab/lab.js)
+LAB_TABLE = ["tag", "pro", "lag", "equity", "potodds"]  # the Lab's default opponents (web/lab/lab.js)
 STAND_IN = "pro"  # plays the human's seat; not recorded
 
 
@@ -32,9 +32,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hands", type=int, default=400)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--table", default=",".join(LAB_TABLE), help="the opponents, comma separated")
+    ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
+    table_specs = a.table.split(",")
     rng = random.Random(a.seed)
-    specs = [STAND_IN] + LAB_TABLE
+    specs = [STAND_IN] + table_specs
     agents, seats = {}, []
     for i, spec in enumerate(specs):
         agent = make_agent(spec, seed=rng.randrange(1 << 30))
@@ -71,17 +74,17 @@ def main() -> None:
         if hand.status not in ("finished", "incomplete"):
             hand.finalize()
         table.finish_hand()
-    out = {"hands": a.hands, "table": LAB_TABLE,
+    out = {"hands": a.hands, "table": table_specs,
            "note": "personal-model counts after watching the Lab's default bots; live accuracy starts from zero",
-           "by_agent": {spec: watch.model(spec).counts for spec in LAB_TABLE},
-           "range_obs": {spec: [[round(a, 5), round(b, 5)] for a, b in watch.model(spec).range_obs] for spec in LAB_TABLE}}
-    with open(OUT, "w", encoding="utf-8") as f:
+           "by_agent": {spec: watch.model(spec).counts for spec in table_specs},
+           "range_obs": {spec: [[round(a, 5), round(b, 5)] for a, b in watch.model(spec).range_obs] for spec in table_specs}}
+    with open(a.out, "w", encoding="utf-8") as f:
         json.dump(out, f, separators=(",", ":"), default=lambda x: round(float(x), 3))
-    for spec in LAB_TABLE:
+    for spec in table_specs:
         m = watch.model(spec)
         print(f"{spec:8s} {m.total:5d} moves · right {m.right / max(m.total, 1):.0%} (people {m.people_right / max(m.total, 1):.0%})"
               f" · range width {m.range_width():.2f}")
-    print(f"{a.hands} hands in {time.time() - t0:.0f} s -> {os.path.relpath(OUT, ROOT)}")
+    print(f"{a.hands} hands in {time.time() - t0:.0f} s -> {os.path.relpath(a.out, ROOT)}")
 
 
 if __name__ == "__main__":

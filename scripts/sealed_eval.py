@@ -107,6 +107,7 @@ def main() -> None:
     ap.add_argument("--chunks", type=int, default=10)
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--out", default=OUT)
+    ap.add_argument("--seed0", type=int, default=SEED0, help="only to smoke-test the pipeline on other deals; the registered test uses the default")
     a = ap.parse_args()
     _init()
 
@@ -123,7 +124,7 @@ def main() -> None:
                                                                     "blank": blank}
 
     chunk = max(50, a.hands // a.chunks)
-    jobs = [{"key": key, "spec": spec, "lineup": lineup, "chunk": c, "hands": chunk, "seed": SEED0 + 97 * c + 1009 * li}
+    jobs = [{"key": key, "spec": spec, "lineup": lineup, "chunk": c, "hands": chunk, "seed": a.seed0 + 97 * c + 1009 * li}
             for li, lineup in enumerate(SEALED_LINEUPS) for c in range(a.chunks) for key, spec in heroes.items()]
     print(f"{len(cands)} policies, {len(heroes)} heroes, {len(jobs)} jobs of {chunk} hands, {a.workers} workers", flush=True)
     t0 = time.time()
@@ -146,7 +147,7 @@ def main() -> None:
         return ci(diffs)
 
     res: Dict[str, Any] = {"generated": _dt.datetime.now().isoformat(timespec="seconds"), "hands_per_table": a.hands,
-                           "seed0": SEED0, "lineups": SEALED_LINEUPS, "unit": "bb/100, paired per hand, 95% CI",
+                           "seed0": a.seed0, "lineups": SEALED_LINEUPS, "unit": "bb/100, paired per hand, 95% CI",
                            "seconds": round(time.time() - t0), "policies": {}}
     for name, c in cands.items():
         row: Dict[str, Any] = {**c, "vs_equity_bot": {}, "range_inputs_gain": {}, "style_inputs_gain": {}}

@@ -20,3 +20,5 @@ data/rl/v1_backup/
 data/rl/runs/*smoke*/
 data/rl/coaches/*/*.pt
 data/rl/remote/
+data/rl/runs/
+data/demo/replay_you.json

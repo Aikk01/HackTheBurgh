@@ -256,8 +256,9 @@ def main():
            "showcase_rule": "last half of his hands, his cards revealed at showdown, at least one move against what people in general would do, evenly spaced",
            "hands": showcase}
     s = json.dumps(out, separators=(",", ":"), default=lambda x: round(float(x), 4))
-    with open(out_path, "w") as f:
+    with open(out_path + ".tmp", "w") as f:  # atomic: the server may be serving the old one
         f.write(s)
+    os.replace(out_path + ".tmp", out_path)
     print(f"{n} hands, {len(curve)} decisions, {len(showcase)} showcase hands, {len(s) / 1e6:.1f} MB; "
           f"accuracy personal {C_[:, 0].mean():.1%} · people {C_[:, 1].mean():.1%} · usual {C_[:, 2].mean():.1%}")
 

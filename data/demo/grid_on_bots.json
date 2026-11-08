@@ -1,11 +1,11 @@
 {
- "hands": 500,
+ "hands": 600,
  "table": [
   "tag",
   "pro",
   "lag",
   "equity",
-  "station"
+  "potodds"
  ],
  "levels": [
   0.5,
@@ -15,67 +15,67 @@
  "widths": {},
  "reference": "Pluribus test hands (humans and Pluribus): inside 50/80/90% = 0.47 / 0.78 / 0.89",
  "all": {
-  "n": 16594,
-  "inside_50": 0.344,
-  "inside_80": 0.628,
-  "inside_90": 0.747
+  "n": 13339,
+  "inside_50": 0.404,
+  "inside_80": 0.72,
+  "inside_90": 0.828
  },
  "by_player": {
-  "Calculator": {
-   "n": 2552,
-   "inside_50": 0.403,
-   "inside_80": 0.702,
-   "inside_90": 0.813
+  "Accountant": {
+   "n": 2731,
+   "inside_50": 0.395,
+   "inside_80": 0.712,
+   "inside_90": 0.838
   },
-  "Caller": {
-   "n": 5907,
-   "inside_50": 0.261,
-   "inside_80": 0.491,
-   "inside_90": 0.616
+  "Calculator": {
+   "n": 2705,
+   "inside_50": 0.385,
+   "inside_80": 0.712,
+   "inside_90": 0.815
   },
   "Hustler": {
-   "n": 3074,
-   "inside_50": 0.418,
-   "inside_80": 0.726,
-   "inside_90": 0.836
+   "n": 3086,
+   "inside_50": 0.442,
+   "inside_80": 0.751,
+   "inside_90": 0.843
   },
   "Pro": {
-   "n": 2836,
-   "inside_50": 0.37,
-   "inside_80": 0.691,
-   "inside_90": 0.816
+   "n": 2568,
+   "inside_50": 0.39,
+   "inside_80": 0.717,
+   "inside_90": 0.847
   },
   "Shark": {
-   "n": 2225,
-   "inside_50": 0.362,
-   "inside_80": 0.691,
-   "inside_90": 0.804
+   "n": 2249,
+   "inside_50": 0.402,
+   "inside_80": 0.699,
+   "inside_90": 0.789
   }
  },
  "by_street": {
   "preflop": {
-   "n": 9451,
-   "inside_50": 0.369,
-   "inside_80": 0.668,
-   "inside_90": 0.78
+   "n": 10212,
+   "inside_50": 0.41,
+   "inside_80": 0.724,
+   "inside_90": 0.829
   },
   "flop": {
-   "n": 2636,
-   "inside_50": 0.326,
-   "inside_80": 0.585,
-   "inside_90": 0.707
+   "n": 1473,
+   "inside_50": 0.388,
+   "inside_80": 0.708,
+   "inside_90": 0.822
   },
   "turn": {
-   "n": 2375,
-   "inside_50": 0.313,
-   "inside_80": 0.582,
-   "inside_90": 0.701
+   "n": 955,
+   "inside_50": 0.403,
+   "inside_80": 0.723,
+   "inside_90": 0.83
   },
   "river": {
-   "n": 2132,
-   "inside_50": 0.288,
-   "inside_80": 0.554,
-   "inside_90": 0.697
+   "n": 699,
+   "inside_50": 0.356,
+   "inside_80": 0.681,
+   "inside_90": 0.82
   }
  }
 }

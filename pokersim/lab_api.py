@@ -230,7 +230,12 @@ def scorecard() -> Dict[str, Any]:
         except (OSError, ValueError):
             return None
 
-    out: Dict[str, Any] = {"moves": None, "hands": None, "coach": None}
+    out: Dict[str, Any] = {"moves": None, "hands": None, "bluff": None, "coach": None}
+    bc = load("demo", "bluff_calibration.json")  # scripts/bluff_calibration.py: the bets were really made
+    if bc:
+        out["bluff"] = {"said": bc["all_fold"]["said"], "happened": bc["all_fold"]["happened"], "n": bc["all_fold"]["n"],
+                        "each_said": bc["each_opponent"]["said"], "each_happened": bc["each_opponent"]["happened"],
+                        "each_n": bc["each_opponent"]["n"]}
     u, cal = load("demo", "unseen_players_eval.json"), load("demo", "calibration.json")
     if u:
         s = u["summary"]

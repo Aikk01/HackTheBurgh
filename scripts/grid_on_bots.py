@@ -27,7 +27,7 @@ from pokersim.agents import make_agent, safe_act  # noqa: E402
 from pokersim.engine import IllegalAction, Seat, Table  # noqa: E402
 
 OUT = os.path.join(ROOT, "data", "demo", "grid_on_bots.json")
-LAB_TABLE = ["tag", "pro", "lag", "equity", "station"]  # web/lab/lab.js
+LAB_TABLE = ["tag", "pro", "lag", "equity", "potodds"]  # web/lab/lab.js
 LEVELS = (0.5, 0.8, 0.9)
 
 

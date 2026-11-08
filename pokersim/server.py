@@ -9,6 +9,8 @@ import mimetypes
 import os
 import queue
 import random
+import subprocess
+import sys
 import threading
 import time
 import traceback
@@ -245,8 +247,21 @@ class GameSession:
                         n = sum(1 for line in f if line.startswith("[") and line.rstrip().endswith("]"))
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(f"{chr(10) if n else ''}[{n + 1}]\n{phh.dump_hand(rec)}")
+                if len(self.human_seats) == 1 and (n + 1) % 5 == 0:
+                    self._rebuild_your_replay(seat.name)
             except Exception:  # noqa: BLE001 - keeping history must never break the table
                 traceback.print_exc()
+
+    _replay_job: Optional[subprocess.Popen] = None
+
+    def _rebuild_your_replay(self, name: str) -> None:
+        """Every few hands, rebuild your replay (data/demo/replay_you.json) in the background."""
+        if self._replay_job is not None and self._replay_job.poll() is None:
+            return
+        root = os.path.join(os.path.dirname(__file__), "..")
+        self._replay_job = subprocess.Popen(
+            ["nice", "-n", "10", sys.executable, os.path.join(root, "scripts", "build_replay.py"), "--me", name],
+            cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # -- scenario (fork a recorded hand) --------------------------------------
     def start_scenario(self, sc: Dict[str, Any]) -> Dict[str, Any]:
@@ -968,8 +983,8 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/"):
                 self._json(self._get_api(path, qs))
                 return
-            if path == "/":
-                self._static("index.html")
+            if path in ("/", "/mirror"):  # Poker Mirror is the front page
+                self._static("lab.html")
             else:
                 self._static(path)
         except ApiError as exc:

@@ -113,6 +113,21 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
   - a "How good are the guesses?" card with every result next to its baseline;
   - quieter chrome: status pills only when a model is missing, no link to the old app.
 
+**Done 04:50–05:30 (from a mock judge's probe of 40 hands):**
+- **Bluff check, measured** (`scripts/bluff_calibration.py`, `data/demo/bluff_calibration.json`): a stand-in in your
+  seat really makes the bet at a size button and the bots answer.
+  - With the Caller at the table it never once said "pays": 942 bets, nobody folded out together, because the Caller
+    never folds. Correct, but the check could only ever say no.
+  - **The Caller is replaced by the Accountant** (`potodds`: calls only at the right price, never bluffs). Now: "they
+    all fold" said 40.3%, happened 39.8% (846 bets); each player's fold chance said 74.4%, folded 75.0% (2,034
+    answers); "pays" in 14% of spots. At the top end it is overconfident (said 79%, happened 58%, 67 bets).
+  - It is a row of the "How good are the guesses?" card.
+- **Warm reads and grid widths rebuilt for the new table:** the grid on these bots, after learning each one's width,
+  holds the real hand 48 / 79 / 90% of the time inside the likeliest 50 / 80 / 90% (fresh hands).
+- **Your replay:** the server rebuilds it every 5 of your hands; it is offered once it has 30 of your moves, with "Model
+  of you / Your usual move" labels.
+- `/` and `/mirror` open Poker Mirror (no `.html` in the address).
+
 **Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
