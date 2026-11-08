@@ -74,7 +74,8 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
   supervisor: checkpoints, wandb, automatic reset or restart, and a health check.
 - **Personal models** (`pokersim/you_model.py`): Dirichlet shrinkage of the next-move prior per street and
   facing-a-bet bucket.
-  - Every prediction is made before the action and scored after it, against the "usual move" baseline.
+  - Every prediction is made before the action and scored after it, against people in general and the "usual
+    move" baseline. The method is that of Bayes' Bluff (Southey et al., UAI 2005).
   - Your counts and a full decision log persist in `data/players/<name>/`.
 - **Poker Mirror frontend** (built on the design of an earlier frontend branch):
   - Each opponent box shows only the next move (People / This player).
@@ -88,13 +89,34 @@ A 13×13 grid shows each opponent's likely starting hands in their own colour. A
 - **Tooling:** uv with `pyproject.toml` and `uv.lock` (Python 3.12, CUDA 12.8 torch on Linux), identical on every
   machine.
 
-**Running now:**
-- three RL runs until about 07:25: v3-ranges (5090), v3-noranges (2080), v2-eddie (Eddie);
-- see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
+**Done since the judge reviews (03:00–03:45):**
+- **Two mock judges** (an HRT and a G-Research persona, with web research): both placed it top 3. Both asked
+  first for calibration, a sealed RL test, and the 30-player result instead of the one null replay player.
+- **Calibration** (`scripts/calibration.py`, `data/demo/calibration.json`):
+  - next move: when it says 75%, it happens 76% (670,615 unseen decisions, error 0.008);
+  - hand grid: the likeliest half holds the real hand 47% of the time on Pluribus test hands. It is slightly
+    overconfident (pairs 14% predicted vs 11% real); a temperature does not fix this, so it is reported.
+- **Personal model on 30 unseen real players:** 68.8% right vs 67.4% people in general and 64.7% usual move;
+  better for 28 of 30 (`data/demo/unseen_players_eval.json`).
+- **Sealed RL test, registered before results** (`scripts/sealed_eval.py`, `train/06_eval_and_overfitting.md`):
+  - new rule bots: Bully, Tourist, Ambusher;
+  - style bots outside every training range;
+  - paired per hand, 30,000 hands per table.
+- **Screen (now named Poker Mirror everywhere):**
+  - one story line at the table centre: the last move, whether we read it, how much it moved our guess; at the
+    end, the winner and where their cards sat in our guess ("our #40 guess of 169");
+  - grids morph when someone acts and follow the player who moved; ✓/✗ with the move on each seat;
+  - "This player" appears only when it differs from people in general;
+  - opponent reads warm-started from 400 earlier hands (`data/demo/warm_reads.json`) and scored live against
+    people in general;
+  - coaches as one fold/call/raise bar each;
+  - a "How good are the guesses?" card with every result next to its baseline;
+  - quieter chrome: status pills only when a model is missing, no link to the old app.
+
+**Running now:** four RL runs on Eddie until about 07:20; see [train/TRAIN_PROGRESS.md](train/TRAIN_PROGRESS.md).
 
 **Next:**
-- Ship the best held-out policy to `data/rl/policy.npz`.
-- A replay mode for the reserved player (watch "This player" learn them hand by hand).
+- 07:20: the sealed test, ship the best held-out policy to `data/rl/policy.npz`, rebuild the replay.
 - Rehearsal.
 
 ## Status board
