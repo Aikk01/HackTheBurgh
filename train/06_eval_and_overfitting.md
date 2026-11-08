@@ -142,3 +142,8 @@ with 95% intervals over hands. Every result is reported.
 **Shipped model:** v3-bc update 50 stays the coach. It was live since 04:42, and at 05:13 the team decided that the
 sealed test would settle v3-bc against v3-noranges-s2 (then the held-out leader): v3-noranges-s2 − v3-bc = −29 ± 27.
 v3-bc-s2 scores highest here but is not shipped: choosing the best of ten on this test would bias its number upwards.
+
+**Added at 06:53, before the 30,000-hand result:** at the team's request the same frozen candidates (05:57) run again
+at the registered **30,000 hands per table**, same seeds, on Eddie (`data/rl/sealed_eval_30k.json`). Each batch starts
+with the same deals as the 10,000-hand run, so this extends it rather than repeating it. Both results are reported; the
+30,000-hand one is the registered size. It picks nothing: the shipped coach stays as decided at 06:01.
