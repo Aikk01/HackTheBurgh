@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table Lab</title>
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/lab/lab.css">
+</head>
+<body>
+<a class="skip" href="#you">Skip to your decision</a>
+<header class="bar">
+  <div class="brand"><span class="mark" aria-hidden="true">♠</span><h1>Table Lab</h1></div>
+  <div class="hand-meta" id="handMeta" aria-live="polite"></div>
+  <ul class="models" id="models" aria-label="Model status"></ul>
+  <div class="bar-actions">
+    <button class="btn" id="newTable" type="button">New table</button>
+    <a class="btn ghost" href="/" title="The full app: Mirror, Simulator, Evidence">Main app</a>
+  </div>
+</header>
+<div class="inject-banner" id="injectBanner" hidden>Showing injected test values, not model output. <button class="linkbtn" id="clearInject" type="button">Clear</button></div>
+
+<main class="lab">
+  <section class="stage-col" aria-label="Table">
+    <div class="stage" id="stage">
+      <div class="felt" id="felt" aria-hidden="true"></div>
+      <div class="center" id="center"></div>
+      <div id="seats"></div>
+      <div class="sit" id="sit" hidden>
+        <h2>Sit down with five bots</h2>
+        <p>You take one seat; a tight bot, two equity bots, a loose bot and a random bot take the others. Blinds 1/2, 200 chips each.</p>
+        <button class="btn primary" id="sitBtn" type="button">Deal</button>
+      </div>
+    </div>
+
+    <section class="you" id="you" aria-label="Your decision">
+      <div class="you-col">
+        <h2 class="kicker">What you should do</h2>
+        <div class="mtable" id="should"></div>
+      </div>
+      <div class="you-col">
+        <h2 class="kicker">What you would do</h2>
+        <div class="mtable" id="would"></div>
+      </div>
+      <div class="you-col act" id="act">
+        <h2 class="kicker" id="actTitle">Your move</h2>
+        <div class="act-row">
+          <button class="btn danger" id="btnFold" type="button">Fold <kbd>F</kbd></button>
+          <button class="btn" id="btnCall" type="button">Call <kbd>C</kbd></button>
+        </div>
+        <div class="raise" id="raise">
+          <input type="range" id="raiseSlider" aria-label="Raise amount">
+          <input type="number" id="raiseInput" aria-label="Raise to">
+          <button class="btn amber" id="btnRaise" type="button">Raise <kbd>R</kbd></button>
+        </div>
+        <button class="btn primary" id="btnNext" type="button" hidden>Next hand <kbd>N</kbd></button>
+        <p class="act-note" id="actNote"></p>
+      </div>
+    </section>
+  </section>
+
+  <aside class="side" aria-label="Likely hands">
+    <div class="side-head">
+      <h2>Likely hands</h2>
+      <div class="seg" role="radiogroup" aria-label="Which model's guess">
+        <button type="button" role="radio" data-src="base" aria-checked="true">Base</button>
+        <button type="button" role="radio" data-src="rl" aria-checked="false">RL</button>
+      </div>
+    </div>
+    <div class="chips" id="chips" role="radiogroup" aria-label="Whose hand"></div>
+    <div class="grid-wrap" id="gridWrap"></div>
+    <div class="top2" id="top2"></div>
+    <div class="ramp" id="ramp"></div>
+    <p class="side-note">Each grid cell is a type of starting hand: pairs on the diagonal, suited hands above it, offsuit below. Only what everyone can see goes into the guess, so it never gives a card away.</p>
+  </aside>
+</main>
+<div class="sr-only" id="announcer" aria-live="polite"></div>
+<script src="/lab/lab.js"></script>
+</body>
+</html>

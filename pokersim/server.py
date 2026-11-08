@@ -914,6 +914,9 @@ class Handler(BaseHTTPRequestHandler):
             return APP.game.advice()
         if path == "/api/game/opponents":
             return APP.game.opponents()
+        if path == "/api/lab/predict":
+            from .lab_api import predict
+            return predict(APP.game)
         if path == "/api/game/export":
             recs = APP.game.records
             if not recs:
